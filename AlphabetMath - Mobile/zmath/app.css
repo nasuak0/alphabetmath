@@ -47,7 +47,7 @@ body {
 #root { position: fixed; inset: 0; overflow: hidden; }
 html[data-fit="ipad"] #root { display: flex; align-items: center; justify-content: center; }
 :root { --vph: 820px; }
-html[data-fit="native"] { --vph: 100vh; }
+html[data-fit="native"] { --vph: 100vh; --vph: 100dvh; }
 
 /* ---- OS ground: cool silver gradient + dot grid + ambient glow ---- */
 .os {
@@ -80,15 +80,15 @@ html[data-fit="ipad"] .os {
   width: 1180px; height: 820px; flex: 0 0 auto;
   transform: scale(var(--ipad-scale, 1)); transform-origin: center center; will-change: transform;
 }
-html[data-fit="native"] .os { width: 100%; height: 100vh; transform: none; }
+html[data-fit="native"] .os { width: 100%; height: 100vh; height: 100dvh; transform: none; }
 
 /* ============================================================
    FLUID DESKTOP FIT — fills the monitor natively; type, content
    width and column count all scale with the viewport. Not a literal
    iPad copy: proportions shift and more tiles fit per row on big screens.
    ============================================================ */
-html[data-fit="fluid"] { --vph: 100vh; font-size: clamp(16px, 0.45vw + 12.6px, 21px); }
-html[data-fit="fluid"] .os { width: 100%; height: 100vh; transform: none; }
+html[data-fit="fluid"] { --vph: 100vh; --vph: 100dvh; font-size: clamp(16px, 0.45vw + 12.6px, 21px); }
+html[data-fit="fluid"] .os { width: 100%; height: 100vh; height: 100dvh; transform: none; }
 html[data-fit="fluid"] .stage-inner { max-width: min(1760px, 95vw); }
 html[data-fit="fluid"] .mosaic,
 html[data-fit="fluid"] .grid-uniform {
@@ -107,7 +107,7 @@ html[data-fit="fluid"] .projects-screen .mosaic {
    (bottoms never clip). Rule of thumb: mimic mobile, expand gently.
    ============================================================ */
 html[data-fit="desktop"] { font-size: clamp(16px, 0.3vw + 13.5px, 19px); }
-html[data-fit="desktop"] .os { width: 100%; height: 100vh; transform: none; }
+html[data-fit="desktop"] .os { width: 100%; height: 100vh; height: 100dvh; transform: none; }
 /* slightly wider than the mobile ~1080 content — enough to fill a desktop without
    reflowing into a different layout. */
 html[data-fit="desktop"] .stage-inner { max-width: 1300px; }
