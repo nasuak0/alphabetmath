@@ -1,0 +1,243 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — iPad Port Guide</title>
+<style>
+:root{--ink:#1b1b1b;--soft:#454545;--faint:#7c7c7c;--rule:#dcdcdc;--paper:#ffffff;--accent:#7a1f12;--box-bg:#f6f7f9;--box-ru:#d9dee6;--note-bg:#fbfaf5;--note-ru:#e7e2d0;--code-bg:#f1f1ee;--code-ink:#4a4a4a;}
+*{box-sizing:border-box}html{-webkit-text-size-adjust:100%}
+body{margin:0;background:var(--paper);color:var(--ink);font-family:"Latin Modern Roman","Georgia","Times New Roman",serif;font-size:18px;line-height:1.7}
+.page{max-width:760px;margin:0 auto;padding:72px 40px 140px;counter-reset:secn}
+.titleblock{text-align:center;margin:0 0 12px}
+.titleblock h1{font-size:32px;font-weight:700;line-height:1.2;margin:0 0 10px;letter-spacing:-.01em}
+.titleblock .sub{font-size:16px;color:var(--soft);margin:2px 0}
+hr.rule{border:0;border-top:1px solid var(--rule);margin:26px 0}
+.abstract{margin:26px 40px 8px;font-size:16px;line-height:1.6}
+.abstract .lbl{text-align:center;font-weight:700;font-size:15px;margin-bottom:8px}
+.abstract p{margin:0;color:var(--soft)}
+section{margin-top:52px;counter-increment:secn}
+h2{font-size:23px;font-weight:700;margin:0 0 6px;letter-spacing:-.01em;scroll-margin-top:16px}
+h2::before{content:counter(secn) "\00a0\00a0";color:var(--accent)}
+p{margin:12px 0}b,strong{font-weight:700}
+.note{background:var(--note-bg);border:1px solid var(--note-ru);border-radius:4px;padding:12px 16px;margin:18px 0;font-size:16px;line-height:1.55}
+.note .lbl{font-weight:700;margin-right:6px}
+ol.steps{list-style:none;counter-reset:s;padding:0;margin:18px 0}
+ol.steps>li{counter-increment:s;position:relative;padding:2px 0 18px 46px}
+ol.steps>li::before{content:counter(s);position:absolute;left:0;top:0;width:30px;height:30px;border-radius:50%;background:var(--paper);border:1.6px solid var(--accent);color:var(--accent);font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;font-weight:700;display:flex;align-items:center;justify-content:center}
+ol.steps>li:not(:last-child)::after{content:"";position:absolute;left:14.5px;top:30px;bottom:2px;width:1.6px;background:var(--rule)}
+ol.steps>li .what{display:block;font-weight:700;margin-bottom:2px}
+ul.plain{margin:12px 0;padding-left:22px}ul.plain li{margin:8px 0}
+code{font-family:ui-monospace,Menlo,Consolas,monospace;font-size:.8em;background:var(--code-bg);color:var(--code-ink);padding:2px 5px;border-radius:4px}
+pre{background:#faf9f6;color:#2a2a2a;border:1px solid var(--rule);border-radius:5px;padding:12px 15px;margin:12px 0;overflow-x:auto;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:14px;line-height:1.5;white-space:pre-wrap;word-break:break-all}
+pre code{background:none;padding:0;font-size:inherit;color:inherit}
+a{color:var(--accent);text-decoration:none}a:hover{border-bottom:1px solid var(--accent)}
+/* ——— screen mock-ups ——— */
+.mock{position:relative;border:1px solid #cfcfcf;border-radius:10px;overflow:hidden;margin:20px 0 8px;background:#fff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:11.5px;color:#555;box-shadow:0 1px 5px rgba(0,0,0,.07);-webkit-user-select:none;user-select:none}
+.cap{font-size:14.5px;color:var(--faint);font-style:italic;margin:4px 0 20px;text-align:center}
+.mtitle{display:flex;align-items:center;gap:10px;background:#f3f3f3;border-bottom:1px solid #e2e2e2;padding:7px 12px}
+.mham{display:flex;flex-direction:column;gap:3px;width:16px}
+.mham i{height:2px;background:#8b8b8b;border-radius:2px}
+.mpill{flex:1;max-width:400px;margin:0 auto;background:#fff;border:1px solid #ddd;border-radius:6px;text-align:center;padding:2px 10px;color:#888;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+.mbody{display:flex;align-items:stretch}
+.mact{width:40px;background:#f3f3f3;border-right:1px solid #e2e2e2;display:flex;flex-direction:column;align-items:center;gap:15px;padding:14px 0}
+.mic{width:17px;height:17px;border:2.2px solid #9c9c9c;border-radius:4px;position:relative;flex:none}
+.mic.round{border-radius:50%}
+.mic.spacer{border:0;flex:1}
+.mside{width:190px;background:#fafafa;border-right:1px solid #e2e2e2;padding:10px 12px}
+.mside .hd{font-size:10px;letter-spacing:.08em;color:#888;margin-bottom:8px}
+.mside .row{padding:3px 4px;border-radius:3px;white-space:nowrap;overflow:hidden}
+.mside .row.sel{background:#e4e6f1}
+.mmain{flex:1;display:flex;flex-direction:column;min-width:0}
+.med{flex:1;display:flex;align-items:center;justify-content:center;color:#bbb;font-style:italic;min-height:70px;padding:10px}
+.mpanel{border-top:1px solid #e2e2e2}
+.mtabs{display:flex;gap:16px;padding:7px 14px;font-size:10.5px;letter-spacing:.05em;color:#999}
+.mtabs b{color:#333;font-weight:700;border-bottom:1.6px solid #333;padding-bottom:3px}
+.mterm{background:#1e1e1e;color:#d6d6d6;padding:10px 14px;min-height:56px;font-size:11px;line-height:1.6}
+.mterm .grn{color:#7fce7f}.mterm .blu{color:#7aa6e8}
+.mstatus{display:flex;align-items:center;gap:12px;background:#f3f3f3;border-top:1px solid #e2e2e2;padding:4px 0;font-size:10.5px}
+.mstatus .csp{background:#1f4fa0;color:#fff;padding:4px 10px}
+/* highlight + numbered badges */
+.hi{outline:2.5px solid var(--accent);outline-offset:2px;border-radius:4px}
+.b{position:absolute;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center;z-index:5;box-shadow:0 1px 3px rgba(0,0,0,.3)}
+.legend{margin:10px 0 0;padding:0;list-style:none;font-size:16px}
+.legend li{margin:6px 0;padding-left:34px;position:relative}
+.legend li i{position:absolute;left:0;top:2px;width:22px;height:22px;border-radius:50%;background:var(--accent);color:#fff;font-style:normal;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12px;font-weight:700;display:flex;align-items:center;justify-content:center}
+/* context menu mock */
+.mmenu{position:absolute;background:#fff;border:1px solid #ccc;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:5px 0;width:150px;z-index:4}
+.mmenu .it{padding:4px 14px;white-space:nowrap}
+.mmenu .it.sel{background:var(--accent);color:#fff;font-weight:700}
+.mmenu .dv{border-top:1px solid #e5e5e5;margin:5px 0}
+/* source control mock bits */
+.minput{background:#fff;border:1px solid #c9c9c9;border-radius:4px;padding:5px 8px;color:#333;margin-bottom:8px}
+.mbtn{background:#2a63c9;color:#fff;text-align:center;border-radius:4px;padding:6px 0;font-weight:700}
+/* toast mock */
+.mtoast{position:absolute;right:12px;bottom:34px;width:250px;background:#fff;border:1px solid #ccc;border-radius:6px;box-shadow:0 4px 14px rgba(0,0,0,.18);padding:10px 12px;z-index:4;font-size:11px;line-height:1.5}
+.mtoast .mbtn{margin-top:8px}
+.gtabs{display:flex;gap:18px;padding:9px 14px;border-bottom:1px solid #e2e2e2;background:#fafafa;white-space:nowrap}
+.gtabs .on{font-weight:700;color:#333;border-bottom:2px solid #333;padding-bottom:6px;margin-bottom:-9px}
+.chk{display:inline-flex;width:16px;height:16px;border-radius:50%;background:#2da44e;color:#fff;align-items:center;justify-content:center;font-size:10px;margin-right:8px;vertical-align:-3px}
+@media (max-width:640px){.page{padding:44px 18px 90px}body{font-size:17px}.abstract{margin-left:0;margin-right:0}.mside{width:132px}}
+@media print{.page{padding:0;max-width:none}h2{break-after:avoid}.note,pre,ol.steps>li,.mock{break-inside:avoid}}
+</style>
+</head>
+<body>
+<div class="page">
+<div class="titleblock">
+<h1>The iPad Port Guide</h1>
+<p class="sub">AlphabetMath · getting the project into your Codespace, with pictures</p>
+</div>
+<hr class="rule" />
+<div class="abstract">
+<p class="lbl">What this is</p>
+<p>Your Codespace works — but the project files never made it to GitHub, so it only shows a README. This guide fixes that, entirely from the iPad, in six short acts: know the screen → get the zip → drop it in → save to GitHub → run the app → publish it as a live website. Every act comes with a picture of what you'll see. The pictures are simplified sketches — colors and exact icons may differ slightly on your screen, but the <b>positions</b> are right.</p>
+</div>
+
+<section id="s1">
+<h2>Know the screen (60 seconds)</h2>
+<p>The workspace looks busy, but there are only five places you'll ever touch:</p>
+<div class="mock">
+<div class="mtitle"><span class="mham"><i></i><i></i><i></i></span><span class="mpill">alphabetmath [Codespaces: expert space giggle]</span><span style="width:16px"></span></div>
+<div class="mbody">
+<div class="mact"><span class="b" style="left:30px;top:52px">2</span><span class="mic hi"></span><span class="mic round"></span><span class="mic"></span><span class="mic round"></span><span class="mic"></span><span class="mic spacer"></span><span class="mic round"></span><span class="mic round"></span></div>
+<div class="mside"><span class="b" style="left:230px;top:46px">3</span><div class="hd">EXPLORER</div><div class="row">▸ OPEN EDITORS</div><div class="row" style="font-weight:700">▾ ALPHABETMATH [CODES…</div><div class="row sel">&nbsp;&nbsp;README.md</div></div>
+<div class="mmain">
+<div class="med">your open file shows here</div>
+<div class="mpanel"><span class="b" style="right:12px;top:196px;left:auto">4</span>
+<div class="mtabs">PROBLEMS <span>OUTPUT</span> <b>TERMINAL</b> <span>PORTS</span></div>
+<div class="mterm"><span class="grn">@you</span> ➜ <span class="blu">/workspaces/alphabetmath</span> $ <span style="opacity:.5">you type here</span></div>
+</div>
+</div>
+</div>
+<div class="mstatus"><span class="b" style="left:66px;top:auto;bottom:4px">5</span><span class="csp">Codespaces: expert space giggle</span><span>main</span></div>
+<span class="b" style="left:8px;top:6px">1</span>
+</div>
+<ul class="legend">
+<li><i>1</i><b>The menu (☰).</b> Top-left corner. Tap it for menus like <code>Terminal → New Terminal</code>.</li>
+<li><i>2</i><b>The icon strip.</b> Each icon swaps what the side panel shows. Top icon (two pages) = your files. The branching-lines icon (3rd) = Source Control, used in Act 4.</li>
+<li><i>3</i><b>The Explorer.</b> Your list of files. Right now it only shows <code>README.md</code> — that's the whole problem.</li>
+<li><i>4</i><b>The Terminal.</b> The typing area at the bottom. If you don't see it: ☰ menu → Terminal → New Terminal.</li>
+<li><i>5</i><b>The status bar.</b> The blue corner confirms you're inside your Codespace.</li>
+</ul>
+<div class="note"><span class="lbl">iPad translations:</span> "click" = tap. "Right-click" = touch and hold for a second. "Paste" in the terminal = tap once inside it, then touch-and-hold → Paste.</div>
+</section>
+
+<section id="s2">
+<h2>Act 1 — Get the zip onto your iPad</h2>
+<ol class="steps">
+<li><span class="what">Find the download card in our chat.</span> Right under this guide in the chat there's a card named <b>alphabetmath.zip</b>. Tap it.</li>
+<li><span class="what">Save it to Files.</span> Safari shows a download arrow (top-right). Tap it → tap <b>alphabetmath.zip</b>. If asked where, choose <b>On My iPad → Downloads</b>. That's it — the project is now on your iPad.</li>
+</ol>
+</section>
+
+<section id="s3">
+<h2>Act 2 — Drop the zip into the Codespace</h2>
+<p>Two ways; use whichever feels easier.</p>
+<p><b>Way A — touch and hold (recommended).</b> In the Explorer (area <b>3</b>), touch and hold on the <b>empty space below README.md</b>. A menu pops up:</p>
+<div class="mock" style="max-width:340px">
+<div class="mbody">
+<div class="mside" style="width:100%;border-right:0;min-height:265px"><div class="hd">EXPLORER</div><div class="row" style="font-weight:700">▾ ALPHABETMATH [CODES…</div><div class="row">&nbsp;&nbsp;README.md</div>
+<div class="mmenu" style="left:90px;top:70px"><div class="it">New File…</div><div class="it">New Folder…</div><div class="dv"></div><div class="it sel">Upload…</div><div class="it">Download…</div><div class="dv"></div><div class="it">Paste</div></div>
+</div>
+</div>
+</div>
+<p class="cap">Touch-and-hold in the empty Explorer space → tap <b>Upload…</b></p>
+<p>Tap <b>Upload…</b>, and in the file picker choose <b>alphabetmath.zip</b> from Downloads. A little progress bar runs; then <code>alphabetmath.zip</code> appears in your file list under README.md.</p>
+<p><b>Way B — drag it.</b> Open the <b>Files</b> app in Split View next to Safari, then drag <code>alphabetmath.zip</code> out of Files and drop it onto the Explorer file list.</p>
+</section>
+
+<section id="s4">
+<h2>Act 3 — Unpack it (one paste)</h2>
+<ol class="steps">
+<li><span class="what">Open the terminal.</span> ☰ menu → <b>Terminal → New Terminal</b> (or tap the TERMINAL tab if the bottom panel is already open).</li>
+<li><span class="what">Copy this whole block, paste it into the terminal, press Enter.</span> It unpacks the zip into place and deletes the zip. It looks scary; it is one command.
+<pre><code>unzip -q alphabetmath.zip -d /tmp/p &amp;&amp; shopt -s dotglob &amp;&amp; { [ -d /tmp/p/alphabetmath ] &amp;&amp; mv /tmp/p/alphabetmath/* . || mv /tmp/p/* . ; } &amp;&amp; rm -rf /tmp/p alphabetmath.zip &amp;&amp; ls -A</code></pre></li>
+<li><span class="what">Check the result.</span> The terminal prints the new file list — you should see <code>AlphabetMath - App</code>, <code>AlphabetMath - Mobile</code>, <code>interactives</code> and more. The Explorer on the left fills up too. If it did — the hard part is over.</li>
+</ol>
+</section>
+
+<section id="s5">
+<h2>Act 4 — Save it to GitHub</h2>
+<p>The files are in the Codespace, but not yet saved to GitHub itself. Use the visual way:</p>
+<div class="mock" style="max-width:340px">
+<div class="mbody">
+<div class="mact"><span class="mic"></span><span class="mic round"></span><span class="mic hi"></span><span class="b" style="left:30px;top:88px">1</span><span class="mic round"></span><span class="mic spacer"></span></div>
+<div class="mside" style="flex:1;min-height:210px"><div class="hd">SOURCE CONTROL</div>
+<div class="minput">port project<span class="b" style="right:14px;top:26px;left:auto">2</span></div>
+<div class="mbtn">✓&nbsp; Commit<span class="b" style="right:14px;top:62px;left:auto">3</span></div>
+<div class="row" style="margin-top:12px;color:#888">▾ Changes&nbsp;&nbsp;·&nbsp;&nbsp;many files</div>
+</div>
+</div>
+</div>
+<p class="cap">The Source Control panel: message box on top, blue button under it</p>
+<ol class="steps">
+<li><span class="what">Open Source Control.</span> Tap the <b>3rd icon</b> in the left strip (branching lines, probably showing a number bubble).</li>
+<li><span class="what">Type a name in the message box:</span> <code>port project</code>.</li>
+<li><span class="what">Tap the blue Commit button.</span> If a popup asks about "staging changes", tap <b>Yes</b> (or <b>Always</b>).</li>
+<li><span class="what">Tap the button again — it now says "Sync Changes".</span> That pushes everything up to GitHub. When the file list clears out, it's done and permanent: even if this Codespace is deleted, the project is safe on GitHub.</li>
+</ol>
+</section>
+
+<section id="s6">
+<h2>Act 5 — Run the app</h2>
+<ol class="steps">
+<li><span class="what">In the terminal, paste this and press Enter:</span>
+<pre><code>cd "AlphabetMath - App" &amp;&amp; npm install &amp;&amp; npm run dev</code></pre>
+It installs the app's parts (a minute or two, first time only), then starts it.</li>
+<li><span class="what">Watch for the popup, bottom-right:</span>
+<div class="mock" style="min-height:120px;max-width:420px"><div class="med" style="min-height:120px"></div><div class="mtoast">Your application running on port <b>5173</b> is available.<div class="mbtn">Open in Browser</div></div></div>
+<p class="cap">Tap <b>Open in Browser</b></p></li>
+<li><span class="what">One quirk:</span> if the new tab shows "404 Not Found", add <code>alphabetmath/</code> to the end of the address and reload — the app lives at <code>…github.dev/alphabetmath/</code>. That's the app, live.</li>
+<li><span class="what">Missed the popup?</span> Tap the <b>PORTS</b> tab in the bottom panel, find the row for <b>5173</b>, touch-and-hold it → <b>Open in Browser</b>.</li>
+<li><span class="what">To stop:</span> tap in the terminal and press <code>Ctrl + C</code> (on-screen keyboard: tap the <code>⌃</code> key, then C). To leave: just close the tab.</li>
+</ol>
+<div class="note"><span class="lbl">Every time after this:</span> github.com → your repo → green <b>Code</b> button → Codespaces tab → tap your Codespace. Then only step 1 above (and <code>npm install</code> finishes instantly once it's been done).</div>
+</section>
+
+<section id="s6b">
+<h2>Act 6 — Make it a live website</h2>
+<p>Every push (Act 4) already carries an instruction telling GitHub to rebuild a public website. You only have to tell GitHub to obey it — <b>once</b>. This act happens on <b>github.com</b>, not in the Codespace.</p>
+<ol class="steps">
+<li><span class="what">Go to your repository page.</span> In Safari: <code>github.com/YOUR-USERNAME/alphabetmath</code>. Tap the <b>Settings</b> tab in the row across the top (on a narrow screen it hides behind a <b>⋯</b> at the end of that row).
+<div class="mock" style="max-width:440px"><div class="gtabs"><span>&lt;&gt; Code</span><span>Issues</span><span>Actions</span><span class="hi" style="padding:0 3px">Settings</span></div><div class="med" style="min-height:44px">your repository page</div></div>
+<p class="cap">The tab row on your repository page → tap <b>Settings</b></p></li>
+<li><span class="what">Tap Pages in the left list, then set the Source.</span> Under "Build and deployment", tap the <b>Source</b> dropdown and pick <b>GitHub Actions</b>.
+<div class="mock" style="max-width:440px"><div class="mbody"><div class="mside" style="width:118px"><div class="hd">SETTINGS</div><div class="row">General</div><div class="row">Branches</div><div class="row sel hi">Pages</div><div class="row">Actions</div></div><div class="mmain"><div style="padding:12px 14px"><b style="color:#333">Build and deployment</b><div style="margin-top:8px;color:#888">Source</div><div class="minput hi" style="max-width:170px;margin-top:5px">GitHub Actions&nbsp;&nbsp;▾</div></div></div></div></div>
+<p class="cap">Settings → <b>Pages</b> → Source: <b>GitHub Actions</b></p></li>
+<li><span class="what">Watch it build.</span> Tap the <b>Actions</b> tab (same row as Settings). You should see "Deploy to GitHub Pages" with a spinner, then a green check after about 2 minutes. If nothing is running, tap the workflow name → <b>Run workflow</b>.
+<div class="mock" style="max-width:440px"><div class="gtabs"><span>&lt;&gt; Code</span><span class="on">Actions</span><span>Settings</span></div><div style="padding:12px 14px"><span class="chk">✓</span><b style="color:#333">Deploy to GitHub Pages</b> <span style="color:#999">· main · 2 minutes ago</span></div></div>
+<p class="cap">A green check in the Actions tab = the site is live</p></li>
+<li><span class="what">Visit your site.</span>
+<pre><code>https://YOUR-USERNAME.github.io/alphabetmath/</code></pre>
+Replace <code>YOUR-USERNAME</code> with your GitHub username (the exact address is also printed at the top of that Pages settings page). Share it with anyone — it works on any phone or computer.</li>
+</ol>
+<div class="note"><span class="lbl">From now on it's automatic:</span> every future push rebuilds the site by itself — you never repeat this act. It's not instant; give it ~2 minutes after the green check, and reload once if you still see the old version.</div>
+</section>
+
+<section id="s7">
+<h2>Bonus — Claude Code in the terminal</h2>
+<p>Claude Code doesn't run on the iPad itself — it runs <b>inside the Codespace terminal</b>, and the iPad is the window into it. Once the project is pushed (Act 4):</p>
+<ol class="steps">
+<li><span class="what">Install it (once):</span><pre><code>npm install -g @anthropic-ai/claude-code</code></pre></li>
+<li><span class="what">Start it from the project folder:</span><pre><code>cd /workspaces/alphabetmath &amp;&amp; claude</code></pre></li>
+<li><span class="what">Sign in.</span> The first run prints a login link — tap it, sign in with your Anthropic account, come back to the terminal. After that, you just talk to it.</li>
+</ol>
+<div class="note"><span class="lbl">One rule to keep:</span> the moment you start <b>editing</b> in the Codespace (with Claude Code or by hand), the design studio must stop editing its copy — one editor at a time, or the two copies drift apart. Running the app is always safe.</div>
+</section>
+
+<section id="s8">
+<h2>If something goes wrong</h2>
+<ul class="plain">
+<li><b>"unzip: cannot find alphabetmath.zip."</b> — Safari may have saved it as <code>alphabetmath (1).zip</code>. Type <code>ls</code> to see the real name, then touch-and-hold the file in the Explorer → Rename → <code>alphabetmath.zip</code>, and retry.</li>
+<li><b>Can't paste into the terminal.</b> — Tap once inside the terminal first, then touch-and-hold → Paste. Safari may ask permission to read the clipboard — allow it.</li>
+<li><b>The Commit button is greyed out.</b> — The message box is empty. Type <code>port project</code> first.</li>
+<li><b>Red text after <code>npm run dev</code>.</b> — If the app still opened, ignore it. If nothing opened, copy the red text and send it to me.</li>
+<li><b>The browser tab shows an old or blank page.</b> — Reload once; if still wrong, check the address ends in <code>/alphabetmath/</code>.</li>
+<li><b>The public link shows 404 / not found.</b> — One of three things: the Pages source isn't set to <b>GitHub Actions</b> (Act 6, step 2); the build hasn't finished (green check in the Actions tab yet?); or the address is missing the final <code>/alphabetmath/</code>.</li>
+<li><b>The Codespace itself is stuck.</b> — Close the tab, reopen from github.com → Code → Codespaces. Your pushed files are safe on GitHub no matter what.</li>
+</ul>
+</section>
+
+</div>
+</body>
+</html>

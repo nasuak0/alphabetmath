@@ -1,0 +1,19 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath</title>
+<!-- The real title is set by the brain (zmath/main.jsx) on boot — identical to the Mobile shell. -->
+</head>
+<body>
+<div id="root">
+  <!-- Loading state shown until React mounts (replaced on mount). Kept identical
+       to the Mobile reader's splash so the two shells never drift. -->
+  <div id="zmath-boot" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#f4f5fb">
+    <div style="font:600 15px/1.4 ui-sans-serif,system-ui,sans-serif;color:#8b93a7;letter-spacing:.02em">Loading AlphabetMath…</div>
+  </div>
+</div>
+<script type="module" src="/src/main.jsx"></script>
+</body>
+</html>

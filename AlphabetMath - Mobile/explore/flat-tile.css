@@ -1,0 +1,267 @@
+/* ============================================================
+   Design tile — flat-material study
+   One tile component, driven by two data-attributes on .tileWrap:
+     data-mat  = glossy | flat        (material)
+     data-dots = none | halftone | tenji   (the "dot edit" layer)
+   Glossy reproduces the CURRENT app tile faithfully (the "before").
+   Flat = molded-cartridge material: hard gradient frame, white label
+   embedded on one recessed line, flat badge (no moat), one contact shadow.
+   Topic = Geometry  → grad #ffac5e → #e0702a, ink #bd5410.
+   ============================================================ */
+
+.tileWrap { --c1:#ffac5e; --c2:#e0702a; --ink:#bd5410;
+  --frame-deep: 150,60,12;            /* deep orange, for hard rims / recess lines */
+  width: 100%; }
+/* Per-topic palette overrides — every rule below reads --c1/--c2/--ink/--frame-deep,
+   so switching these four vars re-skins the whole flat (and glossy) treatment.
+   Geometry is the .tileWrap default above; Algebra overrides here. */
+.tileWrap[data-topic="algebra"] { --c1:#ff7a9c; --c2:#c2326b; --ink:#b51f57;
+  --frame-deep: 110,20,55; }          /* deep rose, for hard rims / recess lines */
+.tileWrap[data-topic="calculus"] { --c1:#ffce4d; --c2:#e0962a; --ink:#b0730f;
+  --frame-deep: 140,90,10; }          /* deep gold, for hard rims / recess lines */
+.tileWrap[data-topic="linalg"] { --c1:#5b8def; --c2:#3147bc; --ink:#2a3db0;
+  --frame-deep: 25,38,120; }          /* deep indigo, for hard rims / recess lines */
+.tileWrap[data-topic="numtheory"] { --c1:#4fd1ad; --c2:#1a9b7d; --ink:#0e8268;
+  --frame-deep: 8,95,75; }            /* deep teal, for hard rims / recess lines */
+.tileWrap[data-topic="prob"] { --c1:#a06ee0; --c2:#6a36b5; --ink:#5e2ba6;
+  --frame-deep: 74,30,120; }          /* deep violet, for hard rims / recess lines */
+.tileWrap[data-topic="analysis"] { --c1:#ff8e72; --c2:#d8512f; --ink:#c4441f;
+  --frame-deep: 150,45,20; }          /* deep blush, for hard rims / recess lines */
+
+/* ---- TILE SHELL ------------------------------------------------------- */
+.tile { position: relative; cursor: pointer; isolation: isolate;
+  aspect-ratio: 1.4 / 1;
+  transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s cubic-bezier(.25,1,.5,1); }
+
+/* GLOSSY (current): gradient frame + colored glow + specular + frosted label */
+[data-mat="glossy"] .tile {
+  border-radius: 22px; padding: 4px;
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05),
+    inset 0 1px 1px rgba(255,255,255,0.55); }
+[data-mat="glossy"] .tile:hover { transform: translateY(-6px) scale(1.025);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07), 0 14px 28px rgba(40,50,80,0.13),
+    inset 0 1px 1px rgba(255,255,255,0.55); }
+[data-mat="glossy"] .art { border-radius: 18px;
+  /* match the real app: OPAQUE white label (no orange bleed through) */
+  background: #ffffff;
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
+
+/* FLAT (target): hard gradient stroke, embedded label, no glow/no frost */
+[data-mat="flat"] .tile {
+  border-radius: 19px; padding: 5px;
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  /* ONE neutral contact shadow + a crisp darker inner rim so the stroke reads HARD */
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16),
+    inset 0 0 0 1px rgba(var(--frame-deep),0.18); }
+[data-mat="flat"] .tile:hover { transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(var(--frame-deep),0.18); }
+[data-mat="flat"] .art { border-radius: 14px; background: #fff; }
+/* 4th option: flat + the crisp division hairline restored */
+.tileWrap.hairline[data-mat="flat"] .art { box-shadow: inset 0 0 0 1px rgba(var(--frame-deep),0.10); }
+
+/* HYBRID (new, geometry pilot): the glossy body — sheen, frosted moat badge,
+   original 22px/4px frame size — but the RIM wears the flat material: one hard
+   contact shadow + the deep warm inner rim line, no white specular. */
+[data-mat="hybrid"] .tile {
+  border-radius: 22.25px; padding: 4.25px; margin: -0.25px;
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16),
+    inset 0 0 0 1px rgba(var(--frame-deep),0.18); }
+[data-mat="hybrid"] .tile:hover { transform: translateY(-6px) scale(1.025);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(var(--frame-deep),0.18); }
+[data-mat="hybrid"] .art { border-radius: 18px; background: #ffffff;
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
+
+/* ---- LABEL (art) shared ---------------------------------------------- */
+.art { position: relative; height: 100%; overflow: hidden;
+  display: flex; flex-direction: column; justify-content: flex-end; }
+.cover { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
+
+/* GLOSSY label keeps the diagonal specular sheen; FLAT removes it */
+.sheen { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(150deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.10) 26%, transparent 50%); }
+[data-mat="flat"] .sheen { display: none; }
+
+/* legibility = HALO (the app's default): nothing covered, art fully intact,
+   a tight white outline crisps the glyphs over the line art. Scrim retired. */
+.scrim { display: none; }
+
+.tx { position: relative; z-index: 3; padding: 13px; }
+.kind { font-family: var(--font-ui); font-size: 0.66rem; font-weight: 800; letter-spacing: 0.10em;
+  text-transform: uppercase; color: var(--ink); opacity: 0.62; margin-bottom: 3px;
+  text-shadow: 0 0 1px #fff, 0 0 1.5px #fff, 0 0 2px rgba(255,255,255,0.9); }
+.name { font-family: var(--font-display); font-weight: 700; font-size: 1.18rem; line-height: 1.05;
+  color: var(--ink); letter-spacing: -0.01em;
+  text-shadow: 0 0 1px #fff, 0 0 1.5px #fff, 0 0 2px rgba(255,255,255,0.9); }
+
+/* ---- BADGE ------------------------------------------------------------ */
+.badge { position: absolute; top: 6px; left: 6px; z-index: 5; isolation: isolate;
+  min-width: 42px; height: 32px; padding: 0 9px; display: flex; align-items: center; justify-content: center;
+  white-space: nowrap; font-family: var(--font-display); font-weight: 800; font-size: 0.86rem;
+  border-radius: 15px 7px 14px 7px; }
+.badge span { position: relative; z-index: 1;
+  background: linear-gradient(150deg, var(--c1), var(--c2));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+
+/* GLOSSY badge = nested moat (grey tray + floating white ::before pill) */
+[data-mat="glossy"] .badge { background: rgba(234,237,244,0.72);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: inset 0 1px 2px rgba(80,95,130,0.12); }
+[data-mat="glossy"] .badge::before { content: ""; position: absolute; inset: 3px; z-index: 0;
+  border-radius: 12px 5px 11px 5px; background: #fff;
+  box-shadow: 0 1px 2px rgba(40,50,80,0.10), 0 0 2px rgba(40,50,80,0.06), inset 0 1px 1px rgba(255,255,255,0.9); }
+
+/* FLAT + HYBRID badge = single flat chip embedded directly in the label (no grey
+   moat, no floating pill, no blur) — just a hairline outline, no top recess shadow.
+   Same footprint + position as the moat tray. */
+[data-mat="flat"] .badge, [data-mat="hybrid"] .badge { background: #fff;
+  box-shadow: inset 0 0 0 1px rgba(var(--frame-deep),0.16); }
+[data-mat="flat"] .badge::before, [data-mat="hybrid"] .badge::before { display: none; }
+
+/* ---- CARTRIDGE (featured Lab card — Knot Atlas pilot) ----------------
+   Same shell + materials; proportions match the home Projects rail exactly:
+   1.9:1 aspect (vs the tile's 1.4:1), width = 1.9/1.4 × the tile hero so both
+   render the SAME HEIGHT, and t-md name (1.18rem) + base badge (44×36 @0.92rem)
+   as the home rail cartridges use. */
+.tileWrap[data-tkind="cartridge"] .tile { aspect-ratio: 1.9 / 1; }
+.play .tileWrap.hero[data-tkind="cartridge"] { width: clamp(271px, 35.3vw, 331px); }
+.tileWrap[data-tkind="cartridge"] .name { font-size: 1.18rem; }
+.tileWrap[data-tkind="cartridge"] .badge { min-width: 44px; height: 36px; font-size: 0.92rem;
+  border-radius: 16px 7px 15px 7px; }
+[data-mat="glossy"][data-tkind="cartridge"] .badge::before { border-radius: 13px 5px 12px 5px; }
+
+/* 3rd cartridge option: flat, minus the hairlines/shadows — no contact shadow,
+   no inner rim line, no badge outline. Same cartridge size. */
+.tileWrap.clean[data-mat="flat"] .tile,
+.tileWrap.clean[data-mat="flat"] .tile:hover { box-shadow: none; }
+.tileWrap.clean[data-mat="flat"] .badge { box-shadow: none; }
+
+/* COMPOSED: art + words are ONE drawing — the words live inside the SVG and
+   crossing lines break at letter edges. HTML text hides; regular Flat rim. */
+.tileWrap.composed .tx { visibility: hidden; }
+/* composed flat tiles also carry the crisp division hairline (the "outline") */
+.tileWrap.composed[data-mat="flat"] .art { box-shadow: inset 0 0 0 1px rgba(var(--frame-deep),0.10); }
+
+/* ---- OPTIONS RAIL: pickable tiles ------------------------------------ */
+.compare .cell .tile { cursor: pointer; }
+/* picked = very faint warm ring held on the chosen tile */
+.compare .cell .tileWrap.picked .tile {
+  outline: 2px solid rgba(var(--frame-deep),0.13); outline-offset: 3px; }
+
+/* ---- MATERIAL DROPDOWN (iOS-style checkmark popover) ------------------ */
+.drop { position: relative; }
+.drop-btn { width: 100%; display: flex; align-items: center; justify-content: space-between; gap: 8px;
+  padding: 10px 14px; border: 0; border-radius: 999px; cursor: pointer;
+  background: rgba(240,242,247,0.92); box-shadow: inset 0 1px 2px rgba(80,95,130,0.10);
+  font-family: var(--font-ui); font-weight: 700; font-size: 0.8rem; color: var(--wii-ink); }
+.drop-btn::after { content: "\25BE"; font-size: 0.72rem; color: #808a9c; }
+.drop-btn:active { transform: scale(0.98); }
+.drop-menu { position: absolute; top: calc(100% + 6px); left: 0; right: 0; z-index: 50;
+  padding: 6px; border-radius: 16px;
+  background: var(--glass-bg-strong);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.06), 0 18px 40px rgba(40,50,80,0.16);
+  display: none; }
+.drop.open .drop-menu { display: block; }
+.drop-item { display: flex; align-items: center; gap: 9px; width: 100%;
+  padding: 9px 10px; border: 0; border-radius: 11px; background: 0; cursor: pointer;
+  font-family: var(--font-ui); font-weight: 600; font-size: 0.82rem; color: var(--wii-ink); text-align: left; }
+.drop-item:hover { background: rgba(240,242,247,0.9); }
+.drop-item .ck { width: 14px; flex: 0 0 14px; font-weight: 800; color: var(--wii-ink); visibility: hidden; }
+.drop-item.on .ck { visibility: visible; }
+
+/* topics without a cartridge are inert while Kind = Cartridge (pilot: geometry) */
+.seg button:disabled { opacity: 0.38; cursor: not-allowed; }
+
+/* ---- COMPARISON RAIL (Driver 1) — cells are GENERATED by the script for
+   the active Kind + Topic only; no hide/show filtering needed. */
+.compare[data-view="cartridge"] .cell { flex-basis: 331px; }
+
+/* ============================================================
+   PAGE CHROME
+   ============================================================ */
+* { box-sizing: border-box; }
+html, body { margin: 0; height: 100%; }
+body { font-family: var(--font-ui); color: var(--wii-ink);
+  -webkit-font-smoothing: antialiased;
+  background: radial-gradient(120% 90% at 50% -10%, #ffffff, #fcfdff 55%, #f6f7fb 100%); }
+body::before { content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(rgba(0,0,0,0.06) 1px, transparent 1.5px); background-size: 22px 22px; }
+
+.page { position: relative; z-index: 1; max-width: 1080px; margin: 0 auto; padding: 24px 40px 90px; }
+
+.head { margin-bottom: 34px; }
+.eyebrow { font-size: 0.72rem; font-weight: 800; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--wii-ink-2); margin-bottom: 8px; }
+.title { font-family: var(--font-display); font-weight: 700; font-size: 2rem; letter-spacing: -0.01em;
+  color: var(--wii-ink); margin: 0 0 8px; }
+.lede { font-size: 0.98rem; line-height: 1.55; color: var(--wii-ink-2); max-width: 64ch; margin: 0; }
+
+/* PLAYGROUND — big live tile + tweak panel */
+/* while a Tweaks dropdown is open, lift the panel above the rail so the menu
+   popover hovers over the comparison rail instead of painting behind it */
+.play:has(.drop.open) { position: relative; z-index: 5; }
+.play { display: flex; align-items: center; gap: 40px; flex-wrap: wrap;
+  padding: 20px 34px; border-radius: 24px; background: rgba(255,255,255,0.6);
+  border: 1px solid rgba(255,255,255,0.7); box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 18px 44px rgba(40,50,80,0.07);
+  -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%); }
+.play .stageCol { flex: 1 1 360px; display: flex; flex-direction: column; align-items: center; gap: 16px; min-width: 300px; }
+/* native/fluid scale — the hero is a real app tile, sized like the mosaic
+   tiles (clamp 190→250 in the live app), NOT a blown-up desktop card. */
+.play .tileWrap.hero { width: clamp(200px, 26vw, 244px); max-width: 100%; }
+.statecap { font-family: var(--font-mono); font-size: 0.82rem; color: var(--wii-ink-2);
+  font-variant-numeric: tabular-nums; }
+.statecap b { color: var(--wii-ink); font-weight: 600; }
+
+/* TWEAKS panel — app chrome style (moat is fine here; only the TILE goes flat) */
+.tweaks { flex: 0 0 270px; align-self: stretch; display: flex; flex-direction: column; gap: 20px;
+  padding: 20px; border-radius: 18px; background: rgba(255,255,255,0.78);
+  border: 1px solid var(--glass-border); box-shadow: 0 1px 2px rgba(0,0,0,0.04), 0 8px 22px rgba(40,50,80,0.08);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
+.tw-head { font-family: var(--font-display); font-weight: 700; font-size: 1.05rem; color: var(--wii-ink);
+  display: flex; align-items: center; gap: 8px; }
+.tw-head::before { content: ""; width: 9px; height: 9px; border-radius: 3px;
+  background: linear-gradient(150deg, var(--c1), var(--c2)); }
+.tw-row { display: flex; flex-direction: column; gap: 9px; }
+.tw-label { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.08em; text-transform: uppercase; color: var(--wii-ink-2); }
+.tw-note { font-size: 0.78rem; line-height: 1.5; color: var(--wii-ink-2); margin: 0; }
+.tw-note b { color: var(--wii-ink); font-weight: 600; }
+
+.seg { --i: 0; --n: 2; position: relative; display: flex; padding: 4px; border-radius: 999px;
+  background: rgba(240,242,247,0.92); box-shadow: inset 0 1px 2px rgba(80,95,130,0.10); }
+.seg-ind { position: absolute; top: 4px; bottom: 4px; width: calc((100% - 8px) / var(--n));
+  left: calc(4px + var(--i) * (100% - 8px) / var(--n)); border-radius: 999px; background: #fff;
+  box-shadow: 0 1px 3px rgba(40,50,80,0.16), inset 0 1px 1px rgba(255,255,255,0.9);
+  transition: left .28s cubic-bezier(.34,1.56,.64,1); }
+.seg button { position: relative; z-index: 1; flex: 1 0 0; min-width: 0; padding: 8px 6px; border: 0; background: 0;
+  font-family: var(--font-ui); font-weight: 700; font-size: 0.8rem; color: #808a9c; cursor: pointer;
+  transition: color .2s ease; }
+.seg button.on { color: var(--wii-ink); }
+.seg button:active { transform: scale(0.95); }
+.seg.disabled { opacity: 0.4; pointer-events: none; }
+
+/* COMPARE rail — home-menu-style frosted bar (mirrors .homebar): full page
+   width, glass panel, hairline edge + lifted shadow, tiles in a horizontal
+   rail with the home .hrail spacing. clip-path keeps hover glows inside the
+   rounded corners, exactly like the home bars. */
+.compare { position: relative; isolation: isolate; margin-top: 8px;
+  border-radius: var(--r-tile);
+  background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-nav), var(--spec-strong);
+  overflow: hidden; clip-path: inset(0 round var(--r-tile));
+  padding: 6px 0 7px; }
+.sheet.two { display: flex; gap: 16px; overflow-x: auto; overflow-y: visible;
+  padding: 10px 18px 8px 12px; scroll-padding: 0 12px;
+  scrollbar-width: none; -ms-overflow-style: none; }
+.sheet.two::-webkit-scrollbar { display: none; height: 0; width: 0; }
+.cell { display: flex; flex-direction: column; gap: 12px; flex: 0 0 244px; }
+.cell .tileWrap { width: 100%; }
+
+@media (max-width: 880px) {
+  .play { flex-direction: column; }
+  .tweaks { flex-basis: auto; width: 100%; }
+}

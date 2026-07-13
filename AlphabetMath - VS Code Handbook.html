@@ -1,0 +1,231 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — VS Code Handbook</title>
+<style>
+  :root{
+    --ink:#1b1b1b; --soft:#454545; --faint:#7c7c7c;
+    --rule:#dcdcdc; --paper:#ffffff;
+    --accent:#7a1f12;
+    --box-bg:#f6f7f9; --box-ru:#d9dee6;
+    --note-bg:#fbfaf5; --note-ru:#e7e2d0;
+    --code-bg:#f1f1ee; --code-ink:#4a4a4a;
+  }
+  *{box-sizing:border-box;}
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Latin Modern Roman","Georgia","Times New Roman",serif;
+    font-size:18px; line-height:1.7;
+  }
+  .page{ max-width:720px; margin:0 auto; padding:72px 40px 140px; counter-reset:secn; }
+
+  .titleblock{ text-align:center; margin:0 0 12px; }
+  .titleblock h1{ font-size:32px; font-weight:700; line-height:1.2; margin:0 0 10px; letter-spacing:-.01em; }
+  .titleblock .sub{ font-size:16px; color:var(--soft); margin:2px 0; }
+  hr.rule{ border:0; border-top:1px solid var(--rule); margin:26px 0; }
+
+  .abstract{ margin:26px 40px 8px; font-size:16px; line-height:1.6; }
+  .abstract .lbl{ text-align:center; font-weight:700; font-size:15px; margin-bottom:8px; }
+  .abstract p{ margin:0; color:var(--soft); }
+
+  .toc{ margin:34px 0; }
+  .toc .lbl{ font-size:20px; font-weight:700; margin-bottom:10px; }
+  .toc ol{ list-style:none; padding:0; margin:0; counter-reset:c; }
+  .toc > ol > li{ counter-increment:c; }
+  .toc > ol > li > a::before{ content:counter(c) "\00a0\00a0"; color:var(--accent); font-weight:700; }
+  .toc a{ color:var(--ink); text-decoration:none; display:flex; justify-content:space-between;
+    align-items:baseline; gap:8px; padding:5px 0; }
+  .toc a:hover{ color:var(--accent); }
+  .toc a .dots{ flex:1; border-bottom:1.5px dotted var(--rule); transform:translateY(-4px); margin:0 6px; }
+
+  section{ margin-top:52px; counter-increment:secn; }
+  h2{ font-size:23px; font-weight:700; margin:0 0 6px; letter-spacing:-.01em; scroll-margin-top:16px; }
+  h2::before{ content:counter(secn) "\00a0\00a0"; color:var(--accent); }
+  h3{ font-size:18px; font-weight:700; margin:28px 0 2px; }
+  p{ margin:12px 0; }
+  b,strong{ font-weight:700; } em{ font-style:italic; }
+
+  .def{ background:var(--box-bg); border:1px solid var(--box-ru); border-left:4px solid var(--accent);
+    border-radius:4px; padding:12px 16px; margin:18px 0; font-size:16.5px; line-height:1.55; }
+  .def .term{ font-weight:700; }
+  .def .term::after{ content:":  "; font-weight:400; }
+
+  .note{ background:var(--note-bg); border:1px solid var(--note-ru); border-radius:4px;
+    padding:12px 16px; margin:18px 0; font-size:16px; line-height:1.55; }
+  .note .lbl{ font-weight:700; margin-right:6px; }
+
+  ol.steps{ list-style:none; counter-reset:s; padding:0; margin:18px 0; }
+  ol.steps > li{ counter-increment:s; position:relative; padding:2px 0 18px 46px; }
+  ol.steps > li::before{ content:counter(s); position:absolute; left:0; top:0;
+    width:30px; height:30px; border-radius:50%; background:var(--paper);
+    border:1.6px solid var(--accent); color:var(--accent);
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; }
+  ol.steps > li:not(:last-child)::after{ content:""; position:absolute; left:14.5px; top:30px;
+    bottom:2px; width:1.6px; background:var(--rule); }
+  ol.steps > li .what{ display:block; font-weight:700; margin-bottom:2px; }
+  ol.steps ul{ margin:8px 0 0; padding-left:20px; }
+  ol.steps ul li{ margin:4px 0; }
+
+  ul.plain{ margin:12px 0; padding-left:22px; }
+  ul.plain li{ margin:8px 0; }
+
+  code{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.8em;
+    background:var(--code-bg); color:var(--code-ink); padding:2px 5px; border-radius:4px; }
+  pre{ background:#faf9f6; color:#2a2a2a; border:1px solid var(--rule); border-radius:5px;
+    padding:12px 15px; margin:12px 0; overflow-x:auto;
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14.5px; line-height:1.5; }
+  pre code{ background:none; padding:0; font-size:inherit; color:inherit; }
+  a{ color:var(--accent); text-decoration:none; }
+  a[href^="http"]{ border-bottom:1px solid rgba(122,31,18,.3); }
+  a:hover{ border-bottom-color:var(--accent); }
+
+  .flow{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px; color:var(--soft);
+    background:var(--box-bg); border:1px solid var(--box-ru); border-radius:5px;
+    padding:14px 16px; margin:16px 0; line-height:2; }
+  .flow b{ color:var(--ink); }
+
+  @media (max-width:640px){
+    .page{ padding:44px 20px 90px; } body{ font-size:17px; }
+    .abstract{ margin-left:0; margin-right:0; }
+  }
+  @media print{
+    .page{ padding:0; max-width:none; } h2,h3{ break-after:avoid; }
+    .def,.note,pre,ol.steps>li{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="titleblock">
+    <h1>The VS Code Handbook</h1>
+    <p class="sub">AlphabetMath · run it on your own computer</p>
+  </div>
+  <hr class="rule" />
+
+  <div class="abstract">
+    <p class="lbl">What this is</p>
+    <p>A step-by-step guide to running the AlphabetMath project on your own computer using VS&nbsp;Code, instead of in the browser with Codespaces. You install two free apps once, then it's the same short routine every time. This guide is for <em>running</em> the project, not editing it — I'm still the one making changes and handing you fresh copies. Read Section&nbsp;1 so the words make sense, then follow Sections&nbsp;2 and&nbsp;3 in order. Section&nbsp;4 is how you get my updates, and Section&nbsp;5 is there if anything goes wrong.</p>
+  </div>
+
+  <div class="toc">
+    <p class="lbl">Contents</p>
+    <ol>
+      <li><a href="#s1">What everything is, in plain words<span class="dots"></span><span>read first</span></a></li>
+      <li><a href="#s2">Set up your computer (do this once)<span class="dots"></span></a></li>
+      <li><a href="#s3">Open and run the project<span class="dots"></span>the routine</a></li>
+      <li><a href="#s4">Get the latest updates from me<span class="dots"></span></a></li>
+      <li><a href="#s5">If something goes wrong<span class="dots"></span>quick fixes</a></li>
+    </ol>
+  </div>
+
+  <!-- ===== 1 ===== -->
+  <section id="s1">
+    <h2>What everything is, in plain words</h2>
+    <p>Only three names to know. Read them once and refer back whenever a word confuses you.</p>
+
+    <div class="def"><span class="term">VS Code</span> a free app from Microsoft for opening and running projects on your own computer. It has a file list, a big area in the middle, and a text box at the bottom called the terminal. It's where you'll do everything.</div>
+
+    <div class="def"><span class="term">Node</span> a free helper that VS Code uses to actually start the project. You install it once and never touch it directly — the project just needs it present in the background.</div>
+
+    <div class="def"><span class="term">The studio</span> where I (your assistant) build the project. When you ask me for "the zip," I hand you a packaged, up-to-date copy of the whole project to run.</div>
+
+    <h3>Two commands you'll type</h3>
+    <p>In the terminal you'll type two short lines. Here's all they do:</p>
+    <ul class="plain">
+      <li><code>npm install</code> = fetch the extra pieces the project needs. Slow the <em>first</em> time (a few minutes), then you rarely run it again.</li>
+      <li><code>npm run dev</code> = start the project. It gives you a web address to open in your browser.</li>
+    </ul>
+
+    <div class="note"><span class="lbl">The one rule:</span> the project has two folders that sit next to each other — <code>AlphabetMath - App</code> and <code>AlphabetMath - Mobile</code>. One relies on the other, so keep the <b>whole project folder together</b>, exactly as it comes out of the zip. Following the steps below does this for you.</div>
+  </section>
+
+  <!-- ===== 2 ===== -->
+  <section id="s2">
+    <h2>Set up your computer (do this once)</h2>
+    <p>Two free installs, then you get the project files. Set aside about 15 minutes. You never repeat this section.</p>
+    <ol class="steps">
+      <li><span class="what">Install VS Code.</span> Go to <a href="https://code.visualstudio.com">code.visualstudio.com</a>, click the big download button, and install it like any app. Open it once so you know it's there.</li>
+      <li><span class="what">Install Node.</span> Go to <a href="https://nodejs.org">nodejs.org</a> and download the button marked <b>LTS</b> (the recommended one). Install it, clicking <b>Next / Agree</b> through every screen — the defaults are correct. When it finishes, Node is running quietly in the background; there's nothing to open.</li>
+      <li><span class="what">Ask me for the zip.</span> Type "give me the zip." I hand you a single packaged file. Save it somewhere easy to find, like your <b>Desktop</b> or <b>Documents</b>.</li>
+      <li><span class="what">Unzip it.</span> Right-click the file → <b>Extract All</b> (Windows) or double-click it (Mac). You now have a project folder full of files. Move it somewhere you'll remember — for example a folder called <code>AlphabetMath</code> on your Desktop.
+        <ul>
+          <li>Open the folder to check. It should contain <code>AlphabetMath - App</code>, <code>AlphabetMath - Mobile</code>, and a few other files side by side. If instead you see just <em>one</em> folder inside, go into it — the real project is one level down.</li>
+        </ul>
+      </li>
+    </ol>
+    <div class="note"><span class="lbl">That's the whole setup.</span> From now on you only ever do Section&nbsp;3.</div>
+  </section>
+
+  <!-- ===== 3 ===== -->
+  <section id="s3">
+    <h2>Open and run the project</h2>
+    <p>This is the routine you'll repeat. The first run takes a few minutes (it fetches its pieces); after that it starts in seconds.</p>
+    <ol class="steps">
+      <li><span class="what">Open the project in VS Code.</span> Open VS&nbsp;Code, then click <code>File → Open Folder</code> and choose your <code>AlphabetMath</code> project folder (the one that holds the two <code>AlphabetMath -</code> folders). Its files appear down the left side.
+        <ul>
+          <li>If a bar pops up asking "Do you trust the authors?", click <b>Yes, I trust</b>.</li>
+        </ul>
+      </li>
+      <li><span class="what">Open the terminal.</span> In the top menu click <code>Terminal → New Terminal</code>. A text box opens along the bottom. This is where the next lines go.</li>
+      <li><span class="what">Move into the App folder.</span> Type this line and press Enter:
+        <pre><code>cd "AlphabetMath - App"</code></pre>
+        <ul>
+          <li>The quote marks matter — the folder name has spaces in it.</li>
+        </ul>
+      </li>
+      <li><span class="what">First time only — fetch the pieces.</span> Type this and press Enter, then wait for it to finish (a few minutes; lots of text is normal):
+        <pre><code>npm install</code></pre>
+        <ul>
+          <li>You only do this the very first time, and again whenever I tell you a new zip needs it. Otherwise skip straight to the next step.</li>
+        </ul>
+      </li>
+      <li><span class="what">Start it.</span> Type this and press Enter:
+        <pre><code>npm run dev</code></pre>
+        <ul>
+          <li>After a moment it prints a web address like <code>http://localhost:5173/</code>. Hold <b>Ctrl</b> (or <b>Cmd</b> on Mac) and click it, or copy it into your browser. The AlphabetMath home screen loads.</li>
+        </ul>
+      </li>
+      <li><span class="what">When you're done.</span> Click inside the terminal and press <code>Ctrl + C</code> to stop it. You can close VS&nbsp;Code entirely. Next time, just reopen VS&nbsp;Code (it remembers the folder) and run steps&nbsp;2, 3, and&nbsp;5 — that's it.</li>
+    </ol>
+    <div class="note"><span class="lbl">The short version, every time after setup:</span> open VS&nbsp;Code → <code>Terminal → New Terminal</code> → <code>cd "AlphabetMath - App"</code> → <code>npm run dev</code> → click the link. Under a minute.</div>
+  </section>
+
+  <!-- ===== 4 ===== -->
+  <section id="s4">
+    <h2>Get the latest updates from me</h2>
+    <p>While I'm still building the project, every update is the same short swap:</p>
+    <div class="flow">
+      <b>1.</b> Ask me for a fresh zip.<br>
+      <b>2.</b> Unzip it, replacing your old project folder with the new one (say "yes / replace" if it asks).<br>
+      <b>3.</b> In VS&nbsp;Code, run it again (Section&nbsp;3, steps&nbsp;2, 3, 5).<br>
+      <b>4.</b> If I tell you the update changed its pieces, also run <code>npm install</code> (Section&nbsp;3, step&nbsp;4) before starting.
+    </div>
+    <p>That's the whole cycle. When in doubt, running <code>npm install</code> once before <code>npm run dev</code> never hurts — it just makes sure everything's present.</p>
+  </section>
+
+  <!-- ===== 5 ===== -->
+  <section id="s5">
+    <h2>If something goes wrong</h2>
+    <p>The few snags that actually come up, with the fix for each.</p>
+    <ul class="plain">
+      <li><b>“<code>npm</code> is not recognized / command not found.”</b> — Node isn't installed, or VS&nbsp;Code opened before it was. Close VS&nbsp;Code completely, reopen it, and try again. If it still says this, reinstall Node (Section&nbsp;2, step&nbsp;2).</li>
+      <li><b>“It can't find the folder after <code>cd</code>.”</b> — Check the quote marks and the exact spacing: <code>cd "AlphabetMath - App"</code>. You must have the project folder open first (Section&nbsp;3, step&nbsp;1).</li>
+      <li><b>“The terminal printed a lot of red text.”</b> — If a web address still appeared and the app opened, ignore it. If nothing opened, copy the red text and send it to me.</li>
+      <li><b>“The link says the page can't be reached.”</b> — The project probably isn't running. Make sure <code>npm run dev</code> is still going in the terminal (don't close that window while you're using the app).</li>
+      <li><b>“It opened but looks broken or half-empty.”</b> — You may have opened the wrong folder, or skipped <code>npm install</code>. Stop it (<code>Ctrl + C</code>), run <code>npm install</code>, then <code>npm run dev</code> again.</li>
+      <li><b>“Unzipping asked about replacing files.”</b> — Choose <b>replace / overwrite</b>. The new copy is the newer version — that's what you want.</li>
+    </ul>
+    <div class="note"><span class="lbl">Still stuck?</span> Tell me the section number and exactly what's on your screen, and I'll walk you through it.</div>
+  </section>
+
+  <hr class="rule" style="margin-top:56px;" />
+  <p style="text-align:center;color:var(--faint);font-size:15px;font-style:italic;">Running on your own computer — nothing you do here can affect the version other people see.</p>
+
+</div>
+</body>
+</html>

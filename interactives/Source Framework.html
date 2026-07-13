@@ -1,0 +1,304 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Source Framework — Zmath</title>
+<link rel="stylesheet" href="../AlphabetMath - Mobile/zmath/tokens.css" />
+<link rel="stylesheet" href="lab.css" />
+<style>
+  .lab { --accent: #4c209e; --accent-ink: #4c209e; --accent-2: #05a3df; max-width: 1000px; }
+  body { --amb-1: rgba(76,32,158,0.10); --amb-2: rgba(5,163,223,0.08); }
+
+  .sect { margin-top: 30px; }
+  .sect-head { display: flex; align-items: baseline; gap: 12px; margin-bottom: 14px; }
+  .sect-num { font-family: var(--font-mono); font-weight: 700; font-size: 0.82rem; color: var(--fg3); }
+  .sect-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.32rem; color: var(--wii-ink);
+    letter-spacing: -0.01em; margin: 0; }
+  .sect-head .sub { margin-left: auto; font-size: 0.84rem; color: var(--wii-ink-2); font-weight: 500; }
+
+  /* ---- layered scope/presentation diagram ---- */
+  .band { border-radius: var(--r-tile); padding: 16px 18px 18px; margin-bottom: 14px;
+    background: var(--glass-bg); -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border); box-shadow: var(--shadow-wii), var(--spec-strong); }
+  .band-lbl { display: flex; align-items: center; gap: 9px; margin-bottom: 13px; }
+  .band-lbl .tag { font-family: var(--font-ui); font-weight: 800; font-size: 0.7rem; letter-spacing: 0.14em;
+    text-transform: uppercase; color: var(--wii-ink-2); }
+  .band-lbl .ln { flex: 1; height: 1px; background: var(--hairline-strong); }
+  .band-lbl .hint { font-size: 0.78rem; color: var(--fg3); font-weight: 500; }
+  .role-row { display: grid; grid-template-columns: 1fr 1fr; gap: 12px; }
+  @media (max-width: 680px) { .role-row { grid-template-columns: 1fr; } }
+
+  .role {
+    --c: #5b8def; --ci: #2a3db0;
+    position: relative; border-radius: var(--r-card); padding: 16px 16px 15px;
+    background: rgba(255,255,255,0.7); border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-xs), inset 0 1px 1px rgba(255,255,255,0.7);
+    overflow: hidden;
+  }
+  .role::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c); }
+  .role-top { display: flex; align-items: flex-start; gap: 10px; margin-bottom: 11px; }
+  .role-sym { flex-shrink: 0; width: 34px; height: 30px; border-radius: 10px 5px 9px 5px;
+    display: flex; align-items: center; justify-content: center; color: #fff;
+    font-family: var(--font-display); font-weight: 800; font-size: 0.84rem;
+    background: var(--c); box-shadow: inset 0 1px 1px rgba(255,255,255,0.45), 0 2px 6px rgba(0,0,0,0.16); }
+  .role-name { font-family: var(--font-display); font-weight: 700; font-size: 0.98rem; color: var(--wii-ink); line-height: 1.15; white-space: nowrap; }
+  .role-pill { display: inline-block; margin-top: 7px; font-size: 0.66rem; font-weight: 800; letter-spacing: 0.07em;
+    text-transform: uppercase; padding: 2px 9px; border-radius: 999px; color: var(--ci);
+    background: color-mix(in srgb, var(--c) 18%, transparent); }
+  .role dl { margin: 0; display: grid; grid-template-columns: auto 1fr; gap: 6px 11px; }
+  .role dt { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg3);
+    padding-top: 2px; }
+  .role dd { margin: 0; font-size: 0.88rem; line-height: 1.45; color: var(--wii-ink-2); }
+  .role dd b { color: var(--wii-ink); font-weight: 650; }
+
+  /* ---- difficulty ladder ---- */
+  .ladder { display: flex; align-items: stretch; gap: 0; border-radius: var(--r-tile); overflow: hidden;
+    border: 1px solid var(--glass-border); box-shadow: var(--shadow-wii); }
+  .rung { flex: 1; padding: 18px 20px; position: relative; }
+  .rung.found { background: linear-gradient(135deg, rgba(209,231,221,0.85), rgba(226,240,217,0.7)); }
+  .rung.core  { background: linear-gradient(135deg, rgba(217,226,243,0.85), rgba(224,228,250,0.7)); }
+  .rung.pure  { background: linear-gradient(135deg, rgba(224,204,255,0.8), rgba(240,228,255,0.7)); }
+  .rung .step-no { font-family: var(--font-mono); font-weight: 700; font-size: 0.74rem; opacity: 0.6; }
+  .rung h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.1rem; margin: 4px 0 3px; }
+  .rung.found h3 { color: var(--mint-ink); } .rung.core h3 { color: var(--sky-ink); } .rung.pure h3 { color: var(--lilac-ink); }
+  .rung .src { font-size: 0.78rem; font-weight: 600; color: var(--wii-ink-2); }
+  .rung p { font-size: 0.84rem; line-height: 1.45; color: var(--wii-ink-2); margin: 9px 0 0; }
+  .rung .arr { position: absolute; right: -11px; top: 50%; transform: translateY(-50%); z-index: 3;
+    width: 24px; height: 24px; border-radius: 50%; background: #fff; box-shadow: 0 2px 6px rgba(0,0,0,0.16);
+    display: flex; align-items: center; justify-content: center; color: var(--wii-ink-2); }
+  .rung:last-child .arr { display: none; }
+  .rung .arr svg { width: 13px; height: 13px; }
+  @media (max-width: 680px) { .ladder { flex-direction: column; } .rung .arr { right: 50%; top: auto; bottom: -11px; transform: translateX(50%) rotate(90deg); } }
+
+  /* ---- three archetypes ---- */
+  .arch-row { display: grid; grid-template-columns: repeat(3, 1fr); gap: 12px; }
+  @media (max-width: 760px) { .arch-row { grid-template-columns: 1fr; } }
+  .arch { --c: #5b8def; border-radius: var(--r-card); padding: 18px 17px;
+    background: rgba(255,255,255,0.72); border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-xs), inset 0 1px 1px rgba(255,255,255,0.7); }
+  .arch .ic { width: 42px; height: 42px; border-radius: 13px; display: flex; align-items: center; justify-content: center;
+    color: #fff; margin-bottom: 12px;
+    background: linear-gradient(135deg, var(--c), color-mix(in srgb, var(--c) 60%, #000 18%));
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 4px 10px -2px var(--c); }
+  .arch .ic svg { width: 22px; height: 22px; }
+  .arch h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.04rem; color: var(--wii-ink); margin: 0 0 3px; }
+  .arch .from { font-size: 0.72rem; font-weight: 700; letter-spacing: 0.04em; text-transform: uppercase; color: var(--fg3); margin-bottom: 9px; }
+  .arch p { font-size: 0.85rem; line-height: 1.5; color: var(--wii-ink-2); margin: 0 0 10px; }
+  .arch .made { display: inline-flex; align-items: center; gap: 6px; font-size: 0.74rem; font-weight: 600;
+    color: var(--accent-ink); text-decoration: none; padding: 5px 11px; border-radius: 999px;
+    background: rgba(255,255,255,0.7); border: 1px solid var(--hairline); transition: transform var(--dur-fast) var(--ease-bounce), background var(--dur-base) var(--ease-smooth); }
+  .arch .made:hover { background: #fff; transform: translateX(2px); }
+  .arch .made svg { width: 12px; height: 12px; }
+
+  /* ---- voice steps ---- */
+  .voice { display: grid; grid-template-columns: repeat(3, 1fr); gap: 0; align-items: stretch; }
+  @media (max-width: 680px) { .voice { grid-template-columns: 1fr; } }
+  .vstep { position: relative; padding: 18px 22px; }
+  .vstep + .vstep { border-left: 1px solid var(--hairline); }
+  @media (max-width: 680px) { .vstep + .vstep { border-left: none; border-top: 1px solid var(--hairline); } }
+  .vstep .vn { font-family: var(--font-display); font-weight: 800; font-size: 1.5rem;
+    background: var(--brand-grad); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+  .vstep h4 { font-family: var(--font-display); font-weight: 700; font-size: 1rem; color: var(--wii-ink); margin: 4px 0 5px; }
+  .vstep p { font-size: 0.83rem; line-height: 1.5; color: var(--wii-ink-2); margin: 0; }
+
+  /* ---- licensing guardrail ---- */
+  .guard { display: flex; gap: 16px; align-items: flex-start; padding: 20px 22px; border-radius: var(--r-tile);
+    background: linear-gradient(135deg, rgba(255,242,204,0.7), rgba(255,229,204,0.55));
+    border: 1px solid rgba(189,84,16,0.18); box-shadow: var(--shadow-xs); }
+  .guard .gic { flex-shrink: 0; width: 40px; height: 40px; border-radius: 13px; display: flex; align-items: center; justify-content: center;
+    color: #fff; background: linear-gradient(135deg, #e8924a, #bd5410); box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 3px 8px rgba(189,84,16,0.3); }
+  .guard .gic svg { width: 20px; height: 20px; }
+  .guard h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.06rem; color: var(--wii-ink); margin: 0 0 6px; }
+  .guard p { font-size: 0.88rem; line-height: 1.55; color: var(--wii-ink-2); margin: 0; }
+  .guard p b { color: var(--peach-ink); font-weight: 700; }
+  .lic-tags { display: flex; flex-wrap: wrap; gap: 8px; margin-top: 11px; }
+  .lic { font-size: 0.74rem; font-weight: 700; padding: 4px 11px; border-radius: 999px; border: 1px solid var(--hairline); }
+  .lic.open { background: rgba(61,210,144,0.16); color: var(--mint-ink); }
+  .lic.closed { background: rgba(181,35,42,0.1); color: var(--coral-ink); }
+
+  .tldr { margin-top: 26px; padding: 18px 22px; border-radius: var(--r-tile);
+    background: var(--ink-button); color: #fff; box-shadow: var(--shadow-pop); }
+  .tldr .lbl { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase; color: rgba(255,255,255,0.55); margin-bottom: 7px; }
+  .tldr p { margin: 0; font-size: 1.02rem; line-height: 1.55; font-weight: 450; color: rgba(255,255,255,0.92); }
+  .tldr p b { color: #fff; font-weight: 700; }
+</style>
+</head>
+<body>
+<div class="lab">
+  <div class="lab-top">
+    <a class="back-chip" href="../Zmath Home Menu.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Home Menu
+    </a>
+    <span class="lab-spacer"></span>
+    <span class="level-badge level-pure"><span class="dot"></span>Reference · planning</span>
+  </div>
+
+  <header class="lab-head">
+    <div class="lab-eyebrow"><span class="strand-sym">Fx</span>Source Framework</div>
+    <h1 class="lab-title">Framework → Page Effect</h1>
+    <p class="lab-intro">How leaning on the five sources as a framework shapes your interactives — <b>without touching the Zmath design</b>. Each source feeds a different layer: two decide <b>scope</b>, two decide <b>presentation</b>, one is a reusable format.</p>
+  </header>
+
+  <!-- 1. Five sources, four layers -->
+  <section class="sect">
+    <div class="sect-head"><span class="sect-num">01</span><h2>Five sources, four layers</h2><span class="sub">what each one actually decides</span></div>
+
+    <div class="band">
+      <div class="band-lbl"><span class="tag">Scope</span><span class="ln"></span><span class="hint">decides what an interactive is &amp; how far it goes</span></div>
+      <div class="role-row">
+        <div class="role" style="--c:#3dd290;--ci:#0e7d64;">
+          <div class="role-top">
+            <div class="role-sym">IM</div>
+            <div><div class="role-name">Illustrative Math · G8</div><span class="role-pill">Content + sequence</span></div>
+          </div>
+          <dl>
+            <dt>Decides</dt><dd>the <b>topic &amp; the order</b> ideas unlock — transformations → slope → equations → functions → Pythagoras.</dd>
+            <dt>On the page</dt><dd>sets the <b>floor</b>: every demo must be graspable hands-first by a Grade-8 visitor.</dd>
+          </dl>
+        </div>
+        <div class="role" style="--c:#a06ee0;--ci:#5e2ba6;">
+          <div class="role-top">
+            <div class="role-sym">SR</div>
+            <div><div class="role-name">Sadler &amp; Reese</div><span class="role-pill">The ceiling</span></div>
+          </div>
+          <dl>
+            <dt>Decides</dt><dd>how far <b>up</b> the same strand reaches — fractional equations, trig, conics, intro calculus.</dd>
+            <dt>On the page</dt><dd>gives each topic a <b>second altitude</b>, so a tile can grow with the visitor.</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+
+    <div class="band">
+      <div class="band-lbl"><span class="tag">Presentation</span><span class="ln"></span><span class="hint">decides how it reads &amp; feels</span></div>
+      <div class="role-row">
+        <div class="role" style="--c:#e8924a;--ci:#bd5410;">
+          <div class="role-top">
+            <div class="role-sym">BE</div>
+            <div><div class="role-name">Better Explained</div><span class="role-pill">Voice</span></div>
+          </div>
+          <dl>
+            <dt>Decides</dt><dd><b>how a page opens</b> — one concrete, grabbable thing first, formalism second.</dd>
+            <dt>On the page</dt><dd>governs intro copy &amp; the <b>order of reveal</b>; not the math itself.</dd>
+          </dl>
+        </div>
+        <div class="role" style="--c:#5b8def;--ci:#2a3db0;">
+          <div class="role-top">
+            <div class="role-sym">MP</div>
+            <div><div class="role-name">Mathproofs</div><span class="role-pill">Format</span></div>
+          </div>
+          <dl>
+            <dt>Decides</dt><dd>a reusable <b>shape</b> — the short, looping, wordless visual argument.</dd>
+            <dt>On the page</dt><dd>supplies one ready-made <b>interaction archetype</b>, topic-agnostic.</dd>
+          </dl>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- 2. Difficulty ladder -->
+  <section class="sect">
+    <div class="sect-head"><span class="sect-num">02</span><h2>The difficulty ladder you inherit</h2><span class="sub">one strand, two altitudes + a bridge</span></div>
+    <div class="ladder">
+      <div class="rung found">
+        <div class="step-no">FLOOR</div>
+        <h3>Foundations</h3>
+        <div class="src">IM Grade 8</div>
+        <p>Concrete, hands-first. Whole numbers, draggable figures, one idea at a time.</p>
+        <div class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+      </div>
+      <div class="rung core">
+        <div class="step-no">BRIDGE</div>
+        <h3>Core</h3>
+        <div class="src">G8 → pre-university</div>
+        <p>Variables both sides, brackets, real coordinates. Formal language starts here.</p>
+        <div class="arr"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+      </div>
+      <div class="rung pure">
+        <div class="step-no">CEILING</div>
+        <h3>Pure</h3>
+        <div class="src">Sadler &amp; Reese</div>
+        <p>Fractional &amp; literal equations, trig, conics, the run-up to calculus.</p>
+      </div>
+    </div>
+    <p class="ctrl-hint" style="margin-top:11px;">Effect on the page: tiles can carry a <b>level badge</b>, and the home menu reads as a <b>climb</b> rather than a flat shelf — which suits the console-tile metaphor.</p>
+  </section>
+
+  <!-- 3. Three archetypes -->
+  <section class="sect">
+    <div class="sect-head"><span class="sect-num">03</span><h2>Three interaction archetypes fall out</h2><span class="sub">the sources resolve into a small, repeatable format set</span></div>
+    <div class="arch-row">
+      <div class="arch" style="--c:#5b8def;">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19l7-7 4 4 4-9"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/><circle cx="5" cy="19" r="1.6" fill="currentColor"/></svg></div>
+        <h3>Manipulative</h3>
+        <div class="from">from IM Grade 8</div>
+        <p>Drag and watch. A figure responds live; the visitor discovers the rule by moving it.</p>
+        <a class="made" href="Slope Machine.html">Slope Machine <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="arch" style="--c:#e8924a;">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div>
+        <h3>Proof without words</h3>
+        <div class="from">from Mathproofs</div>
+        <p>Loop and watch. A short wordless animation that <em>is</em> the argument — no algebra needed.</p>
+        <a class="made" href="Pythagoras Without Words.html">Pythagoras <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+      <div class="arch" style="--c:#3dd290;">
+        <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 11l3 3 8-8"/><path d="M20 12v6a2 2 0 0 1-2 2H6a2 2 0 0 1-2-2V6a2 2 0 0 1 2-2h9"/></svg></div>
+        <h3>Worked practice</h3>
+        <div class="from">from Sadler &amp; Reese</div>
+        <p>Generate, step through, print. Leveled problem sets with reveal-able working.</p>
+        <a class="made" href="Equation Workshop.html">Equation Workshop <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></a>
+      </div>
+    </div>
+  </section>
+
+  <!-- 4. One voice -->
+  <section class="sect">
+    <div class="sect-head"><span class="sect-num">04</span><h2>One voice, every page</h2><span class="sub">Better Explained's reveal order, made a rule</span></div>
+    <div class="band" style="padding:0;">
+      <div class="voice">
+        <div class="vstep"><div class="vn">1</div><h4>Hook</h4><p>Open on one concrete thing the visitor can grab — a point to drag, a shape to slide.</p></div>
+        <div class="vstep"><div class="vn">2</div><h4>Visual</h4><p>An immediate payoff appears as they act. The idea is <em>seen</em> before it's named.</p></div>
+        <div class="vstep"><div class="vn">3</div><h4>Name it</h4><p>Only then attach the formal term, notation, or theorem — now it has something to stick to.</p></div>
+      </div>
+    </div>
+    <p class="ctrl-hint" style="margin-top:11px;">This is already your house line — <b>"Stop memorizing — start visualizing."</b> The framework just makes it a consistent shape every blurb and opening frame follows.</p>
+  </section>
+
+  <!-- 5. Licensing guardrail -->
+  <section class="sect">
+    <div class="sect-head"><span class="sect-num">05</span><h2>The one guardrail</h2><span class="sub">what keeps the page publishable</span></div>
+    <div class="guard">
+      <div class="gic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 22s8-4 8-10V5l-8-3-8 3v7c0 6 8 10 8 10Z"/></svg></div>
+      <div>
+        <h3>Scaffolding, not source material</h3>
+        <p>Use all five for <b>what to teach, how to sequence, and how to phrase the intuition</b> — but the figures, wording, and problems on the page must be <b>original</b>. Only IM is openly licensed; the rest are not.</p>
+        <div class="lic-tags">
+          <span class="lic open">IM Grade 8 — CC-BY ✓</span>
+          <span class="lic closed">Sadler — © all rights reserved</span>
+          <span class="lic closed">Reese — © all rights reserved</span>
+          <span class="lic closed">Better Explained — ©</span>
+          <span class="lic closed">Mathproofs posts — ©</span>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <div class="tldr">
+    <div class="lbl">In one line</div>
+    <p>These sources don't redecorate your page — they decide its <b>altitude</b>, its <b>difficulty ladder</b>, its <b>interaction formats</b>, and its <b>voice</b>, while the Zmath glass-and-paper design stays exactly as you built it.</p>
+  </div>
+
+  <div class="lineage">
+    <span class="lin-lbl">Framework</span>
+    <span class="src">IM Grade 8</span>
+    <span class="src">Better Explained</span>
+    <span class="src">Sadler</span>
+    <span class="src">Reese</span>
+    <span class="src">Mathproofs</span>
+  </div>
+</div>
+</body>
+</html>

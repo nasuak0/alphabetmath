@@ -1,0 +1,309 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — Codespaces Handbook</title>
+<style>
+  :root{
+    --ink:#1b1b1b; --soft:#454545; --faint:#7c7c7c;
+    --rule:#dcdcdc; --paper:#ffffff;
+    --accent:#7a1f12;
+    --box-bg:#f6f7f9; --box-ru:#d9dee6;
+    --note-bg:#fbfaf5; --note-ru:#e7e2d0;
+    --code-bg:#f1f1ee; --code-ink:#4a4a4a;
+  }
+  *{box-sizing:border-box;}
+  html{ -webkit-text-size-adjust:100%; }
+  body{
+    margin:0; background:var(--paper); color:var(--ink);
+    font-family:"Latin Modern Roman","Georgia","Times New Roman",serif;
+    font-size:18px; line-height:1.7;
+  }
+  .page{ max-width:720px; margin:0 auto; padding:72px 40px 140px; counter-reset:secn; }
+
+  .titleblock{ text-align:center; margin:0 0 12px; }
+  .titleblock h1{ font-size:32px; font-weight:700; line-height:1.2; margin:0 0 10px; letter-spacing:-.01em; }
+  .titleblock .sub{ font-size:16px; color:var(--soft); margin:2px 0; }
+  hr.rule{ border:0; border-top:1px solid var(--rule); margin:26px 0; }
+
+  .abstract{ margin:26px 40px 8px; font-size:16px; line-height:1.6; }
+  .abstract .lbl{ text-align:center; font-weight:700; font-size:15px; margin-bottom:8px; }
+  .abstract p{ margin:0; color:var(--soft); }
+
+  .toc{ margin:34px 0; }
+  .toc .lbl{ font-size:20px; font-weight:700; margin-bottom:10px; }
+  .toc ol{ list-style:none; padding:0; margin:0; counter-reset:c; }
+  .toc > ol > li{ counter-increment:c; }
+  .toc > ol > li > a::before{ content:counter(c) "\00a0\00a0"; color:var(--accent); font-weight:700; }
+  .toc a{ color:var(--ink); text-decoration:none; display:flex; justify-content:space-between;
+    align-items:baseline; gap:8px; padding:5px 0; }
+  .toc a:hover{ color:var(--accent); }
+  .toc a .dots{ flex:1; border-bottom:1.5px dotted var(--rule); transform:translateY(-4px); margin:0 6px; }
+
+  section{ margin-top:52px; counter-increment:secn; }
+  h2{ font-size:23px; font-weight:700; margin:0 0 6px; letter-spacing:-.01em; scroll-margin-top:16px; }
+  h2::before{ content:counter(secn) "\00a0\00a0"; color:var(--accent); }
+  h3{ font-size:18px; font-weight:700; margin:28px 0 2px; }
+  p{ margin:12px 0; }
+  b,strong{ font-weight:700; } em{ font-style:italic; }
+
+  .def{ background:var(--box-bg); border:1px solid var(--box-ru); border-left:4px solid var(--accent);
+    border-radius:4px; padding:12px 16px; margin:18px 0; font-size:16.5px; line-height:1.55; }
+  .def .term{ font-weight:700; }
+  .def .term::after{ content:":  "; font-weight:400; }
+
+  .note{ background:var(--note-bg); border:1px solid var(--note-ru); border-radius:4px;
+    padding:12px 16px; margin:18px 0; font-size:16px; line-height:1.55; }
+  .note .lbl{ font-weight:700; margin-right:6px; }
+
+  /* Big numbered steps — the core of the doc */
+  ol.steps{ list-style:none; counter-reset:s; padding:0; margin:18px 0; }
+  ol.steps > li{ counter-increment:s; position:relative; padding:2px 0 18px 46px; }
+  ol.steps > li::before{ content:counter(s); position:absolute; left:0; top:0;
+    width:30px; height:30px; border-radius:50%; background:var(--paper);
+    border:1.6px solid var(--accent); color:var(--accent);
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px; font-weight:700;
+    display:flex; align-items:center; justify-content:center; }
+  ol.steps > li:not(:last-child)::after{ content:""; position:absolute; left:14.5px; top:30px;
+    bottom:2px; width:1.6px; background:var(--rule); }
+  ol.steps > li .what{ display:block; font-weight:700; margin-bottom:2px; }
+  ol.steps ul{ margin:8px 0 0; padding-left:20px; }
+  ol.steps ul li{ margin:4px 0; }
+
+  ul.plain{ margin:12px 0; padding-left:22px; }
+  ul.plain li{ margin:8px 0; }
+
+  code{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:.8em;
+    background:var(--code-bg); color:var(--code-ink); padding:2px 5px; border-radius:4px; }
+  pre{ background:#faf9f6; color:#2a2a2a; border:1px solid var(--rule); border-radius:5px;
+    padding:12px 15px; margin:12px 0; overflow-x:auto;
+    font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14.5px; line-height:1.5; }
+  pre code{ background:none; padding:0; font-size:inherit; color:inherit; }
+  a{ color:var(--accent); text-decoration:none; }
+  a[href^="http"]{ border-bottom:1px solid rgba(122,31,18,.3); }
+  a:hover{ border-bottom-color:var(--accent); }
+
+  .flow{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:14px; color:var(--soft);
+    background:var(--box-bg); border:1px solid var(--box-ru); border-radius:5px;
+    padding:14px 16px; margin:16px 0; line-height:2; }
+  .flow b{ color:var(--ink); }
+
+  @media (max-width:640px){
+    .page{ padding:44px 20px 90px; } body{ font-size:17px; }
+    .abstract{ margin-left:0; margin-right:0; }
+  }
+  @media print{
+    .page{ padding:0; max-width:none; } h2,h3{ break-after:avoid; }
+    .def,.note,pre,ol.steps>li{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="page">
+
+  <div class="titleblock">
+    <h1>The Codespaces Handbook</h1>
+    <p class="sub">AlphabetMath · everything runs in your web browser</p>
+  </div>
+  <hr class="rule" />
+
+  <div class="abstract">
+    <p class="lbl">What this is</p>
+    <p>A step-by-step guide to putting the AlphabetMath project on the internet and running it — entirely in your web browser. You install nothing except one small helper app, and you use it only once. Read Section&nbsp;1 first so the words make sense; then follow Sections&nbsp;2 through 5 in order. Section&nbsp;6 is there if anything goes wrong, Section&nbsp;7 shows you the code, and Section&nbsp;8 shows you how to make a change yourself.</p>
+  </div>
+
+  <div class="toc">
+    <p class="lbl">Contents</p>
+    <ol>
+      <li><a href="#s1">What everything is, in plain words<span class="dots"></span><span>read first</span></a></li>
+      <li><a href="#s2">Put the project online (do this once)<span class="dots"></span></a></li>
+      <li><a href="#s3">Open and run the project<span class="dots"></span></a></li>
+      <li><a href="#s4">Make a public link to share<span class="dots"></span></a></li>
+      <li><a href="#s5">Get the latest updates from me<span class="dots"></span></a></li>
+      <li><a href="#s6">If something goes wrong<span class="dots"></span>quick fixes</a></li>
+      <li><a href="#s7">Where the code lives<span class="dots"></span>when you're ready</a></li>
+      <li><a href="#s8">Making an edit yourself<span class="dots"></span>and copying mine</a></li>
+    </ol>
+  </div>
+
+  <!-- ===== 1 ===== -->
+  <section id="s1">
+    <h2>What everything is, in plain words</h2>
+    <p>You are about to use a few tools with unfamiliar names. None of them are complicated once you know what each one is <em>for</em>. Read these once and refer back whenever a word confuses you.</p>
+
+    <div class="def"><span class="term">GitHub</span> a website that stores your project safely on the internet and keeps a copy of every version you save. Your project's storage spot there is called a <b>repository</b> — or "repo" for short. Yours is named <code>alphabetmath</code>.</div>
+
+    <div class="def"><span class="term">Codespace</span> a complete workspace for running and editing your project that lives on GitHub's computers and opens right inside your web browser. You install nothing, and it does the hard work — not your computer. This is where you will spend almost all your time.</div>
+
+    <div class="def"><span class="term">GitHub Desktop</span> a small free app for your computer. Its only job is to carry your project files up to GitHub the very first time. You use it once, in Section&nbsp;2, and then rarely again.</div>
+
+    <div class="def"><span class="term">The studio</span> where I (your assistant) build the project. When you ask me for "the zip," I am handing you a packaged, up-to-date copy of the project to upload.</div>
+
+    <h3>Three small words GitHub uses</h3>
+    <p>You will see these three words as buttons. Here is all they mean:</p>
+    <ul class="plain">
+      <li><b>Commit</b> = save a snapshot and give it a short name (like naming a save file in a game).</li>
+      <li><b>Push</b> = send your saved snapshots up to GitHub on the internet.</li>
+      <li><b>Pull</b> = the opposite of push: bring the newest version <em>down</em> from GitHub into wherever you are working.</li>
+    </ul>
+
+    <h3>The one rule that keeps things from breaking</h3>
+    <div class="note"><span class="lbl">Rule:</span> the project has two folders that sit next to each other — <code>AlphabetMath - App</code> and <code>AlphabetMath - Mobile</code>. One relies on the other, so they must always stay together. Whenever you upload, upload the <b>whole project</b>, never just one folder. (You don't have to think about this — following the steps below does it for you.)</div>
+  </section>
+
+  <!-- ===== 2 ===== -->
+  <section id="s2">
+    <h2>Put the project online (do this once)</h2>
+    <p>The goal of this section: get the project files onto GitHub. This is the only part that uses your own computer, and you never repeat it. Set aside about 20 minutes. You need a free GitHub account and the empty <code>alphabetmath</code> repository (already created).</p>
+    <ol class="steps">
+      <li><span class="what">Install GitHub Desktop.</span> Go to <a href="https://desktop.github.com">desktop.github.com</a>, download it, install it, and sign in with your GitHub account.</li>
+      <li><span class="what">Bring the empty repository onto your computer.</span> In GitHub Desktop, click <code>File → Clone repository</code>. In the list, choose <code>alphabetmath</code>. Choose a place to keep it (for example a new folder called <code>C:\dev\</code>). Click <b>Clone</b>.
+        <ul>
+          <li>This creates an empty folder on your computer that GitHub Desktop now watches for changes. Leave it where it is.</li>
+        </ul>
+      </li>
+      <li><span class="what">Ask me for the zip.</span> Type "give me the zip." I will hand you a single packaged file. Save it and unzip it (right-click → Extract / Unzip). You now have a folder full of the project's files.</li>
+      <li><span class="what">Copy the project files into the watched folder.</span> Open the unzipped folder, select <em>everything</em> inside it, and copy it into the folder you cloned in step&nbsp;2.
+        <ul>
+          <li>Copy all of it — the project automatically leaves out anything that shouldn't be uploaded, so you never have to pick and choose.</li>
+          <li>Once copied, you can delete the zip. It has done its job.</li>
+        </ul>
+      </li>
+      <li><span class="what">Save a snapshot (commit).</span> Switch back to GitHub Desktop. It now shows a long list of files it noticed. In the box at the bottom-left, type a short name like <code>first upload</code>. Click <b>Commit to main</b>.</li>
+      <li><span class="what">Send it to the internet (push).</span> Click <b>Push origin</b> at the top. When it finishes, open <code>github.com</code>, go to your <code>alphabetmath</code> repository, and refresh — your files are now there. Section&nbsp;2 is finished forever.</li>
+    </ol>
+    <div class="note"><span class="lbl">Quick check before step&nbsp;5:</span> open the folder you copied everything into. It should contain at least these names. If you see them, you copied the right thing:
+      <pre><code>AlphabetMath - App/
+AlphabetMath - Mobile/
+interactives/
+STATUS.md
+(plus a few other files)</code></pre>
+      If you only see <em>one</em> folder, you copied a level too deep — go back into the unzipped folder, open it, and copy what's <em>inside</em> it instead.</div>
+  </section>
+
+  <!-- ===== 3 ===== -->
+  <section id="s3">
+    <h2>Open and run the project</h2>
+    <p>From here on, everything happens in your web browser. The first time takes about 10 minutes (it sets itself up); after that it opens in about a minute.</p>
+    <div class="note"><span class="lbl">First look inside:</span> when the workspace opens it can feel busy. There are really just three areas. Down the <b>left</b> is the list of your files and folders. The <b>large middle</b> is where a file's contents show when you click one. The <b>strip along the bottom</b> is the terminal — the text box you type commands into. That's all you need to recognize.</div>
+    <ol class="steps">
+      <li><span class="what">Start a Codespace.</span> On your <code>alphabetmath</code> page at <code>github.com</code>, click the green <b>Code</b> button → the <b>Codespaces</b> tab → <b>Create codespace on main</b>. Wait a couple of minutes the first time while it prepares itself. A code workspace opens in your browser.
+        <ul>
+          <li>Next time, you reopen it from the very same menu — it will already exist and open quickly.</li>
+        </ul>
+      </li>
+      <li><span class="what">Open a command box (terminal).</span> In the top menu of the workspace, click <code>Terminal → New Terminal</code>. A text box appears at the bottom. This is where you type the two lines below.</li>
+      <li><span class="what">Type these two lines, pressing Enter after each:</span>
+        <pre><code>cd "AlphabetMath - App"
+npm run dev</code></pre>
+        <ul>
+          <li>The first line moves into the right folder. The second starts the project.</li>
+          <li>A small pop-up appears saying <b>"Open in Browser."</b> Click it — the AlphabetMath home screen loads in a new tab.</li>
+        </ul>
+      </li>
+      <li><span class="what">When you're done.</span> To stop the project, click inside the terminal and press <code>Ctrl + C</code>. To leave entirely, just close the browser tab — the Codespace goes to sleep on its own and costs nothing while asleep.</li>
+    </ol>
+    <div class="note"><span class="lbl">Every time after the first:</span> you don't repeat the setup. Just (1)&nbsp;go to your repository at <code>github.com</code>, (2)&nbsp;click the green <b>Code</b> button → <b>Codespaces</b> and reopen the one already listed, then (3)&nbsp;open a terminal and run the same two lines from step&nbsp;3. That's it — about a minute.</div>
+    <div class="note"><span class="lbl">Why so easy?</span> The project was set up ahead of time so the Codespace arrives with everything it needs already installed. That is why there are no error messages or extra installs here.</div>
+  </section>
+
+  <!-- ===== 4 ===== -->
+  <section id="s4">
+    <h2>Make a public link to share</h2>
+    <p>This gives you a normal web address that anyone can open — no account needed on their end. You set it up once; after that it updates itself.</p>
+    <ol class="steps">
+      <li><span class="what">Turn it on (one time).</span> On your repository page, click <b>Settings</b> → <b>Pages</b> (in the left-hand list). Under <b>Source</b>, choose <b>GitHub Actions</b>. That is the entire setup.</li>
+      <li><span class="what">Let it build.</span> Go to the <b>Actions</b> tab of your repository, find "Deploy to GitHub Pages," and if it isn't already running, click <b>Run workflow</b>. Wait for the green check mark (about 2 minutes).</li>
+      <li><span class="what">Share your link.</span> Your address is:
+        <pre><code>https://&lt;your-username&gt;.github.io/alphabetmath/</code></pre>
+        Replace <code>&lt;your-username&gt;</code> with your GitHub username. It also appears on the Pages settings page. Every future update refreshes this link automatically.</li>
+    </ol>
+    <div class="note"><span class="lbl">Note:</span> on a free GitHub account, the public link requires the repository to be set to <b>public</b>. If it isn't, open <code>Settings → General</code>, scroll to the bottom, and switch it to public. The private, behind-the-scenes files still never get shared.</div>
+
+    <h3>What happens after you push a change</h3>
+    <p>Once the link exists, you never set it up again. From then on the site keeps itself up to date on its own. Here is the exact chain each time a change is pushed:</p>
+    <ol class="steps">
+      <li><span class="what">The change is pushed.</span> Your saved edit travels up to the repository on GitHub. (In Phase&nbsp;1 this is the zip I give you; later it will be your own edits.)</li>
+      <li><span class="what">GitHub rebuilds the site by itself.</span> A built-in instruction file tells GitHub: "whenever anything is pushed, rebuild the site and republish it." You press nothing — the push alone starts it. You can watch it on the repository's <b>Actions</b> tab: a spinning dot while it works, then a green check when it's done (about 1–2 minutes).</li>
+      <li><span class="what">The link shows the new version.</span> When that green check appears, your address <code>https://&lt;your-username&gt;.github.io/alphabetmath/</code> is now serving the update. The link itself never changes — only what it shows.</li>
+    </ol>
+    <div class="note"><span class="lbl">Two things to expect.</span> It is <b>not instant</b> — give it a couple of minutes after the green check. If you still see the old version, your browser is showing a saved copy: press <code>Ctrl + Shift + R</code> to force a fresh load. And if the check turns into a <b>red X</b>, the build failed — the live site simply stays on the last good version (nothing breaks); open the Actions tab and send me what it says.</div>
+  </section>
+
+  <!-- ===== 5 ===== -->
+  <section id="s5">
+    <h2>Get the latest updates from me</h2>
+    <p>While I am still the one building the project, every update travels the same short path. Here it is start to finish:</p>
+    <div class="flow">
+      <b>1.</b> Ask me for a fresh zip.<br>
+      <b>2.</b> Unzip it and copy everything into your watched folder (say "yes / replace" if it asks).<br>
+      <b>3.</b> In GitHub Desktop: type a short name, click <b>Commit to main</b>, then <b>Push origin</b>.<br>
+      <b>4.</b> In your open Codespace: click the <b>Pull</b> (sync) arrow, then run it again (Section&nbsp;3, step&nbsp;3).
+    </div>
+    <p>That's the whole cycle, and it repeats each time there's something new. If the Codespace ever says it is "behind," clicking that same sync arrow (bottom-left of the workspace) fixes it.</p>
+  </section>
+
+  <!-- ===== 6 ===== -->
+  <section id="s6">
+    <h2>If something goes wrong</h2>
+    <p>These are the few snags that actually come up, with the fix for each. Find your situation on the left.</p>
+    <ul class="plain">
+      <li><b>“Push origin is greyed out / won't click.”</b> — You haven't saved a snapshot yet. Do the commit first: type a short name in the bottom-left box and click <b>Commit to main</b>. Push will wake up.</li>
+      <li><b>“The terminal printed a lot of red text after <code>npm run dev</code>.”</b> — If the app still opened in a tab, ignore it. If nothing opened, copy the red text and send it to me.</li>
+      <li><b>“The Codespace is stuck, blank, or won't open.”</b> — Close the tab and reopen it from <b>Code → Codespaces</b>. If it's still stuck, delete it (the <code>⋯</code> menu next to its name → <b>Delete</b>) and create a fresh one. <em>Your files are safe on GitHub — nothing is lost.</em></li>
+      <li><b>“My public link shows 404 / page not found.”</b> — One of three things: the Pages source isn't set to <b>GitHub Actions</b> (Section&nbsp;4, step&nbsp;1); the repository is still private (make it public); or the build hasn't finished yet (check the <b>Actions</b> tab for a green check mark).</li>
+      <li><b>“Copying the files asks about replacing or conflicts.”</b> — Choose <b>replace / overwrite</b>. The new files are the newer version — that's exactly what you want.</li>
+      <li><b>“It says my branch is behind.”</b> — Click the small sync/refresh arrow at the bottom-left of the Codespace. That pulls the newest version down.</li>
+    </ul>
+  </section>
+
+  <!-- ===== 7 ===== -->
+  <section id="s7">
+    <h2>Where the code lives (for when you're ready)</h2>
+    <p>You don't need this to run the project — only when you want to start changing it. The whole app is built from <b>one folder</b>: <code>AlphabetMath - Mobile/zmath/</code>. Everything else just reads from it.</p>
+    <div class="note"><span class="lbl">The only rule:</span> only change files inside that <code>zmath/</code> folder. The other folders simply run what's in it.</div>
+
+    <h3>Which file to open first</h3>
+    <p>Listed easiest-and-safest first:</p>
+    <ul class="plain">
+      <li><b><code>data.js</code> — start here.</b> All the words: topic names, project titles, descriptions, colors. Change a title, save, and it changes on screen. You can't break the layout from this file.</li>
+      <li><b><code>tokens.css</code> — the look.</b> All the colors, fonts, and roundness in one place. Change one value and it updates across the whole app.</li>
+      <li><b><code>app.css</code></b> — the detailed styling of each screen.</li>
+      <li><b><code>app.jsx</code></b> — the arrangement of the five screens (Home, Topics, Projects, Notes, About).</li>
+      <li><b><code>components.jsx</code></b> — the reusable parts (the side menu, the tiles, pop-up boxes).</li>
+      <li><b>Everything else</b> — leave it alone for now; you don't need it to begin.</li>
+    </ul>
+
+    <h3>Three tiny changes to try first</h3>
+    <p>Do them one at a time, saving and looking after each. They prove you know where words, colors, and sizes live.</p>
+    <ol class="steps">
+      <li><span class="what">Change a word.</span> In <code>data.js</code>, edit a topic name or project title. Save. Watch it change.</li>
+      <li><span class="what">Change a color.</span> In <code>tokens.css</code>, find <code>--paper</code> and set it to something obvious like <code>#ffe8e8</code>. Save — the background shifts. Then change it back.</li>
+      <li><span class="what">Change a size.</span> In <code>tokens.css</code>, make the <code>font-size</code> of <code>.t-h1</code> bigger. Save.</li>
+    </ol>
+  </section>
+
+  <!-- ===== 8 ===== -->
+  <section id="s8">
+    <h2>Making an edit yourself</h2>
+    <p>Changing a file in the Codespace is the same five steps every time, for any file — the app's code, or even this handbook. Learn it once and it never changes.</p>
+    <ol class="steps">
+      <li><span class="what">Open the file.</span> Click it in the file list on the left; its contents fill the middle. (The app's files worth changing live in the <code>zmath/</code> folder — Section&nbsp;7.)</li>
+      <li><span class="what">Find the text.</span> Press <code>Ctrl + F</code>, type a few words of what you want to change, and it jumps you there.</li>
+      <li><span class="what">Type your change.</span> Click into the text and edit it like any document.</li>
+      <li><span class="what">Save.</span> Press <code>Ctrl + S</code>. The dot on the file's tab disappears when it's saved.</li>
+      <li><span class="what">See it.</span> If the project is running (Section&nbsp;3), its tab refreshes on its own. For the handbook, right-click the file → <b>Open Preview</b>.</li>
+    </ol>
+
+    <h3>Copying a change I made, without a zip</h3>
+    <p>For small changes you don't need a fresh zip — you can just repeat my edit by hand. Whenever I change something, ask me <b>“show me the lines you changed.”</b> I'll always answer the same way: the <b>file</b> to open, a few words to <b>search for</b>, the <b>old</b> text, and the <b>new</b> text to put in its place. Then you do the five steps above — open, search, swap old for new, save. The result is identical to mine.</p>
+    <div class="note"><span class="lbl">One caution:</span> while I'm still building the project, treat your Codespace edits as <b>practice</b> — if we both change the same file, the versions can clash next time I send a zip. When you're ready to take over for real, tell me and we'll hand it over cleanly so you're the only editor.</div>
+  </section>
+
+  <hr class="rule" style="margin-top:56px;" />
+  <p style="text-align:center;color:var(--faint);font-size:15px;font-style:italic;">Stuck? Tell me the section number and what is on your screen, and I'll walk you through it.</p>
+
+</div>
+</body>
+</html>

@@ -1,0 +1,255 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Grade 8 Template — Zmath</title>
+<link rel="stylesheet" href="../AlphabetMath - Mobile/zmath/tokens.css" />
+<link rel="stylesheet" href="lab.css" />
+<style>
+  .lab { --accent: #2a6cdb; --accent-ink: #2a3db0; --accent-2: #05a3df; max-width: 1040px; }
+  body { --amb-1: rgba(42,108,219,0.09); --amb-2: rgba(61,210,144,0.08); }
+
+  /* ---- progress / legend bar ---- */
+  .frame-meta { display: grid; grid-template-columns: 240px 1fr; gap: 0; }
+  @media (max-width: 720px) { .frame-meta { grid-template-columns: 1fr; } }
+  .fill-summary { padding: 22px 24px; border-right: 1px solid var(--hairline);
+    background: linear-gradient(180deg, rgba(255,255,255,0.5), rgba(247,243,236,0.4)); }
+  @media (max-width: 720px) { .fill-summary { border-right: none; border-bottom: 1px solid var(--hairline); } }
+  .fill-summary .big { font-family: var(--font-display); font-weight: 800; font-size: 2.4rem; line-height: 1; color: var(--wii-ink); }
+  .fill-summary .big small { font-size: 1.1rem; color: var(--fg3); font-weight: 700; }
+  .fill-summary .cap { font-size: 0.8rem; color: var(--wii-ink-2); margin-top: 6px; font-weight: 500; }
+  .fill-bar { margin-top: 13px; height: 9px; border-radius: 999px; background: var(--scrim); overflow: hidden; box-shadow: inset 0 1px 2px rgba(0,0,0,0.08); }
+  .fill-bar i { display: block; height: 100%; border-radius: 999px; background: linear-gradient(90deg, var(--z-blue), var(--z-green)); }
+
+  .legend { padding: 20px 24px; display: grid; grid-template-columns: repeat(2, 1fr); gap: 13px 18px; align-content: center; }
+  @media (max-width: 480px) { .legend { grid-template-columns: 1fr; } }
+  .leg { display: flex; align-items: flex-start; gap: 10px; }
+  .leg .lg-ic { flex-shrink: 0; width: 30px; height: 30px; border-radius: 9px; display: flex; align-items: center; justify-content: center; color: #fff;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.45), 0 2px 5px rgba(0,0,0,0.14); }
+  .leg .lg-ic svg { width: 16px; height: 16px; }
+  .leg .lg-tx b { display: block; font-size: 0.84rem; font-weight: 700; color: var(--wii-ink); line-height: 1.2; }
+  .leg .lg-tx span { font-size: 0.72rem; color: var(--wii-ink-2); }
+
+  /* ---- unit accordion ---- */
+  .units { display: flex; flex-direction: column; gap: 11px; margin-top: 20px; }
+  .unit { --c: #5b8def; --ci: #2a3db0; border-radius: var(--r-tile);
+    background: var(--glass-bg-strong); -webkit-backdrop-filter: blur(22px) saturate(180%); backdrop-filter: blur(22px) saturate(180%);
+    border: 1px solid var(--glass-border); box-shadow: var(--shadow-wii), var(--spec-strong); overflow: hidden; }
+  .u-head { display: flex; align-items: center; gap: 15px; padding: 16px 20px; cursor: pointer; position: relative; }
+  .u-head::before { content: ""; position: absolute; left: 0; top: 0; bottom: 0; width: 4px; background: var(--c); }
+  .u-no { flex-shrink: 0; width: 46px; height: 46px; border-radius: 14px; display: flex; align-items: center; justify-content: center;
+    font-family: var(--font-display); font-weight: 800; font-size: 1.2rem; color: #fff;
+    background: linear-gradient(140deg, var(--c), color-mix(in srgb, var(--c) 62%, #000 16%));
+    box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 3px 8px rgba(0,0,0,0.16); }
+  .u-mid { flex: 1; min-width: 0; }
+  .u-domain { font-family: var(--font-mono); font-weight: 700; font-size: 0.7rem; letter-spacing: 0.04em; color: var(--ci); }
+  .u-title { font-family: var(--font-display); font-weight: 700; font-size: 1.12rem; color: var(--wii-ink); line-height: 1.15; letter-spacing: -0.01em; }
+  .u-fill { flex-shrink: 0; display: flex; align-items: center; gap: 9px; }
+  .pips { display: flex; gap: 4px; }
+  .pip { width: 9px; height: 9px; border-radius: 3px; background: var(--scrim-hover); box-shadow: inset 0 1px 1px rgba(0,0,0,0.1); }
+  .pip.on { box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 1px 3px rgba(0,0,0,0.18); }
+  .u-fill .ct { font-size: 0.74rem; font-weight: 700; color: var(--wii-ink-2); font-variant-numeric: tabular-nums; min-width: 26px; }
+  .u-chev { flex-shrink: 0; width: 28px; height: 28px; border-radius: 50%; background: rgba(255,255,255,0.7);
+    display: flex; align-items: center; justify-content: center; color: var(--wii-ink-2); border: 1px solid var(--hairline);
+    transition: transform var(--dur-base) var(--ease-bounce); }
+  .u-chev svg { width: 15px; height: 15px; }
+  .unit.open .u-chev { transform: rotate(90deg); }
+
+  .u-body { display: none; padding: 4px 20px 20px 39px; }
+  .unit.open .u-body { display: block; animation: bodyIn 0.3s var(--ease-smooth) both; }
+  @keyframes bodyIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+
+  .lessons-lbl, .slots-lbl { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.1em; text-transform: uppercase; color: var(--fg3); margin: 6px 0 9px; }
+  .lessons { display: flex; flex-wrap: wrap; gap: 7px; margin-bottom: 18px; }
+  .lesson { font-size: 0.8rem; font-weight: 600; color: var(--wii-ink-2); padding: 6px 12px; border-radius: 999px;
+    background: rgba(255,255,255,0.6); border: 1px solid var(--hairline); }
+
+  .slots { display: grid; grid-template-columns: repeat(4, 1fr); gap: 10px; }
+  @media (max-width: 860px) { .slots { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 480px) { .slots { grid-template-columns: 1fr; } }
+  .slot { --c: #5b8def; --ci: #2a3db0; position: relative; border-radius: var(--r-card); padding: 13px 13px 12px; min-height: 104px;
+    display: flex; flex-direction: column; text-decoration: none; transition: transform var(--dur-fast) var(--ease-bounce), box-shadow var(--dur-base) var(--ease-smooth); }
+  .slot .s-ic { width: 28px; height: 28px; border-radius: 9px; display: flex; align-items: center; justify-content: center; margin-bottom: 9px; }
+  .slot .s-ic svg { width: 15px; height: 15px; }
+  .slot .s-src { font-size: 0.64rem; font-weight: 800; letter-spacing: 0.05em; text-transform: uppercase; color: var(--ci); opacity: 0.85; }
+  .slot .s-label { font-family: var(--font-display); font-weight: 700; font-size: 0.92rem; color: var(--wii-ink); line-height: 1.15; margin-top: 1px; }
+  .slot .s-state { margin-top: auto; font-size: 0.72rem; font-weight: 600; display: flex; align-items: center; gap: 5px; padding-top: 8px; }
+  .slot .s-state svg { width: 13px; height: 13px; }
+
+  /* empty slot — dashed, awaiting fill */
+  .slot.empty { background: rgba(255,255,255,0.4); border: 1.5px dashed var(--wii-edge-2); }
+  .slot.empty .s-ic { background: var(--scrim); color: var(--fg3); }
+  .slot.empty .s-src { opacity: 0.55; }
+  .slot.empty .s-label { color: var(--wii-ink-2); }
+  .slot.empty .s-state { color: var(--fg3); }
+
+  /* filled slot — solid, themed, clickable */
+  .slot.filled { background: color-mix(in srgb, var(--c) 12%, #fff); border: 1px solid color-mix(in srgb, var(--c) 28%, transparent);
+    box-shadow: var(--shadow-xs), inset 0 1px 1px rgba(255,255,255,0.7); cursor: pointer; }
+  .slot.filled .s-ic { background: linear-gradient(140deg, var(--c), color-mix(in srgb, var(--c) 60%, #000 16%)); color: #fff;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.45), 0 2px 5px rgba(0,0,0,0.14); }
+  .slot.filled .s-state { color: var(--ci); }
+  a.slot.filled:hover { transform: translateY(-3px); box-shadow: var(--shadow-wii), inset 0 1px 1px rgba(255,255,255,0.7); }
+  a.slot.filled:active { transform: scale(0.98); }
+
+  .tip { margin-top: 22px; display: flex; gap: 13px; padding: 16px 18px; border-radius: var(--r-card);
+    background: linear-gradient(135deg, rgba(255,255,255,0.7), rgba(247,243,236,0.55)); border: 1px solid var(--hairline); box-shadow: var(--shadow-xs); }
+  .tip .ic { flex-shrink: 0; width: 34px; height: 34px; border-radius: 11px; display: flex; align-items: center; justify-content: center; color: #fff;
+    background: linear-gradient(135deg, var(--z-blue), var(--z-green)); box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 3px 7px rgba(0,0,0,0.14); }
+  .tip .ic svg { width: 18px; height: 18px; }
+  .tip p { margin: 0; font-size: 0.9rem; line-height: 1.55; color: var(--wii-ink-2); }
+  .tip p b { color: var(--wii-ink); font-weight: 650; }
+</style>
+</head>
+<body>
+<div class="lab">
+  <div class="lab-top">
+    <a class="back-chip" href="Source Framework.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Framework
+    </a>
+    <span class="lab-spacer"></span>
+    <span class="level-badge level-foundations"><span class="dot"></span>Template · IM Grade 8</span>
+  </div>
+
+  <header class="lab-head">
+    <div class="lab-eyebrow"><span class="strand-sym">G8</span>Curriculum Template</div>
+    <h1 class="lab-title">The Grade 8 Skeleton</h1>
+    <p class="lab-intro">IM Grade 8's nine units are your <b>frame</b>. Every unit opens into four empty slots — an <b>intuition</b>, a <b>visual proof</b>, an <b>extension</b>, an <b>interactive</b> — each fed by one of your references. Start with the empty frame; stuff it over time.</p>
+  </header>
+
+  <div class="panel accent-lip">
+    <div class="frame-meta">
+      <div class="fill-summary">
+        <div class="big" id="fill-num">3<small>/36</small></div>
+        <div class="cap">slots filled — the rest is yours to stuff</div>
+        <div class="fill-bar"><i id="fill-i" style="width:8%"></i></div>
+      </div>
+      <div class="legend">
+        <div class="leg"><div class="lg-ic" style="background:linear-gradient(140deg,#e8924a,#a8480d)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2Z"/></svg></div><div class="lg-tx"><b>Intuition</b><span>Better Explained — the plain-language hook</span></div></div>
+        <div class="leg"><div class="lg-ic" style="background:linear-gradient(140deg,#5b8def,#24409c)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/></svg></div><div class="lg-tx"><b>Visual proof</b><span>Mathproofs — the wordless argument</span></div></div>
+        <div class="leg"><div class="lg-ic" style="background:linear-gradient(140deg,#a06ee0,#5e2ba6)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 19V5M5 12l7-7 7 7"/></svg></div><div class="lg-tx"><b>Extension</b><span>Sadler &amp; Reese — the Pure-level stretch</span></div></div>
+        <div class="leg"><div class="lg-ic" style="background:linear-gradient(140deg,#3dd290,#0e7d64)"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M5 19l7-7 4 4 4-9"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/></svg></div><div class="lg-tx"><b>Interactive</b><span>Manipulative — the thing you drag</span></div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="units" id="units"></div>
+
+  <div class="tip">
+    <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 2v4M12 18v4M2 12h4M18 12h4M5 5l3 3M16 16l3 3M19 5l-3 3M8 16l-3 3"/></svg></div>
+    <p><b>How to grow it:</b> a unit is "done" when its four slots are full — but it's useful the moment <em>one</em> is. Drop a single intuition write-up or one draggable demo into any node and publish; the skeleton means nothing ever feels half-built. The dashed slots simply show what's next.</p>
+  </div>
+
+  <div class="lineage">
+    <span class="lin-lbl">Frame</span>
+    <span class="src">IM Grade 8 — 9 units, CC-BY</span>
+    <span class="src">filled by Better Explained · Mathproofs · Sadler · Reese</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  // slot-type meta (the four references that fill every unit)
+  const SLOT = {
+    intuition:   { src: 'Better Explained', label: 'Intuition',    c: '#e8924a', ci: '#a8480d',
+      ic: '<path d="M9 18h6M10 22h4M12 2a7 7 0 0 0-4 12.7c.6.5 1 1.3 1 2.3h6c0-1 .4-1.8 1-2.3A7 7 0 0 0 12 2Z"/>' },
+    proof:       { src: 'Mathproofs',       label: 'Visual proof', c: '#5b8def', ci: '#24409c',
+      ic: '<path d="M3 3v18h18"/><path d="M7 14l4-4 3 3 5-6"/>' },
+    extension:   { src: 'Sadler & Reese',   label: 'Extension',    c: '#a06ee0', ci: '#5e2ba6',
+      ic: '<path d="M12 19V5M5 12l7-7 7 7"/>' },
+    interactive: { src: 'Manipulative',     label: 'Interactive',  c: '#3dd290', ci: '#0e7d64',
+      ic: '<path d="M5 19l7-7 4 4 4-9"/><circle cx="12" cy="12" r="1.6" fill="currentColor"/>' },
+  };
+  const ORDER = ['intuition', 'proof', 'extension', 'interactive'];
+
+  // IM Grade 8 unit frame. fill[type] = null (empty) | {title, href}
+  const UNITS = [
+    { n: 1, c: '#ffac5e', ci: '#bd5410', domain: '8.G', title: 'Rigid Transformations & Congruence',
+      lessons: ['Translations, rotations, reflections', 'Congruence', 'Angles in a triangle = 180°', 'Parallel lines & transversals'], fill: {} },
+    { n: 2, c: '#5b8def', ci: '#2a3db0', domain: '8.G · 8.EE', title: 'Dilations, Similarity & Introducing Slope',
+      lessons: ['Dilations & scale factor', 'Similar figures', 'Similar triangles', 'Slope & slope triangles'],
+      fill: { interactive: { title: 'Slope Machine', href: 'Slope Machine.html' } } },
+    { n: 3, c: '#ffce4d', ci: '#a76c06', domain: '8.EE · 8.F', title: 'Linear Relationships',
+      lessons: ['Proportional relationships', 'Slope of a line', 'y = mx + b', 'Horizontal & vertical lines'], fill: {} },
+    { n: 4, c: '#3dd290', ci: '#0e7d64', domain: '8.EE', title: 'Linear Equations & Linear Systems',
+      lessons: ['Solving linear equations', 'Variables on both sides', 'Systems of equations', 'Substitution & elimination'],
+      fill: { interactive: { title: 'Equation Workshop', href: 'Equation Workshop.html' } } },
+    { n: 5, c: '#a06ee0', ci: '#5e2ba6', domain: '8.F · 8.G', title: 'Functions & Volume',
+      lessons: ['Inputs & outputs', 'Function rules & graphs', 'Linear functions', 'Volume of cylinders, cones, spheres'], fill: {} },
+    { n: 6, c: '#7fd06a', ci: '#338530', domain: '8.SP', title: 'Associations in Data',
+      lessons: ['Scatter plots', 'Line of best fit', 'Two-way tables', 'Clustering & outliers'], fill: {} },
+    { n: 7, c: '#ffe14d', ci: '#9a6e00', domain: '8.EE', title: 'Exponents & Scientific Notation',
+      lessons: ['Exponent rules', 'Powers of 10', 'Scientific notation', 'Computing with large & small numbers'], fill: {} },
+    { n: 8, c: '#ff8e72', ci: '#c4441f', domain: '8.NS · 8.G', title: 'Pythagorean Theorem & Irrational Numbers',
+      lessons: ['Square & cube roots', 'Rational vs irrational', 'The Pythagorean theorem', 'Distances in the plane'],
+      fill: { proof: { title: 'Pythagoras, Without Words', href: 'Pythagoras Without Words.html' } } },
+    { n: 9, c: '#ff7a9c', ci: '#b51f57', domain: 'Capstone', title: 'Putting It All Together',
+      lessons: ['Tessellations', 'Cross-unit problem solving', 'Modelling with functions'], fill: {} },
+  ];
+
+  const wrap = document.getElementById('units');
+  let totalFilled = 0;
+  const totalSlots = UNITS.length * 4;
+
+  UNITS.forEach((u, idx) => {
+    const filledCount = ORDER.filter(t => u.fill[t]).length;
+    totalFilled += filledCount;
+
+    const unit = document.createElement('div');
+    unit.className = 'unit' + (filledCount > 0 ? ' open' : '');
+    unit.style.setProperty('--c', u.c);
+    unit.style.setProperty('--ci', u.ci);
+
+    const pips = ORDER.map(t => `<span class="pip ${u.fill[t] ? 'on' : ''}" style="${u.fill[t] ? `background:${SLOT[t].c}` : ''}"></span>`).join('');
+
+    const slots = ORDER.map(t => {
+      const m = SLOT[t], f = u.fill[t];
+      const style = `--c:${m.c};--ci:${m.ci}`;
+      if (f) {
+        return `<a class="slot filled" style="${style}" href="${f.href}">
+            <div class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${m.ic}</svg></div>
+            <div class="s-src">${m.src}</div>
+            <div class="s-label">${f.title}</div>
+            <div class="s-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg> Built · open</div>
+          </a>`;
+      }
+      return `<div class="slot empty" style="${style}">
+          <div class="s-ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round">${m.ic}</svg></div>
+          <div class="s-src">${m.src}</div>
+          <div class="s-label">${m.label}</div>
+          <div class="s-state"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg> Empty slot</div>
+        </div>`;
+    }).join('');
+
+    unit.innerHTML = `
+      <div class="u-head">
+        <div class="u-no">${u.n}</div>
+        <div class="u-mid">
+          <div class="u-domain">UNIT ${u.n} · ${u.domain}</div>
+          <div class="u-title">${u.title}</div>
+        </div>
+        <div class="u-fill">
+          <div class="pips">${pips}</div>
+          <span class="ct">${filledCount}/4</span>
+        </div>
+        <div class="u-chev"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></div>
+      </div>
+      <div class="u-body">
+        <div class="lessons-lbl">Key lessons in the frame</div>
+        <div class="lessons">${u.lessons.map(l => `<span class="lesson">${l}</span>`).join('')}</div>
+        <div class="slots-lbl">Fill slots</div>
+        <div class="slots">${slots}</div>
+      </div>`;
+
+    unit.querySelector('.u-head').addEventListener('click', () => unit.classList.toggle('open'));
+    wrap.appendChild(unit);
+  });
+
+  document.getElementById('fill-num').innerHTML = `${totalFilled}<small>/${totalSlots}</small>`;
+  document.getElementById('fill-i').style.width = Math.max(4, Math.round(totalFilled / totalSlots * 100)) + '%';
+})();
+</script>
+</body>
+</html>

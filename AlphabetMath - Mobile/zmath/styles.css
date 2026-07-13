@@ -1,0 +1,7 @@
+/* Zmath styles entry — the ONE stylesheet both readers load.
+   Order matters: tokens (foundation) → app (layout/components) → tweaks (overrides).
+   Add any future brain stylesheet HERE, never in the readers/shells. */
+@import "./tokens.css";
+@import "./app.css";
+@import "./lab.css";
+@import "./tweaks-overrides.css";

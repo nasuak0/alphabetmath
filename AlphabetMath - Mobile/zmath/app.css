@@ -1,0 +1,1283 @@
+/* ============================================================
+   Zmath home-menu — iisu Wii-U re-skin (cool grey glass).
+   Builds on tokens.css. Layout: left Miiverse rail + scrolling
+   stage + floating glossy dock. Tiles = mosaic of cover-art cards.
+   ============================================================ */
+* { box-sizing: border-box; }
+
+/* ============================================================
+   ORIENTATION GUARD — landscape-only; overlay shown in portrait
+   ============================================================ */
+#rotate-guard { display: none; }
+@media (orientation: portrait) {
+  #rotate-guard { display: flex; position: fixed; inset: 0; z-index: 99999;
+    align-items: center; justify-content: center; padding: 32px;
+    background: linear-gradient(155deg, #1a2236, #0e1422); }
+  body:has(#rotate-guard) #root { display: none; }
+  .rg-card { text-align: center; max-width: 320px; color: #fff;
+    font-family: var(--font-ui, system-ui, sans-serif); }
+  .rg-phone { width: 64px; height: 102px; margin: 0 auto 26px; border-radius: 12px;
+    border: 3px solid rgba(255,255,255,0.92); position: relative;
+    animation: rg-tilt 2.4s ease-in-out infinite; transform-origin: 50% 50%; }
+  .rg-phone::after { content: ""; position: absolute; left: 50%; bottom: 6px; transform: translateX(-50%);
+    width: 20px; height: 3px; border-radius: 3px; background: rgba(255,255,255,0.7); }
+  .rg-phone-arc { position: absolute; inset: -26px -34px auto auto; width: 44px; height: 44px;
+    border: 2.5px solid rgba(255,255,255,0.55); border-left-color: transparent; border-bottom-color: transparent;
+    border-radius: 50%; transform: rotate(35deg); }
+  .rg-title { font-size: 1.34rem; font-weight: 700; margin: 0 0 10px;
+    font-family: var(--font-display, var(--font-ui, sans-serif)); }
+  .rg-text { font-size: 0.95rem; line-height: 1.5; margin: 0; color: rgba(255,255,255,0.74); }
+}
+@keyframes rg-tilt {
+  0%, 100% { transform: rotate(0deg); }
+  45%, 70% { transform: rotate(-90deg); }
+}
+
+html, body { margin: 0; height: 100%; }
+body {
+  font-family: var(--font-ui);
+  color: var(--wii-ink);
+  -webkit-font-smoothing: antialiased;
+  overflow: hidden;
+  /* letterbox backdrop blends with the canvas so scaled-up desktop has no hard seams */
+  background:
+    radial-gradient(120% 90% at 50% -10%, var(--wii-bg-1), var(--wii-bg-2) 55%, var(--wii-bg-3) 100%);
+}
+/* full-viewport letterbox stage that centres the fixed iPad canvas */
+#root { position: fixed; inset: 0; overflow: hidden; }
+html[data-fit="ipad"] #root { display: flex; align-items: center; justify-content: center; }
+:root { --vph: 820px; }
+html[data-fit="native"] { --vph: 100vh; }
+
+/* ---- OS ground: cool silver gradient + dot grid + ambient glow ---- */
+.os {
+  position: relative; overflow: hidden;
+  display: flex;
+  background:
+    radial-gradient(120% 90% at 50% -10%, var(--wii-bg-1), var(--wii-bg-2) 55%, var(--wii-bg-3) 100%);
+}
+.os::before {                 /* faint pastel ambient glows (kept subtle) */
+  content: ""; position: absolute; inset: -15%;
+  background:
+    radial-gradient(26% 24% at 14% 18%, rgba(160,110,224,0.09), transparent 70%),
+    radial-gradient(24% 22% at 86% 14%, rgba(255,150,110,0.07), transparent 70%),
+    radial-gradient(28% 26% at 12% 88%, rgba(60,210,176,0.08), transparent 70%),
+    radial-gradient(26% 22% at 90% 84%, rgba(120,140,240,0.07), transparent 70%);
+  filter: blur(40px); animation: osdrift 22s ease-in-out infinite alternate; z-index: 0;
+}
+.os::after {                  /* white-paper dot grid (main texture) */
+  content: ""; position: absolute; inset: 0; z-index: 0; pointer-events: none;
+  background-image: radial-gradient(var(--wii-dot) 1px, transparent 1.5px);
+  background-size: 22px 22px;
+}
+@keyframes osdrift { 0% { transform: translate(0,0) scale(1); } 100% { transform: translate(2%,-2%) scale(1.07); } }
+body.reduce-motion .os::before { animation: none; }
+
+/* iPad-canvas fit: fixed A16 11" landscape (1180×820) scaled to fit the viewport,
+   so a desktop monitor renders an upscaled copy of the iPad layout (same proportions).
+   native fit: the os fills the real viewport like an ordinary responsive desktop app. */
+html[data-fit="ipad"] .os {
+  width: 1180px; height: 820px; flex: 0 0 auto;
+  transform: scale(var(--ipad-scale, 1)); transform-origin: center center; will-change: transform;
+}
+html[data-fit="native"] .os { width: 100%; height: 100vh; transform: none; }
+
+/* ============================================================
+   FLUID DESKTOP FIT — fills the monitor natively; type, content
+   width and column count all scale with the viewport. Not a literal
+   iPad copy: proportions shift and more tiles fit per row on big screens.
+   ============================================================ */
+html[data-fit="fluid"] { --vph: 100vh; font-size: clamp(16px, 0.45vw + 12.6px, 21px); }
+html[data-fit="fluid"] .os { width: 100%; height: 100vh; transform: none; }
+html[data-fit="fluid"] .stage-inner { max-width: min(1760px, 95vw); }
+html[data-fit="fluid"] .mosaic,
+html[data-fit="fluid"] .grid-uniform {
+  grid-template-columns: repeat(auto-fill, minmax(clamp(190px, 14.5vw, 250px), 1fr));
+  grid-auto-rows: clamp(172px, 13vw, 238px);
+}
+html[data-fit="fluid"] .projects-screen .mosaic {
+  grid-template-columns: none; grid-auto-columns: clamp(458px, 32vw, 580px);
+}
+
+/* ============================================================
+   DESKTOP FIT — the default. NOT a fluid reflow: it takes the mobile /
+   iPad design and only SLIGHTLY expands it to fill a desktop monitor
+   better — a touch wider and centred — keeping the SAME tile proportions
+   and layout that mobile users see. Two rows of the Library always fit
+   (bottoms never clip). Rule of thumb: mimic mobile, expand gently.
+   ============================================================ */
+html[data-fit="desktop"] { font-size: clamp(16px, 0.3vw + 13.5px, 19px); }
+html[data-fit="desktop"] .os { width: 100%; height: 100vh; transform: none; }
+/* slightly wider than the mobile ~1080 content — enough to fill a desktop without
+   reflowing into a different layout. */
+html[data-fit="desktop"] .stage-inner { max-width: 1300px; }
+/* keep the mobile 4-column grid; give rows a little extra height so the modest
+   width bump stays proportional and two rows still fit the tray uncropped. */
+html[data-fit="desktop"] .grid-uniform { grid-auto-rows: clamp(178px, 27vh, 248px); }
+
+/* ============================================================
+   HD CANVAS FIT — the iPad layout RE-DIMENSIONED to a fixed
+   1920×1080 canvas (Dell Inspiron screen), letterboxed + scaled to
+   fit the real viewport — the same mechanism as the iPad fit.
+   Values are the iPad/base numbers scaled by 1920/1180 ≈ 1.63:
+   4-column grid, same tile proportions, two clean rows of 4.
+   ============================================================ */
+html[data-fit="hd"] { --vph: 1080px; font-size: 24px; }
+html[data-fit="hd"] #root { display: flex; align-items: center; justify-content: center; }
+html[data-fit="hd"] .os {
+  width: 1920px; height: 1080px; flex: 0 0 auto;
+  transform: scale(var(--hd-scale, 1)); transform-origin: center center; will-change: transform;
+}
+html[data-fit="hd"] .stage-inner { max-width: 1760px; }
+/* iPad's fixed 4-column grid, tiles scaled up — NOT fluid auto-fill */
+html[data-fit="hd"] .mosaic,
+html[data-fit="hd"] .grid-uniform {
+  grid-template-columns: repeat(4, 1fr);
+  grid-auto-rows: 290px;
+}
+html[data-fit="hd"] .projects-screen .mosaic {
+  grid-template-columns: none; grid-auto-columns: 745px;
+}
+/* collapsed rail at the iPad proportion (90/1180 scaled to 1920). Dragging/open
+   states keep inline width. */
+html[data-fit="hd"] .rail:not(.open):not(.dragging) { flex-basis: 146px !important; }
+
+/* ============================================================
+   LEFT RAIL  (Wii U / Miiverse)
+   ============================================================ */
+.rail {
+  position: relative; z-index: 10; flex: 0 0 90px; height: 100%;
+  padding: 18px 12px; display: flex; flex-direction: column; gap: 14px;
+  transition: flex-basis var(--dur-base) var(--ease-smooth);
+}
+.rail.dragging { transition: none; }
+.rail-panel {
+  position: relative;
+  flex: 1; display: flex; flex-direction: column; align-items: center; gap: 6px;
+  padding: 18px 10px; border-radius: var(--r-tile);
+  background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border); box-shadow: var(--shadow-nav), var(--spec-strong);
+}
+/* brand lockup — logo only when collapsed, (Z)math wordmark when open */
+.brand { display: flex; align-items: center; justify-content: center; gap: 11px; padding: 6px 0 12px; }
+.brand .wordmark { display: none; }
+/* standalone brand mark = the rank scroll wheel (bright colorful rounded letter, spins Z…A) */
+/* one letter centred at rest (no cut-off); offset driven by --rank so it works at any size */
+.brand-wheel { --wheel-h: 40px; font-size: 1.72rem; width: 1.05em; height: var(--wheel-h); margin: 0; flex-shrink: 0; overflow: hidden; position: relative;
+  cursor: ns-resize; touch-action: none; user-select: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 26%, #000 74%, transparent); }
+.brand-wheel .rankstrip { position: absolute; left: 0; right: 0; top: calc(var(--rank, 0) * -1 * var(--wheel-h));
+  display: flex; flex-direction: column; align-items: center;
+  transition: top var(--dur-base) var(--ease-bounce); }
+.brand-wheel .rankstrip i { height: var(--wheel-h); line-height: var(--wheel-h); font-size: 1em; font-weight: 800; opacity: 0.22; }
+.brand-wheel .rankstrip i.on { opacity: 1; }
+/* collapsed rail → big chunky letter (matches the old pixel-Z logo footprint) */
+.rail:not(.open) .brand-wheel { --wheel-h: 74px; font-size: 4.2rem; }
+.rail.open .rail-panel { align-items: stretch; }
+.rail.open .brand { justify-content: flex-start; padding: 6px 8px 14px; }
+.rail.open .brand .wordmark { display: inline-flex; align-items: center; white-space: nowrap; }
+
+/* whole (Z)math wordmark rendered in the brand spectrum (no flat black) */
+.wordmark .wm-paren, .wordmark .wm-math {
+  font-family: var(--font-display); font-weight: 700; font-size: 1.34rem; line-height: 1; letter-spacing: -0.01em;
+  background: linear-gradient(135deg, #3a86e0 0%, #5a4fd0 28%, #7b3fc8 46%, #06a6e0 70%, #1ec6bf 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.wordmark .wm-math { margin-left: -1px; }
+/* the rank scroll wheel — spins through Z…A */
+.rankwheel { position: relative; width: 1.05em; height: 38px; margin: 0 1px; overflow: hidden;
+  cursor: ns-resize; touch-action: none; user-select: none;
+  -webkit-mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent);
+          mask-image: linear-gradient(180deg, transparent, #000 28%, #000 72%, transparent); }
+.rankstrip { position: absolute; top: 0; left: 0; right: 0; display: flex; flex-direction: column; align-items: center;
+  transition: transform var(--dur-base) var(--ease-bounce); }
+.rankstrip i { height: 22px; line-height: 22px; font-style: normal; text-align: center;
+  font-family: var(--font-display); font-weight: 800; font-size: 1.3rem; color: var(--wii-ink-2); opacity: 0.4;
+  transition: opacity var(--dur-fast) ease; }
+.rankstrip i.on { opacity: 1;
+  background: linear-gradient(135deg, #3a86e0 0%, #5a4fd0 28%, #7b3fc8 46%, #06a6e0 70%, #1ec6bf 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.pixletter { display: inline-grid; gap: 0; flex-shrink: 0; image-rendering: pixelated;
+  transition: transform var(--dur-base) var(--ease-bounce); }
+.pixletter .px { width: 100%; height: 100%; }
+.pixletter .px.on { border-radius: 1px; }
+.brand:hover .pixletter { transform: scale(1.1) rotate(-5deg); }
+.brand b { font-family: var(--font-display); font-weight: 700; font-size: 1.38rem;
+  color: var(--wii-ink); letter-spacing: -0.01em; line-height: 1; }
+.brand sup { font-size: 0.58rem; color: var(--wii-ink-2); font-weight: 600; margin-left: 1px; }
+
+/* author mini-profile — avatar only when collapsed, full when open */
+.profile { display: flex; align-items: center; justify-content: center; gap: 11px; margin: 0 0 8px;
+  padding: 9px; border-radius: 18px; background: var(--scrim);
+  box-shadow: inset 0 1px 2px rgba(80,95,130,0.06); }
+.profile > div { display: none; }
+.profile .nm, .profile .role { white-space: nowrap; }
+.rail.open .profile { justify-content: flex-start; margin: 0 4px 8px; padding: 11px; }
+.rail.open .profile > div { display: block; }
+.profile .ava { width: 46px; height: 46px; border-radius: 50%; flex-shrink: 0; position: relative;
+  background: linear-gradient(160deg, #ffffff, #f4f6fb); display: flex; align-items: center; justify-content: center;
+  box-shadow: var(--glass-spec), inset 0 0 0 1px rgba(255,255,255,0.9), 0 3px 8px rgba(60,70,110,0.18); }
+.profile .ava img { width: 22px; height: 27px; image-rendering: pixelated; filter: drop-shadow(0 1px 1px rgba(0,0,0,.3)); }
+.profile .ava-lambda { font-family: var(--font-display); font-weight: 700;
+  font-size: 31px; line-height: 1; display: block; transform: translate(0.8px, 0.8px);
+  background: linear-gradient(145deg, #6a3bd0 0%, #4f5fe0 38%, #2f8ee0 66%, #19c3c0 100%);
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent;
+  -webkit-font-smoothing: antialiased; }
+.profile .nm { font-weight: 700; font-size: 0.92rem; color: var(--wii-ink); line-height: 1.1; }
+.profile .role { font-size: 0.72rem; color: var(--wii-ink-2); font-weight: 500; margin-top: 2px; }
+
+.rail-label { display: none; }
+.rail.open .rail-label { display: block; font-family: var(--font-ui); font-weight: 700; font-size: 0.64rem;
+  letter-spacing: 0.16em; text-transform: uppercase; color: var(--wii-ink-2); padding: 4px 12px; opacity: 0.8; }
+
+/* nav items */
+.nav-item {
+  position: relative; display: flex; align-items: center; justify-content: center; width: 100%; border: none; cursor: pointer;
+  padding: 8px; border-radius: 16px; background: transparent; font-family: inherit;
+  text-align: left; color: var(--wii-ink); transition: background var(--dur-base) var(--ease-smooth), transform var(--dur-fast) var(--ease-bounce);
+}
+.nav-item:hover { background: rgba(255,255,255,0.6); }
+.nav-item:active { transform: scale(0.97); }
+/* active "dent" — the SAME nested-capsule material as the tile .badge: a cool-grey
+   outer tray (translucent + inner shadow, no outer lift) with a white pill nested
+   inside it via ::before. The glyph rides on the pill (z-index 1). */
+.nav-item.on {
+  background: rgba(234,237,244,0.72);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: inset 0 1px 2px rgba(80,95,130,0.12);
+  isolation: isolate;
+}
+.nav-item.on::before {
+  content: ""; position: absolute; inset: 5px; z-index: 0;
+  border-radius: 12px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(40,50,80,0.10),
+    0 0 2px rgba(40,50,80,0.06),
+    inset 0 1px 1px rgba(255,255,255,0.9);
+}
+/* plain capsule — a single floating white squircle behind the icon
+   (no cool-grey tray, no nested pill), matching the reference image. */
+[data-capsule="plain"] .nav-item.on {
+  background: #ffffff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border-radius: 20px;
+  box-shadow:
+    0 5px 14px rgba(40,50,80,0.13),
+    0 1px 3px rgba(40,50,80,0.09),
+    inset 0 1px 1px rgba(255,255,255,0.95);
+}
+[data-capsule="plain"] .nav-item.on::before { display: none; }
+
+.nav-item .ni-ic {
+  position: relative; z-index: 1;
+  width: 46px; height: 46px; flex-shrink: 0;
+  display: flex; align-items: center; justify-content: center;
+}
+/* labels hidden when collapsed; revealed inline when the rail is dragged open */
+.nav-item .ni-tx { display: none; white-space: nowrap; font-weight: 600; font-size: 0.95rem; letter-spacing: -0.01em; }
+.nav-item .ni-cur { display: none; }
+.rail.open .nav-item { justify-content: flex-start; gap: 13px; padding: 8px 11px; }
+.rail.open .nav-item .ni-tx { display: block; }
+.rail.open .nav-item.on .ni-tx { font-weight: 700; }
+.rail.open .nav-item .ni-cur { display: flex; margin-left: auto; color: var(--wii-ink-2);
+  opacity: 0; transform: translateX(-4px); transition: all var(--dur-base) var(--ease-bounce); }
+.rail.open .nav-item.on .ni-cur { opacity: 1; transform: translateX(0); }
+
+.rail-foot { display: none; }
+.rail.open .rail-foot { display: block; margin-top: auto; padding: 10px 12px 2px; font-size: 0.68rem;
+  color: var(--wii-ink-2); opacity: 0.7; }
+
+/* drag grip — sits in the outer right gutter, vertically centred, clear of the nav icons */
+.rail-grip { position: absolute; top: 50%; bottom: auto; right: -6px; transform: translateY(-50%);
+  width: 16px; height: 60px; display: flex; align-items: center; justify-content: center;
+  cursor: ew-resize; z-index: 40; touch-action: none; }
+.rail-grip span { width: 5px; height: 32px; border-radius: 999px; background: var(--hairline-strong);
+  transition: background var(--dur-fast) ease, height var(--dur-base) var(--ease-bounce); }
+.rail-grip:hover span { background: var(--wii-ink-2); height: 44px; }
+.rail.dragging .rail-grip span { background: var(--wii-ink-2); }
+
+/* ============================================================
+   STAGE  (scrolling content)
+   ============================================================ */
+.stage { position: relative; z-index: 5; flex: 1; height: 100%; overflow-y: auto;
+  padding: 28px 30px 132px 8px; scrollbar-width: thin; }
+.stage::-webkit-scrollbar { width: 9px; }
+.stage::-webkit-scrollbar-thumb { background: rgba(70,90,130,0.18); border-radius: 5px; }
+.stage-inner { max-width: 1080px; margin: 0 auto; }
+
+/* top status bar */
+.topbar { display: flex; align-items: flex-start; gap: 16px; margin-bottom: 24px; }
+.topbar .title { font-family: var(--font-ui); font-weight: 700; font-size: 1.7rem;
+  color: var(--wii-ink); letter-spacing: -0.01em; line-height: 1; }
+.topbar .sub { font-size: 0.86rem; color: var(--wii-ink-2); margin-top: 3px; font-weight: 500; }
+.status-pill { margin-left: auto; flex-shrink: 0; white-space: nowrap; display: flex; align-items: center; gap: 10px;
+  padding: 9px 16px; border-radius: 999px;
+  background: var(--wii-panel); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%);
+  border: 1px solid var(--wii-edge); box-shadow: var(--shadow-xs), var(--glass-spec); }
+.status-pill .clock { font-family: var(--font-mono); font-weight: 500; font-size: 0.84rem; color: var(--wii-ink);
+  font-variant-numeric: tabular-nums; }
+.status-pill .date { font-size: 0.78rem; color: var(--wii-ink-2); font-weight: 500; }
+.status-pill .sep { width: 1px; height: 16px; background: var(--hairline-strong); }
+.status-pill svg { color: var(--wii-ink-2); }
+
+/* ============================================================
+   MOSAIC  (Wii-U mixed-size grid)
+   ============================================================ */
+/* frosted glass tray holding the whole grid (matches rail + dock chrome) */
+.tile-tray { border-radius: var(--r-tile);
+  background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border); box-shadow: var(--shadow-nav), var(--spec-strong);
+  padding: 18px; margin-bottom: 56px; }
+.mosaic { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 172px;
+  gap: 16px; grid-auto-flow: dense; padding-top: 0; }
+.grid-uniform { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 172px; gap: 16px; }
+
+/* ---- TOPICS PAGE: lock the tray to the viewport; only the grid scrolls ---- */
+/* the whole screen becomes a flex column that fills the stage; the hero stays put
+   and the tile-tray takes the rest, bottom-aligned with the left rail. scrolling
+   happens INSIDE the tray, not the page. (also applies to the Projects page) */
+.stage:has(.topics-screen), .stage:has(.projects-screen) { overflow: hidden; padding-bottom: 18px; }
+.stage:has(.topics-screen) .stage-inner, .stage:has(.projects-screen) .stage-inner { height: 100%; display: flex; flex-direction: column; }
+.topics-screen, .projects-screen { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.topics-screen .topics-hero, .projects-screen .topics-hero { flex: 0 0 auto; }
+.topics-screen .tile-tray, .projects-screen .tile-tray { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-bottom: 0;
+  scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
+.topics-screen .tile-tray::-webkit-scrollbar, .projects-screen .tile-tray::-webkit-scrollbar { width: 9px; }
+.topics-screen .tile-tray::-webkit-scrollbar-thumb, .projects-screen .tile-tray::-webkit-scrollbar-thumb { background: rgba(70,90,130,0.18); border-radius: 5px; }
+/* the floating dock sits over the bottom-middle of the tray — give the grid room
+   to scroll its last row clear of it. */
+.topics-screen .grid-uniform, .projects-screen .mosaic { padding-bottom: 84px; }
+
+/* ---- PROJECTS PAGE: scroll SIDEWAYS inside the locked tray ----
+   cards flow into columns that fill the tray height (2 rows) and overflow to the
+   right. extra bottom padding keeps the bottom row clear of the floating dock. */
+.projects-screen .tile-tray { overflow-x: auto; overflow-y: hidden; padding: 24px 22px 40px;
+  scrollbar-width: none; -ms-overflow-style: none; }
+.projects-screen .tile-tray::-webkit-scrollbar { display: none; height: 0; width: 0; }
+.projects-screen .mosaic {
+  grid-auto-flow: column; grid-template-columns: none;
+  grid-template-rows: 1fr 1fr; grid-auto-rows: auto;
+  grid-auto-columns: 458px; height: 100%; padding-bottom: 0;
+}
+.projects-screen .mosaic .tile.w2 { grid-column: auto; }
+.projects-screen .mosaic .tile.h2 { grid-row: auto; }
+
+/* tile = crisp colored gradient LINE around a white glass card (icon framework) */
+.tile {
+  position: relative; border-radius: 22px; padding: 4px; cursor: pointer;
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  /* colored resting glow restored — the parent .homebar's clip-path (rounded corner)
+     contains it, so the glow now follows the bar's nested corner radius instead of
+     bleeding past it. */
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 10px 24px var(--tglow, rgba(0,0,0,0.12)),
+    inset 0 1px 1px rgba(255,255,255,0.55);
+  transition: transform var(--dur-base) var(--ease-bounce), box-shadow var(--dur-base) var(--ease-smooth);
+  opacity: 0; transform: translateY(10px) scale(0.98);
+}
+.tile.in { opacity: 1; transform: none; }
+.tile:hover { transform: translateY(-6px) scale(1.025);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.07), 0 24px 46px var(--tglow, rgba(0,0,0,0.18)),
+    inset 0 1px 1px rgba(255,255,255,0.55); z-index: 4; }
+.tile:active { transform: translateY(-1px) scale(0.985); }
+.tile.w2 { grid-column: span 2; }
+.tile.h2 { grid-row: span 2; }
+
+.tile-art { position: relative; height: 100%; border-radius: 18px; overflow: hidden;
+  background: #ffffff;
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  display: flex; flex-direction: column; justify-content: flex-end; padding: 13px; color: var(--ink); }
+.tile-cover { position: absolute; inset: 0; z-index: 0; opacity: 1; filter: saturate(1.1); }
+.tile-sheen { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(150deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.10) 26%, transparent 50%); }
+.tile-scrim { position: absolute; inset: 0; z-index: 1; pointer-events: none;
+  background: linear-gradient(180deg, transparent 38%, rgba(255,255,255,0.82) 72%, rgba(255,255,255,0.96) 100%); }
+.tile-tx { position: relative; z-index: 2; }
+.tile-kind { font-size: 0.66rem; font-weight: 800; letter-spacing: 0.10em; text-transform: uppercase;
+  color: var(--ink); opacity: 0.62; margin-bottom: 3px; }
+.tile-name { font-family: var(--font-display); font-weight: 700; line-height: 1.05;
+  color: var(--ink); letter-spacing: -0.01em; }
+.tile.t-sm .tile-name { font-size: 1.0rem; }
+.tile.t-md .tile-name { font-size: 1.18rem; }
+.tile.t-lg .tile-name { font-size: 1.7rem; }
+.tile-sym-bg { display: none; }
+
+/* GEOMETRY tile: the tiling art bleeds off all four edges by default, so shapes
+   get sliced at the corners and crowd the badge. Scale it down in place (centered)
+   so the whole composition sits INSIDE the frame — but only a little, so the shapes
+   fill most of the white card (small even margin, uncropped corners), matching the
+   reference. Applies to BOTH materials (glossy + flat). */
+[data-tilemat="glossy"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-cover,
+[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-cover {
+  transform: scale(0.92); transform-origin: center center;
+}
+
+/* GLOSSY geometry tile: give the white card the same EMBEDDED-in-a-frame look as
+   the flat material — matching frame geometry (5px gutter, 14px inner) + a recessed
+   white label — but keep the finish GLOSSY: the recess is COOL-toned (glassy blue-
+   grey, not warm plastic), there's a bright glassy lip along the bottom, the colored
+   gradient frame + glow is untouched, and the diagonal .tile-sheen stays on. */
+[data-tilemat="glossy"] .home .tile[data-topic="geometry"][data-kind="topic"] {
+  border-radius: 19px; padding: 5px;
+}
+[data-tilemat="glossy"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-art {
+  border-radius: 14px;
+  box-shadow:
+    inset 0 0 0 1px rgba(70,95,150,0.12),
+    inset 0 2.5px 5px -1px rgba(55,75,130,0.22),
+    inset 0 -1.5px 1px rgba(255,255,255,0.65);
+}
+
+/* ============================================================
+   FLAT TILE MATERIAL  (home-page tweak: html[data-tilemat="flat"])
+   Molded-cartridge look — keeps the tile geometry but swaps the material:
+   hard gradient frame (no colored glow, no white rim sheen), white label
+   embedded on one recessed line, flat badge (no grey moat / floating pill).
+   Scoped to the GEOMETRY topic tile on the home page ONLY — every other
+   tile (and the Topics/Projects grids) keeps the glossy material.
+   ============================================================ */
+/* molded-cartridge frame: thicker padding + tighter inner radius so the gradient
+   stroke reads as a solid wall, and a WARM deep-orange inner rim (150,60,12) — NOT
+   black — so it looks like colored plastic in shadow, not a dirty grey line. */
+[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"] {
+  border-radius: 19px; padding: 5px;
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(150,60,12,0.18);
+}
+[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"]:hover {
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(150,60,12,0.18);
+}
+/* white label embedded into the frame: crisp warm division hairline + a soft warm
+   top recess so the label reads as pressed down into the molded plastic. */
+[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-art {
+  border-radius: 14px;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(150,60,12,0.10), inset 0 2.5px 4px -1px rgba(150,60,12,0.22);
+}
+[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-sheen { display: none; }
+
+/* FLAT BADGE STYLE — tweak: data-flatbadge (only meaningful under the flat material).
+   "solid" (default): one flat white chip with a warm hairline, no moat/pill — same
+   footprint (46×38) as the moat tray.
+   "moat": the base nested capsule — grey tray/moat with the white pill nested inside.
+   No override needed for "moat"; it's the base .badge look. */
+[data-tilemat="flat"][data-flatbadge="solid"] .home .tile[data-topic="geometry"][data-kind="topic"] .badge {
+  background: #ffffff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(150,60,12,0.16);
+}
+[data-tilemat="flat"][data-flatbadge="solid"] .home .tile[data-topic="geometry"][data-kind="topic"] .badge::before {
+  display: none;
+}
+
+/* FLAT 2 — the explore/Design Tile.html rendering, verbatim (tweak: data-tilemat="flat2").
+   Same molded-cartridge shell as flat, but: solid badge BAKED IN with the study's
+   snugger geometry (42×32 @ 6,6 — molded into the corner, not floating near it),
+   full-bleed cover art (no 0.92 inset — the scale rule above targets glossy|flat only),
+   and the study's softer hover lift (-5px/1.02). */
+[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] {
+  border-radius: 19px; padding: 5px;
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(150,60,12,0.18);
+}
+[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"]:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(150,60,12,0.18);
+}
+[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-art {
+  border-radius: 14px;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(150,60,12,0.10), inset 0 2.5px 4px -1px rgba(150,60,12,0.22);
+}
+[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-sheen { display: none; }
+[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] .badge {
+  top: 6px; left: 6px; min-width: 42px; height: 32px;
+  border-radius: 15px 7px 14px 7px; font-size: 0.86rem;
+  background: #ffffff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(150,60,12,0.16);
+}
+[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] .badge::before { display: none; }
+
+/* Geometry badge is inset off the frame corner PERMANENTLY — independent of the
+   material tweak (applies under flat, glossy, and the untweaked default). Other
+   tiles keep the base top/left:4px. The grey moat/tray is also a touch larger here
+   (wider grey ring + slightly bigger tray) while the white pill stays the same size. */
+.home .tile[data-topic="geometry"][data-kind="topic"] .badge {
+  top: 8px; left: 8px;
+  min-width: 46px; height: 38px;
+}
+.home .tile[data-topic="geometry"][data-kind="topic"] .badge::before {
+  inset: 4px;
+  border-radius: 12px 4px 11px 4px;
+}
+
+/* ============================================================
+   LABEL LEGIBILITY TREATMENTS  (tweakable: data-tilelabel)
+   The number+name sit at the bottom of .tile-art over busy line art.
+   Each option trades how much white chrome vs. how intact the art stays.
+   ============================================================ */
+/* scrim+ : strengthen the existing bottom white fade into a clean shelf */
+html[data-tilelabel="scrim"] .tile-scrim {
+  background: linear-gradient(180deg, transparent 24%, rgba(255,255,255,0.91) 55%, rgba(255,255,255,1) 100%);
+}
+
+/* plate and footer treatments removed */
+
+/* halo : white outline on the glyphs only — nothing covered, art fully intact */
+html[data-tilelabel="halo"] .tile-scrim { display: none; }
+html[data-tilelabel="halo"] .tile-kind,
+html[data-tilelabel="halo"] .tile-name {
+  text-shadow:
+    0 0 1px #fff, 0 0 1.5px #fff, 0 0 2px rgba(255,255,255,0.9);
+}
+
+/* fade : mask the cover art toward transparent in the bottom label band */
+html[data-tilelabel="fade"] .tile-scrim { display: none; }
+html[data-tilelabel="fade"] .tile-cover {
+  -webkit-mask-image: linear-gradient(180deg, #000 44%, rgba(0,0,0,0.14) 72%, rgba(0,0,0,0.03) 100%);
+          mask-image: linear-gradient(180deg, #000 44%, rgba(0,0,0,0.14) 72%, rgba(0,0,0,0.03) 100%);
+}
+
+/* combo : a gentle scrim shelf PLUS a soft halo on the glyphs — the fade lifts
+   the band off the art and the halo crisps the letter edges over what remains */
+html[data-tilelabel="combo"] .tile-scrim {
+  background: linear-gradient(180deg, transparent 33%, rgba(255,255,255,0.70) 64%, rgba(255,255,255,0.92) 100%);
+}
+html[data-tilelabel="combo"] .tile-kind,
+html[data-tilelabel="combo"] .tile-name {
+  text-shadow:
+    0 0 1px #fff, 0 0 2px #fff, 0 0 3px #fff, 0 0 4px #fff, 0 0 5px #fff,
+    0 0 9px rgba(255,255,255,0.97), 0 1px 2px rgba(255,255,255,0.92);
+}
+
+/* corner chip — frosted .glass-nav squircle, two-letter glyph filled with the accent GRADIENT (like the nav icons) */
+/* nested-capsule badge — mirrors .rail-tag / .th-pill: the element itself is a
+   sunken cool-grey TRAY (translucent + inner shadow, no outer lift), and ::before
+   is the floating white PILL inset inside it. the gradient letters ride on top. */
+.badge {
+  position: absolute; top: 4px; left: 4px; z-index: 5; isolation: isolate;
+  min-width: 44px; height: 36px; padding: 0 9px;
+  border-radius: 16px 7px 15px 7px;
+  display: flex; align-items: center; justify-content: center; white-space: nowrap;
+  font-family: var(--font-display); font-weight: 800; font-size: 0.92rem; letter-spacing: 0;
+  background: rgba(234,237,244,0.72);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  box-shadow: inset 0 1px 2px rgba(80,95,130,0.12);
+}
+.badge::before {
+  content: ""; position: absolute; inset: 3px; z-index: 0;
+  border-radius: 13px 5px 12px 5px;
+  background: #ffffff;
+  box-shadow:
+    0 1px 2px rgba(40,50,80,0.10),
+    0 0 2px rgba(40,50,80,0.06),
+    inset 0 1px 1px rgba(255,255,255,0.9);
+}
+.badge span { position: relative; z-index: 1; padding: 0 0.04em;
+  background: linear-gradient(150deg, var(--b1), var(--b2));
+  -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
+.tile.h2 .badge { min-width: 50px; height: 40px; border-radius: 18px 8px 16px 8px; font-size: 1.05rem; }
+.tile.h2 .badge::before { border-radius: 15px 6px 13px 6px; }
+
+/* ============================================================
+   SECTION HEADS
+   ============================================================ */
+.section { margin-top: 30px; }
+.section:first-child { margin-top: 0; }
+.section-head { display: flex; align-items: baseline; justify-content: space-between; margin-bottom: 14px; }
+.section-head h2 { font-family: var(--font-display); font-weight: 700; font-size: 1.18rem; color: var(--wii-ink);
+  letter-spacing: -0.01em; margin: 0; }
+.section-head .eyebrow { font-weight: 700; font-size: 0.66rem; letter-spacing: 0.16em; text-transform: uppercase;
+  color: var(--wii-ink-2); }
+.section-head a { font-size: 0.82rem; font-weight: 600; color: var(--wii-ink-2); cursor: pointer; display: inline-flex; align-items: center; gap: 4px; }
+.section-head a:hover { color: var(--wii-ink); }
+
+/* ============================================================
+   FILTER CHIPS
+   ============================================================ */
+.chips { display: flex; gap: 9px; flex-wrap: wrap; margin-bottom: 20px; }
+.chip { padding: 8px 16px; border-radius: 999px; border: 1.5px solid var(--wii-edge-2);
+  background: rgba(255,255,255,0.5); color: var(--wii-ink-2); font-weight: 600; font-size: 0.84rem;
+  cursor: pointer; font-family: inherit; transition: all var(--dur-fast) ease; }
+.chip:hover { background: #fff; color: var(--wii-ink); }
+.chip:active { transform: scale(0.95); }
+.chip.on { background: var(--ink-button); border-color: var(--ink-button); color: #fff; }
+
+/* ---- TOPICS HERO WIDGET (frosted glass + segmented control) ---- */
+.topics-hero { position: relative; isolation: isolate; overflow: hidden; clip-path: inset(0 round var(--r-tile)); display: flex; align-items: flex-start; gap: 20px;
+  padding: 22px 24px 24px; margin-bottom: 22px; border-radius: var(--r-tile);
+  background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(120%); backdrop-filter: blur(20px) saturate(120%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-nav), var(--spec-strong); }
+.th-glow { display: none; }
+.th-main { position: relative; z-index: 1; flex: 1; min-width: 0; }
+.th-eyebrow { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+  background: var(--brand-spectrum); -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent;
+  color: transparent; margin-bottom: 6px; }
+.topics-hero .title { font-family: var(--font-ui); font-weight: 700; font-size: 1.7rem;
+  color: var(--wii-ink); letter-spacing: -0.01em; line-height: 1; }
+.topics-hero .sub { font-size: 0.86rem; color: var(--wii-ink-2); margin-top: 4px; font-weight: 500; }
+/* compact hero — used on Home so the main bar gets the attention.
+   left padding trimmed to 17px so the inner pill's left edge (118+1 border+17)
+   lines up with the Topics rail-tag below it (118+18) — concentric left corners. */
+.topics-hero.compact { padding: 18px 22px 18px 12px; margin-bottom: 16px; align-items: center; }
+.topics-hero.compact .th-eyebrow { margin-bottom: 4px; }
+.topics-hero.compact .title { font-size: 1.42rem; }
+/* eyebrow rendered as a white pill in a grey moat ring — same embedment as the
+   .seg / clock pill. the frosted-white body sits behind the gradient eyebrow text. */
+/* fully-round stadium pill, matching the clock/date pill on the right.
+   the 6px grey moat (box-shadow spread) follows the same round contour. */
+.th-eyebrow-pill { display: inline-flex; align-items: center; padding: 6px 18px; border-radius: 999px;
+  background: rgba(255,255,255,0.95);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow:
+    0 3px 9px rgba(40,50,80,0.09),
+    0 1px 2px rgba(40,50,80,0.05),
+    inset 0 1px 1px rgba(255,255,255,0.9); }
+/* uppercase caps sit high in the line box (8px above / 12px below); nudge down
+   2px so the space above and below the lettering is equal inside the pill. */
+.th-eyebrow-pill .th-eyebrow { margin-bottom: 0; font-size: 1.18rem; letter-spacing: 0.06em; position: relative; top: 2px; }
+/* compact hero with eyebrow + control (Library): lay them side-by-side so the
+   hero stays short and the tile grid below gets more breathing room. */
+.topics-hero.compact .th-main:has(.seg) { display: flex; align-items: center; gap: 18px; }
+.topics-hero.compact .th-main:has(.seg) .th-eyebrow-pill { margin-bottom: 0; flex-shrink: 0; }
+.topics-hero.compact .th-main:has(.seg) .th-eyebrow { white-space: nowrap; }
+.topics-hero.compact .th-main > .seg { margin-top: 0; }
+/* Library page: LIBRARY in a white pill (matching MENU); shrink the seg height so
+   it sits proportional and vertically centred against the pill. */
+.topics-hero .seg { margin-top: 0; padding: 5px; }
+.topics-hero .seg-ind { top: 5px; bottom: 5px; width: calc((100% - 10px) / 3);
+  left: calc(5px + var(--seg, 0) * (100% - 10px) / 3); }
+.topics-hero .seg-btn { font-size: 0.86rem; padding: 8px 20px; min-width: 70px; }
+/* clock/date pill on the hero — rebuilt to match the .seg encasing exactly:
+   a sunken cool-grey track (rgba 233,235,241) with a soft inner well shadow,
+   carrying the white frosted clock pill inset with an even 5px grey moat. total
+   height tuned to 44px so it lines up with the All/Pure/Applied widget. */
+.th-pill { position: relative; z-index: 1; flex-shrink: 0;
+  padding: 12px 16px;
+  background: rgba(240,242,247,0.72);
+  -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%);
+  border: none;
+  box-shadow: inset 0 1px 2px rgba(80,95,130,0.08); }
+.th-pill::before {
+  content: ""; position: absolute; inset: 5px; z-index: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 0.5px solid rgba(40,50,80,0.04);
+  box-shadow:
+    0 0 6px rgba(40,50,80,0.16),
+    0 0 2px rgba(40,50,80,0.10),
+    inset 0 1px 1px rgba(255,255,255,0.9),
+    inset 0 -1px 1px rgba(255,255,255,0.9); }
+.th-pill svg, .th-pill .clock, .th-pill .date, .th-pill .sep { position: relative; z-index: 1; }
+
+/* signature Zperiod segmented control — grey moat embedment (matches .rail-tag
+   Topics/Projects pills + the top-right clock pill). the track is a RAISED
+   cool-grey chip (rgb 233,235,241) with a soft outer lift + subtle inner top
+   shadow; the selected option sits inset inside it as a clean matte-white pill
+   with an even grey moat wrapping all around it. Unselected labels sit in the
+   moat blue-grey; the selected label deepens to near-black. */
+/* signature Zperiod segmented control — made of the exact grey moat-ring property
+   from the Topics & Projects pills (.rail-tag::before): flat cool-grey
+   rgba(233,235,241,0.96), the same 0 2px 8px outer + inset 0 1px 2px moat shadow,
+   and NO backdrop frost (the moat ring is a flat matte grey, never saturated).
+   the selected option rides a matte-white pill inset in the moat; unselected
+   labels sit in the grey, the selected deepens to near-black. */
+/* signature Zperiod segmented control — made of the EXACT embedment property
+   from the Nana profile card (.profile): background var(--scrim) + a subtle
+   inner shadow that reads as a soft sunken well, no frost, no halo, no second
+   layer. the selected option rides a clean matte-white pill inside; unselected
+   labels sit in the embedment tone, the selected deepens to near-black. */
+.seg { position: relative; display: inline-flex; margin-top: 16px; padding: 4px; border-radius: 999px;
+  background: rgba(240,242,247,0.78);
+  -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%);
+  border: none;
+  box-shadow: inset 0 1px 2px rgba(80,95,130,0.08); }
+.seg-ind { position: absolute; top: 4px; bottom: 4px; width: calc((100% - 8px) / 3);
+  left: calc(4px + var(--seg, 0) * (100% - 8px) / 3);
+  border-radius: 999px; background: #ffffff;
+  border: 0.5px solid rgba(40,50,80,0.04);
+  box-shadow:
+    0 0 6px rgba(40,50,80,0.16),
+    0 0 2px rgba(40,50,80,0.10),
+    inset 0 1px 1px rgba(255,255,255,0.9),
+    inset 0 -1px 1px rgba(255,255,255,0.9);
+  transition: left var(--dur-base) var(--ease-bounce); }
+.seg-btn { position: relative; z-index: 1; flex: 1 0 0; min-width: 68px; padding: 6px 16px; border: none; background: none;
+  display: inline-flex; align-items: center; justify-content: center; text-align: center;
+  font-family: inherit; font-weight: 700; font-size: 0.8rem; color: rgb(128, 136, 156); cursor: pointer; white-space: nowrap;
+  transition: color var(--dur-base) var(--ease-smooth); }
+.seg-btn.on { color: var(--wii-ink);
+  background: var(--brand-spectrum);
+  -webkit-background-clip: text; background-clip: text;
+  -webkit-text-fill-color: transparent; color: transparent; }
+.seg-btn:active { transform: scale(0.95); }
+@media (max-width: 720px) { .topics-hero { flex-wrap: wrap; } .th-pill { order: -1; margin-left: auto; } }
+
+/* ============================================================
+   HOME MAIN BAR  (two separate bars glide together into one tray)
+   ============================================================ */
+/* home fills the stage so the merged tray bottom lines up with the left sidebar */
+.home { display: flex; flex-direction: column; min-height: calc(var(--vph) - 46px); }
+.stage:has(.home) { padding-bottom: 24px; }
+.home .topics-hero { flex: 0 0 auto; }
+/* top notch (1) nudged up flush with the sidebar top — transform keeps the main
+   bar in place; (2) made a solid, defined panel like the main tray: fully opaque
+   white, a faint hairline edge + lifted shadow so it no longer blends into the page. */
+.home .topics-hero {
+  position: relative; z-index: 12;
+  background: var(--glass-bg-nav);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-nav), var(--spec-strong);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  overflow: hidden;
+  clip-path: inset(0 round var(--r-tile));
+}
+/* the faint blue→pink ambient hue, brought INSIDE the tray and pooled around the
+   clock widget at top-right. clipped by the panel's rounded corners (overflow +
+   clip-path above), so the corner design stays intact. sits behind content (z0). */
+.topics-hero::after {
+  content: ""; position: absolute; z-index: 0; pointer-events: none;
+  top: 18%; right: 0; width: 30%; height: 82%;
+  background:
+    linear-gradient(90deg, rgba(150,178,252,0) 0%, rgba(150,178,252,0.2) 34%, rgba(200,180,232,0.14) 62%, rgba(247,168,206,0.24) 100%);
+  filter: blur(20px);
+}
+.mainbar { position: relative; margin-bottom: 56px; padding: 0; }
+/* two stacked panels butted together (gap filled) so they read as ONE continuous
+   main bar: shared outer rounding, square inner edges where they meet, a hairline
+   seam, and the float shadow on the wrapper so the seam stays flat. */
+.home .homestack {
+  flex: 0 0 auto;
+  border-radius: var(--r-tile);
+  box-shadow: var(--shadow-nav), var(--spec-strong);
+  margin: 0 0 28px;
+}
+.home .homebar {
+  position: relative; isolation: isolate;
+  flex: 0 0 auto;
+  overflow: hidden;
+  display: flex; flex-direction: column; align-items: stretch;
+  padding: 15px 0 16px;
+  background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+}
+/* top panel rounds only its top corners; bottom panel only its bottom — the meeting
+   edges are square and share a single hairline so the gap between them is filled. */
+.home .homebar-top {
+  border-radius: var(--r-tile) var(--r-tile) 0 0;
+  border-bottom: none;
+  clip-path: inset(0 round var(--r-tile) var(--r-tile) 0 0);
+  /* symmetric inner padding so the inter-rail gap stays proportional to the
+     16px above the top pill and the 17px below the bottom tiles. */
+  padding-bottom: 6px;
+}
+.home .homebar-bottom {
+  border-radius: 0 0 var(--r-tile) var(--r-tile);
+  clip-path: inset(0 round 0 0 var(--r-tile) var(--r-tile));
+  padding-bottom: 8px;
+  /* match the top bar's inner padding so the seam sits centered in an even gap. */
+  padding-top: 6px;
+}
+/* dim the tile glow inside the home-page bars — tighter, lower-spread shadow so the
+   colored glow fades out before it reaches the bar's rounded corners. */
+.home .homebar .tile {
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 5px 11px var(--tglow, rgba(0,0,0,0.10)),
+    inset 0 1px 1px rgba(255,255,255,0.55);
+}
+
+/* one unified frosted glass tray — always present, no merge animation.
+   matches the Topics .tile-tray chrome exactly, just taller (two rails). */
+.merge-bg { position: absolute; inset: 0; z-index: 0; border-radius: var(--r-tile);
+  background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: none; box-shadow: var(--spec-strong);
+  opacity: 1; }
+
+/* each rail row sits inside the one shared tray — no own shell, no animation.
+   top/bottom padding is kept tight so the tray stays a slim wrap; the only
+   added height is the notch/pill label row, which seats snugly above each rail. */
+.subtray { position: relative; z-index: 1; display: flex; flex-direction: column; align-items: stretch; }
+.subtray.top    { padding: 15px 0 8px; }
+.subtray.bottom { padding: 8px 0 14px; margin-top: 0; }
+
+/* notch / pill label ("Topics", "Projects") — solid opaque-white chip.
+   dropped the glossy cream gradient + glass specular for a clean matte white
+   (per ref image 2). width:fit-content keeps it a slim wrap with no empty
+   space; aligned to the 18px tile inset of the rail below it. */
+/* nested-capsule pill — mirrors .th-pill (the clock widget):
+   the element itself is the sunken cool-grey TRAY (background + inner shadow);
+   ::before is the floating white PILL that sits inset inside it. content
+   (the label text) sits on top via z-index: 1 above the inner pill. */
+.rail-tag {
+  position: relative; isolation: isolate;
+  align-self: flex-start;
+  box-sizing: border-box; justify-content: center;
+  display: inline-flex; align-items: center;
+  margin: 0 0 4px 13px; padding: 0 13px; height: 44px; min-width: 113px; width: auto;
+  border-radius: 999px;
+  font-family: var(--font-ui); font-weight: 700;
+  font-size: 0.86rem; letter-spacing: -0.005em; line-height: 1;
+  color: var(--wii-ink);
+  /* outer tray — sunken cool-grey well */
+  background: rgba(240,242,247,0.78);
+  -webkit-backdrop-filter: blur(16px) saturate(150%); backdrop-filter: blur(16px) saturate(150%);
+  border: none;
+  box-shadow: inset 0 1px 2px rgba(80,95,130,0.08);
+}
+.rail-tag > * {
+  position: relative; z-index: 1;
+  /* slightly black-grey — a touch darker than silver, still soft */
+  color: #5b626f;
+}
+.rail-tag::before {
+  /* inner floating solid-white pill (matches the All/Pure/Applied seg-ind) */
+  content: ""; position: absolute; inset: 5px; z-index: 0;
+  border-radius: 999px;
+  background: #ffffff;
+  border: 0.5px solid rgba(40,50,80,0.04);
+  box-shadow:
+    0 0 6px rgba(40,50,80,0.16),
+    0 0 2px rgba(40,50,80,0.10),
+    inset 0 1px 1px rgba(255,255,255,0.9),
+    inset 0 -1px 1px rgba(255,255,255,0.9);
+}
+
+/* segmented-control single-option pill — cream/white glass shell holding one
+   glossy multi-stop gradient button. mirrors the .seg control from the design
+   system, just with one segment instead of three. */
+.row-seg { position: relative; z-index: 2; display: inline-flex; padding: 4px;
+  border-radius: 999px;
+  background: linear-gradient(180deg, rgba(255,255,255,0.96), rgba(245,239,230,0.92));
+  border: 1px solid rgba(255,255,255,0.85);
+  box-shadow:
+    0 1px 0 rgba(255,255,255,0.9) inset,
+    0 -1px 2px rgba(0,0,0,0.04) inset,
+    0 2px 8px rgba(20,15,40,0.08),
+    0 1px 2px rgba(20,15,40,0.05); }
+
+/* the filled gradient button. layered glossy finish:
+     background = rich multi-stop gradient
+     ::before    = top half-moon specular sheen
+     ::after     = bottom soft color bounce */
+.row-seg-ind { position: relative; z-index: 1; display: inline-block;
+  border-radius: 999px; isolation: isolate;
+  border: 1px solid var(--row-seg-rim, rgba(255,255,255,0.55));
+  box-shadow:
+    0 4px 10px -2px var(--row-seg-glow, rgba(60,80,200,0.45)),
+    0 1px 2px rgba(20,15,40,0.18),
+    inset 0 1px 0 rgba(255,255,255,0.55),
+    inset 0 -2px 4px rgba(0,0,0,0.18); }
+.row-seg-ind::before { content: ""; position: absolute; inset: 1px 1px 50% 1px;
+  border-radius: 999px 999px 60% 60% / 999px 999px 100% 100%;
+  background: linear-gradient(180deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.18) 60%, rgba(255,255,255,0) 100%);
+  pointer-events: none; }
+.row-seg-ind::after { content: ""; position: absolute; inset: 40% 8% 6% 8%;
+  border-radius: 999px;
+  background: radial-gradient(ellipse at 50% 100%, var(--row-seg-bounce, rgba(255,255,255,0.35)) 0%, transparent 70%);
+  filter: blur(4px); pointer-events: none; }
+
+.row-seg-lbl { position: relative; z-index: 2; display: inline-block;
+  padding: 8px 22px; font-family: inherit; font-weight: 800;
+  font-size: 0.86rem; letter-spacing: 0.015em; color: #fff;
+  text-shadow: 0 1px 1px rgba(0,0,0,0.18); white-space: nowrap; }
+
+/* Topics — indigo → violet → cyan */
+.row-seg.topic .row-seg-ind {
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(214,168,255,0.65) 0%, transparent 55%),
+    linear-gradient(110deg, #4a1fb8 0%, #6a2bd6 35%, #5b6cff 65%, #3fd0e8 100%);
+  --row-seg-glow: rgba(80,50,220,0.50);
+  --row-seg-rim: rgba(210,200,255,0.55);
+  --row-seg-bounce: rgba(180,220,255,0.55); }
+
+/* Projects — blue → teal → mint */
+.row-seg.project .row-seg-ind {
+  background:
+    radial-gradient(ellipse at 30% 0%, rgba(180,255,220,0.6) 0%, transparent 55%),
+    linear-gradient(110deg, #1c54e0 0%, #1da3c8 45%, #2cd6a6 100%);
+  --row-seg-glow: rgba(30,140,180,0.50);
+  --row-seg-rim: rgba(190,240,255,0.55);
+  --row-seg-bounce: rgba(190,255,220,0.55); }
+
+/* horizontal scroll rail — same spacing as the Topics .tile-tray grid (gap 16,
+   18px breathing room at each end), hidden scrollbar, no mask.
+   generous vertical padding (10px top / 8px bottom) lives INSIDE the scroll
+   viewport so a hovered/pressed tile's lift + scale has room and isn't clipped
+   by the overflow-x:auto (which forces overflow-y to clip). */
+.hrail { width: 100%; display: flex; gap: 16px; overflow-x: auto; overflow-y: visible;
+  padding: 10px 18px 8px 12px; scroll-padding: 0 12px;
+  scrollbar-width: none;
+  -ms-overflow-style: none;
+}
+.hrail::-webkit-scrollbar { display: none; height: 0; width: 0; }
+
+/* home rails reuse the real Tile design (identical to Topics / Projects pages).
+   sized with calc() so a whole number of cartridges fills the rail edge-to-edge
+   with NO peek of the next one before it scrolls sideways: 4 topic tiles, 3
+   (wider) project tiles, the 5th/4th pushed fully off-screen. the subtracted
+   constants are tuned to the rail's 12/18px padding + 16px gap so the last
+   visible tile sits flush to the right edge at any desktop width. aspect-ratio
+   (not a fixed height) locks the landscape cartridge proportion from the
+   Topics-grid reference, so the cover-art "screenshots" render at identical
+   dimensions on any desktop, and the two ratios keep both rails equal height. */
+/* tiles/cartridges made smaller — wider gap absorbs the freed space so all 4 topics
+   and 3 project cartridges still fit, just noticeably more compact. */
+.hrail-topics .tile { flex: 0 0 calc((100% - 72px) / 4); height: auto; aspect-ratio: 1.4 / 1; }
+.hrail-projects .tile { flex: 0 0 calc((100% - 52px) / 3); height: auto; aspect-ratio: 1.9 / 1; }
+
+body.reduce-motion .merge-bg { opacity: 1; }
+
+/* ============================================================
+   NOTES LIST
+   ============================================================ */
+.notes { display: flex; flex-direction: column; gap: 10px; }
+.note-row { display: flex; align-items: center; gap: 15px; padding: 15px 18px; border-radius: var(--r-card);
+  background: var(--wii-panel); -webkit-backdrop-filter: blur(20px) saturate(170%); backdrop-filter: blur(20px) saturate(170%);
+  border: 1px solid var(--wii-edge); box-shadow: var(--shadow-xs), var(--glass-spec); cursor: pointer;
+  transition: transform var(--dur-base) var(--ease-smooth), box-shadow var(--dur-base) var(--ease-smooth); }
+.note-row:hover { transform: translateX(3px); box-shadow: var(--shadow-wii), var(--glass-spec); }
+.note-row:active { transform: scale(0.995); }
+.note-glyph { width: 38px; height: 38px; border-radius: 12px; flex-shrink: 0; display: flex; align-items: center; justify-content: center;
+  color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 0.82rem;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 3px 7px rgba(0,0,0,0.16); }
+.note-row .nt { font-weight: 600; font-size: 0.98rem; color: var(--wii-ink); flex: 1; min-width: 0; }
+.note-row .badge2 { font-size: 0.72rem; font-weight: 700; padding: 5px 12px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid var(--glass-border); box-shadow: inset 0 1px 1px rgba(255,255,255,0.65), var(--shadow-xs); }
+.note-row .when { font-size: 0.76rem; color: var(--wii-ink-2); white-space: nowrap; font-family: var(--font-mono); }
+
+/* ============================================================
+   NOTES DRILL-IN  (list ⇄ article, locked tray like Topics/Projects)
+   ============================================================ */
+/* page becomes a flex column filling the stage; top strip stays put, tray scrolls inside */
+.stage:has(.notes-screen) { overflow: hidden; padding-bottom: 18px; }
+.stage:has(.notes-screen) .stage-inner { height: 100%; display: flex; flex-direction: column; }
+.notes-screen { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+
+/* TOP STRIP — NOTEBOOK hero (list mode only; removed while reading) */
+.notes-topstrip { position: relative; flex: 0 0 auto; }
+.notes-screen.reading .notes-topstrip { display: none; }
+.notes-topstrip .nts-hero-layer .topics-hero.compact { margin-bottom: 0; }
+
+/* merged sticky header inside the article card — blue cover, back + title on one row */
+.reader-header { position: relative; flex: 0 0 auto; z-index: 5;
+  display: flex; flex-direction: row; align-items: center; gap: 15px; padding: 16px 26px; overflow: hidden; }
+.reader-header .mc-grad { position: absolute; inset: 0; z-index: 0; background: linear-gradient(150deg, var(--c1), var(--c2)); }
+.reader-header .tile-cover { position: absolute; inset: 0; z-index: 1; }
+/* white fade from the LEFT — title/back rest on calm white, art whispers right */
+.reader-header::after { content: ""; position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(to right, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.62) 38%, rgba(255,255,255,0.12) 66%, transparent 100%); }
+.reader-header .nts-back { position: relative; z-index: 3; flex-shrink: 0; display: inline-flex; align-items: center; justify-content: center;
+  width: 32px; height: 32px; padding: 0; color: var(--wii-ink); cursor: pointer;
+  background: rgba(255,255,255,0.72); border: 1px solid var(--wii-edge); border-radius: 50%;
+  -webkit-backdrop-filter: blur(6px); backdrop-filter: blur(6px);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.12); transition: background var(--dur-fast) ease, transform var(--dur-fast) ease; }
+.reader-header .nts-back:hover { background: #fff; }
+.reader-header .nts-back:active { transform: scale(0.92); }
+.reader-header .nts-title { position: relative; z-index: 3; font-family: var(--font-display); font-weight: 700;
+  font-size: 1.12rem; line-height: 1.12; color: var(--wii-ink); margin: 0; min-width: 0; text-wrap: balance; }
+
+/* TRAY — locked to viewport bottom, scrolls inside; list + reader panes slide */
+.notes-tray { flex: 1 1 auto; min-height: 0; position: relative; overflow: hidden; margin-top: 16px; }
+.notes-screen.reading .notes-tray { margin-top: 0; }
+.notes-list-pane { position: absolute; inset: 0; overflow-y: auto; padding: 1px 6px 1px 1px;
+  scrollbar-width: thin; -webkit-overflow-scrolling: touch;
+  transition: transform var(--dur-base) var(--ease-smooth), opacity var(--dur-fast) ease; }
+.notes-list-pane::-webkit-scrollbar { width: 9px; }
+.notes-list-pane::-webkit-scrollbar-thumb { background: rgba(70,90,130,0.18); border-radius: 5px; }
+.notes-screen.reading .notes-list-pane { transform: translateX(-7%); opacity: 0; pointer-events: none; }
+
+.notes-reader-pane { position: absolute; inset: 0; display: flex; flex-direction: column;
+  border-radius: var(--r-tile); overflow: hidden; background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--wii-edge); box-shadow: var(--shadow-wii), var(--glass-spec);
+  transform: translateX(101%); opacity: 0; pointer-events: none;
+  transition: transform var(--dur-base) var(--ease-smooth), opacity var(--dur-fast) ease; }
+.notes-screen.reading .notes-reader-pane { transform: none; opacity: 1; pointer-events: auto; }
+.notes-reader-pane .reader-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 28px 34px 40px;
+  scrollbar-width: thin; }
+.notes-reader-pane .reader-scroll::-webkit-scrollbar { width: 9px; }
+.notes-reader-pane .reader-scroll::-webkit-scrollbar-thumb { background: rgba(70,90,130,0.18); border-radius: 5px; }
+.note-glyph.sm { width: 26px; height: 26px; border-radius: 9px; font-size: 0.6rem; }
+
+/* two-column reading layout — prose (≈65%) + Bittinger-style exercise rail (≈35%) */
+.reader-grid { display: grid; grid-template-columns: minmax(0, 1.9fr) minmax(0, 1fr); align-items: stretch; }
+.reader-main { min-width: 0; padding-right: 36px; }
+.reader-grid .reader-prose { max-width: none; }
+.reader-rail { min-width: 0; border-left: 1.5px solid var(--wii-ink); padding-left: 30px; }
+.rail-head { font-family: var(--font-ui); font-weight: 800; font-size: 0.72rem; letter-spacing: 0.16em;
+  text-transform: uppercase; color: var(--wii-ink-2); margin: 2px 0 18px; }
+.rail-ex { padding-bottom: 22px; margin-bottom: 22px; border-bottom: 1px solid var(--wii-edge); }
+.rail-ex:last-child { border-bottom: none; margin-bottom: 0; }
+.rail-ex-n { font-family: var(--font-display); font-weight: 700; font-size: 0.82rem; color: var(--c1, var(--wii-ink)); margin-bottom: 6px; }
+.rail-ex-q { font-size: 0.92rem; line-height: 1.55; color: var(--wii-ink); margin-bottom: 13px; text-wrap: pretty; }
+.ex-mtx { font-family: var(--font-mono); font-size: 0.88em; white-space: nowrap; }
+.rail-ex-row { display: flex; gap: 8px; align-items: center; }
+.rail-ex-in { flex: 1 1 auto; min-width: 0; font-family: var(--font-mono); font-size: 0.9rem; padding: 8px 11px;
+  border: 1.5px solid var(--wii-edge); border-radius: 9px; background: rgba(255,255,255,0.6); color: var(--wii-ink);
+  transition: border-color var(--dur-fast) ease; }
+.rail-ex-in:focus { outline: none; border-color: var(--c1); }
+.rail-ex-check { flex: 0 0 auto; font-family: var(--font-ui); font-weight: 700; font-size: 0.84rem; cursor: pointer;
+  padding: 8px 15px; border-radius: 9px; border: none; color: #fff; background: linear-gradient(150deg, var(--c1), var(--c2));
+  box-shadow: 0 2px 6px rgba(0,0,0,0.14); transition: transform var(--dur-fast) ease; }
+.rail-ex-check:active { transform: scale(0.95); }
+.rail-ex-fb { font-size: 0.82rem; font-weight: 600; margin-top: 9px; }
+.rail-ex-fb.ok { color: #1f8a5b; }
+.rail-ex-fb.no { color: #c0392b; }
+.rail-ex.right .rail-ex-in { border-color: #1f8a5b; }
+.rail-ex.wrong .rail-ex-in { border-color: #c0392b; }
+.rail-ex-reveal { display: inline-block; margin-top: 11px; font-family: var(--font-ui); font-size: 0.78rem; font-weight: 600;
+  color: var(--wii-ink-2); background: none; border: none; cursor: pointer; padding: 0;
+  text-decoration: underline; text-underline-offset: 3px; }
+.rail-ex-reveal:hover { color: var(--wii-ink); }
+.rail-ex-sol { font-size: 0.86rem; line-height: 1.55; color: var(--wii-ink-2); margin-top: 9px; padding: 11px 13px;
+  background: rgba(120,140,180,0.1); border-radius: 10px; }
+
+/* ============================================================
+   ABOUT
+   ============================================================ */
+.about-grid { display: grid; grid-template-columns: 1.25fr 1fr; gap: 18px; align-items: start; }
+.card { background: var(--wii-panel-strong); -webkit-backdrop-filter: blur(24px) saturate(180%); backdrop-filter: blur(24px) saturate(180%);
+  border: 1px solid var(--wii-edge); border-radius: var(--r-card); box-shadow: var(--shadow-wii), var(--glass-spec); padding: 26px; }
+.card h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.4rem; color: var(--wii-ink); margin: 0 0 12px; }
+.card p { color: var(--wii-ink-2); line-height: 1.65; margin: 0 0 14px; font-size: 0.98rem; }
+.card p:last-child { margin-bottom: 0; }
+.sig { display: flex; align-items: center; gap: 10px; margin-top: 18px; }
+.sig img { width: 26px; height: 31px; image-rendering: pixelated; }
+.sig span { font-weight: 700; color: var(--wii-ink); }
+.link-card { display: flex; align-items: center; gap: 14px; padding: 14px 16px; border-radius: 16px;
+  background: rgba(255,255,255,0.55); border: 1px solid var(--wii-edge); box-shadow: var(--glass-spec); cursor: pointer;
+  transition: all var(--dur-base) var(--ease-smooth); margin-bottom: 11px; }
+.link-card:last-child { margin-bottom: 0; }
+.link-card:hover { background: #fff; transform: scale(1.02); box-shadow: var(--shadow-wii), var(--glass-spec); }
+.link-card:active { transform: scale(0.97); }
+.link-ic { width: 40px; height: 40px; border-radius: 12px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: #fff;
+  box-shadow: inset 0 1px 2px rgba(255,255,255,0.5), 0 3px 7px rgba(0,0,0,0.16); }
+.link-tx b { display: block; font-size: 0.95rem; color: var(--wii-ink); }
+.link-tx span { font-size: 0.8rem; color: var(--wii-ink-2); }
+
+/* ============================================================
+   DOCK  (glossy colored squircles)
+   ============================================================ */
+.dock { position: fixed; bottom: 20px; left: calc(50% + 45px); transform: translateX(-50%); z-index: 60;
+  transition: left var(--dur-base) var(--ease-smooth);
+  display: flex; align-items: center; gap: 16px; padding: 12px 22px; border-radius: 30px;
+  background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border); box-shadow: var(--shadow-nav), var(--spec-strong); }
+.dock .di { width: 50px; height: 50px; border-radius: 16px; background: transparent; border: none; cursor: pointer; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  transition: transform var(--dur-base) var(--ease-bounce); }
+.dock .di:hover { transform: translateY(-7px) scale(1.16); }
+.dock .di:active { transform: scale(0.92); }
+.dock .di .tip { position: absolute; bottom: calc(100% + 10px); left: 50%; transform: translateX(-50%) translateY(4px);
+  background: var(--ink-button); color: #fff; font-size: 0.72rem; font-weight: 600; padding: 5px 10px; border-radius: 8px;
+  white-space: nowrap; opacity: 0; pointer-events: none; transition: all var(--dur-fast) ease; }
+.dock .di:hover .tip { opacity: 1; transform: translateX(-50%) translateY(0); }
+.dock .sep { width: 1px; height: 30px; background: var(--hairline-strong); margin: 0 2px; }
+body.rail-open .dock { left: calc(50% + 124px); }
+
+/* ============================================================
+   MODAL  (Zperiod element-modal style)
+   ============================================================ */
+.scrim { position: fixed; inset: 0; z-index: 200; background: rgba(40,48,70,0.32);
+  -webkit-backdrop-filter: blur(7px); backdrop-filter: blur(7px);
+  display: flex; align-items: center; justify-content: center; padding: 24px;
+  opacity: 0; pointer-events: none; transition: opacity var(--dur-base) ease; }
+.scrim.open { opacity: 1; pointer-events: auto; }
+.modal { width: min(540px, 100%); border-radius: var(--r-modal); overflow: hidden;
+  background: var(--glass-bg-strong); -webkit-backdrop-filter: var(--glass-blur-lg); backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--wii-edge); box-shadow: var(--shadow-float), var(--spec-strong);
+  transform: translateY(14px) scale(0.95); transition: transform var(--dur-base) var(--ease-bounce); }
+.scrim.open .modal { transform: none; }
+.modal-cover { height: 150px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 16px; }
+.modal-cover .mc-grad { position: absolute; inset: 0; z-index: 0; background: linear-gradient(150deg, var(--c1), var(--c2)); }
+.modal-cover .tile-sheen, .modal-cover .tile-scrim { z-index: 1; }
+/* soft fade: the artwork dissolves into the white body at the bottom edge (matches the gentler look) */
+.modal-cover::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 58%; z-index: 2; pointer-events: none;
+  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 55%, rgba(255,255,255,0.92) 100%); }
+.modal-glyph { position: absolute; left: 18px; bottom: -26px; z-index: 3; width: 64px; height: 64px; border-radius: 18px;
+  display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 1.4rem;
+  background: linear-gradient(155deg, var(--b1), var(--b2));
+  box-shadow: inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -4px 8px rgba(0,0,0,0.22), 0 6px 14px rgba(0,0,0,0.3); }
+.modal-glyph::after { content:""; position:absolute; inset:0; border-radius:18px; background: linear-gradient(155deg, rgba(255,255,255,0.55), transparent 48%); }
+.modal-glyph span { position: relative; z-index: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+.modal-close { position: absolute; top: 14px; right: 14px; z-index: 4; width: 34px; height: 34px; border-radius: 50%;
+  border: none; background: rgba(255,255,255,0.85); color: var(--wii-ink); cursor: pointer; display: flex; align-items: center; justify-content: center;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.18); transition: transform var(--dur-fast) ease; }
+.modal-close:hover { background: #fff; } .modal-close:active { transform: scale(0.9); }
+.modal-body { padding: 40px 26px 8px; }
+.modal-body .kicker { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--wii-ink-2); }
+.modal-body h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.7rem; color: var(--wii-ink); margin: 5px 0 10px; }
+.modal-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
+.modal-tags .tg { font-size: 0.72rem; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
+.modal-body p { color: var(--wii-ink-2); line-height: 1.6; font-size: 0.98rem; margin: 0; }
+.modal-foot { padding: 18px 26px 24px; display: flex; gap: 11px; }
+.btn-primary { background: var(--ink-button); color: #fff; border: none; padding: 12px 22px; border-radius: var(--r-button);
+  font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
+  transition: all var(--dur-base) var(--ease-smooth); }
+.btn-primary:hover { background: var(--ink-button-2); } .btn-primary:active { transform: scale(0.95); }
+.btn-ghost { background: rgba(255,255,255,0.7); color: var(--wii-ink); border: 1.5px solid var(--wii-edge-2);
+  padding: 12px 20px; border-radius: var(--r-button); font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; }
+.btn-ghost:hover { background: #fff; } .btn-ghost:active { transform: scale(0.95); }
+
+/* locked affordance — sits beside the action button; clicking refuses to advance */
+.btn-lock { margin-left: auto; flex: 0 0 auto; width: 44px; height: 44px; border-radius: var(--r-button);
+  display: inline-flex; align-items: center; justify-content: center; cursor: not-allowed;
+  background: rgba(120,130,150,0.12); color: var(--wii-ink-2); border: 1.5px solid var(--wii-edge-2);
+  transition: background var(--dur-fast) ease, color var(--dur-fast) ease; }
+.btn-lock:hover { background: rgba(190,60,60,0.12); color: #c0392b; border-color: rgba(190,60,60,0.32); }
+
+/* refusal rumble — modal shakes when a locked action is attempted */
+.modal.shake { animation: modal-rumble 0.5s cubic-bezier(.36,.07,.19,.97); }
+@keyframes modal-rumble {
+  0%, 100% { transform: translateX(0); }
+  10% { transform: translateX(-9px) rotate(-0.6deg); }
+  22% { transform: translateX(8px) rotate(0.5deg); }
+  35% { transform: translateX(-7px) rotate(-0.4deg); }
+  48% { transform: translateX(6px) rotate(0.35deg); }
+  62% { transform: translateX(-4px) rotate(-0.25deg); }
+  76% { transform: translateX(3px); }
+  88% { transform: translateX(-1.5px); }
+}
+.btn-primary svg, .btn-ghost svg { width: 16px; height: 16px; }
+
+/* fade for screen swaps */
+.fade { animation: fadein var(--dur-slow) var(--ease-smooth) both; }
+@keyframes fadein { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: none; } }
+body.reduce-motion .fade { animation: none; }
+body.reduce-motion .tile { opacity: 1; transform: none; }
+
+/* ============================================================
+   NOTE READER  (full article sheet)
+   ============================================================ */
+.reader-scrim { align-items: stretch; justify-content: center; padding: 40px 24px; }
+.reader {
+  width: min(720px, 100%); max-height: 100%; display: flex; flex-direction: column; overflow: hidden;
+  border-radius: var(--r-modal);
+  background: var(--glass-bg-strong); -webkit-backdrop-filter: var(--glass-blur-lg); backdrop-filter: var(--glass-blur-lg);
+  border: 1px solid var(--wii-edge); box-shadow: var(--shadow-float), var(--spec-strong);
+  transform: translateY(16px) scale(0.97); transition: transform var(--dur-base) var(--ease-bounce);
+}
+.reader-scrim.open .reader { transform: none; }
+.reader-cover { position: relative; min-height: 156px; flex-shrink: 0; overflow: hidden; display: flex; align-items: flex-end; padding: 22px 26px 18px; }
+.reader-cover .mc-grad { position: absolute; inset: 0; z-index: 0; background: linear-gradient(150deg, var(--c1), var(--c2)); }
+.reader-cover .tile-cover { z-index: 1; }
+.reader-cover .tile-sheen { z-index: 2; }
+.reader-cover::after { content:""; position: absolute; inset: 0; z-index: 2;
+  background: linear-gradient(180deg, transparent 30%, rgba(20,26,42,0.55) 100%); }
+.reader-cover-tx { position: relative; z-index: 3; max-width: 88%; }
+.reader-kicker { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.14em; text-transform: uppercase;
+  color: rgba(255,255,255,0.92); text-shadow: 0 1px 4px rgba(0,0,0,0.35); margin-bottom: 6px; }
+.reader-title { font-family: var(--font-display); font-weight: 700; font-size: 1.55rem; line-height: 1.13;
+  color: #fff; margin: 0; text-shadow: 0 2px 10px rgba(0,0,0,0.4); text-wrap: balance; }
+.reader-scroll { flex: 1 1 auto; min-height: 0; overflow-y: auto; padding: 24px 38px 40px; }
+
+.reader-meta { display: flex; align-items: center; gap: 9px; margin-bottom: 18px; }
+.note-glyph.sm { width: 30px; height: 30px; border-radius: 9px; font-size: 0.7rem; }
+.reader-meta .badge2 { font-size: 0.72rem; font-weight: 700; padding: 4px 11px; border-radius: 999px; white-space: nowrap;
+  border: 1px solid var(--glass-border); box-shadow: inset 0 1px 1px rgba(255,255,255,0.6), var(--shadow-xs); }
+.reader-meta .rm-when { font-size: 0.78rem; color: var(--wii-ink-2); font-family: var(--font-mono); }
+.reader-meta .rm-dot { color: var(--wii-ink-3, var(--wii-ink-2)); opacity: 0.5; }
+
+.reader-dek { font-family: var(--font-display); font-weight: 500; font-size: 1.18rem; line-height: 1.45;
+  color: var(--wii-ink); margin: 0 0 8px; text-wrap: pretty; }
+.reader-prose { max-width: 60ch; }
+.rd-h { font-family: var(--font-display); font-weight: 700; font-size: 1.22rem; color: var(--wii-ink);
+  margin: 28px 0 10px; }
+.rd-p { color: var(--wii-ink-2); line-height: 1.72; font-size: 1.02rem; margin: 0 0 14px; text-wrap: pretty; }
+.rd-p strong, .rd-list strong { color: var(--wii-ink); font-weight: 700; }
+.rd-p em, .rd-list em { font-style: italic; }
+.rd-p i, .rd-math i, .rd-list i { font-family: var(--font-serif, Georgia, "Times New Roman", serif); font-style: italic; }
+
+.rd-list { margin: 0 0 16px; padding: 0; list-style: none; display: flex; flex-direction: column; gap: 10px; }
+.rd-list li { position: relative; padding-left: 22px; color: var(--wii-ink-2); line-height: 1.6; font-size: 1.0rem; }
+.rd-list li::before { content:""; position: absolute; left: 4px; top: 0.62em; width: 6px; height: 6px; border-radius: 50%;
+  background: linear-gradient(155deg, var(--c1), var(--c2)); box-shadow: inset 0 1px 1px rgba(255,255,255,0.5); }
+
+.rd-math { display: flex; justify-content: center; margin: 8px 0 20px; }
+.rd-math .eq { font-family: var(--font-serif, Georgia, serif); font-size: 1.5rem; color: var(--wii-ink);
+  display: inline-flex; align-items: center; gap: 8px; padding: 14px 26px; border-radius: var(--r-card);
+  background: rgba(255,255,255,0.5); border: 1px solid var(--wii-edge); box-shadow: var(--glass-spec); }
+.rd-math .fn { font-style: italic; }
+.rd-math .rel, .rd-math .op { font-style: normal; margin: 0 2px; }
+.rd-math .mtx { display: inline-grid; grid-template-columns: repeat(2, 1fr); gap: 2px 14px; padding: 2px 10px;
+  position: relative; font-style: italic; place-items: center; }
+.rd-math .mtx::before, .rd-math .mtx::after { content:""; position: absolute; top: 0; bottom: 0; width: 7px;
+  border: 2px solid var(--wii-ink); }
+.rd-math .mtx::before { left: 0; border-right: none; border-radius: 4px 0 0 4px; }
+.rd-math .mtx::after  { right: 0; border-left: none; border-radius: 0 4px 4px 0; }
+
+.rd-fig { margin: 6px 0 22px; display: flex; justify-content: center; padding: 18px;
+  background: rgba(255,255,255,0.42); border: 1px solid var(--wii-edge); border-radius: var(--r-card); }
+.fig-svg { width: 300px; max-width: 100%; height: auto; }
+.fig-lab { font-family: var(--font-serif, Georgia, serif); font-style: italic; font-size: 16px; font-weight: 600; fill: var(--wii-ink); }
+.fig-area { font-family: var(--font-ui); font-size: 11px; font-weight: 700; fill: var(--wii-ink-2); letter-spacing: 0.02em; }
+
+.rd-note { margin: 4px 0 20px; padding: 14px 18px; border-radius: var(--r-card);
+  background: rgba(255,255,255,0.5); border: 1px solid var(--wii-edge);
+  border-left: 3px solid var(--c2); color: var(--wii-ink-2); line-height: 1.62; font-size: 0.98rem; box-shadow: var(--shadow-xs); }
+.rd-note em { color: var(--wii-ink); font-style: italic; font-weight: 600; }
+
+/* numbered section header (mirrors the source "Page N —" rule) */
+.rd-sec { margin: 38px 0 4px; border-bottom: 1.5px solid var(--wii-edge); padding-bottom: 12px; }
+.rd-sec:first-child { margin-top: 8px; }
+.rd-sec-t { font-family: var(--font-display); font-weight: 700; font-size: 1.34rem; color: var(--wii-ink); margin: 0; display: flex; align-items: baseline; gap: 12px; }
+.rd-sec-n { flex: 0 0 auto; font-size: 0.9rem; font-weight: 800; color: #fff; background: linear-gradient(150deg, var(--c1), var(--c2));
+  width: 1.9em; height: 1.9em; border-radius: 8px; display: inline-flex; align-items: center; justify-content: center;
+  box-shadow: inset 0 1px 1px rgba(255,255,255,0.4), 0 2px 5px rgba(0,0,0,0.14); }
+.rd-sub { font-family: var(--font-display); font-weight: 700; font-size: 1.04rem; color: var(--c2); margin: 22px 0 9px; letter-spacing: 0.01em; }
+
+/* boxed key equation */
+.rd-box { display: flex; justify-content: center; margin: 14px 0 18px; }
+.rd-box .eq { font-family: var(--font-serif, Georgia, serif); font-size: 1.18rem; color: var(--wii-ink); text-align: center;
+  padding: 15px 28px; border-radius: var(--r-card); background: rgba(120,140,180,0.07);
+  border: 1.5px solid color-mix(in srgb, var(--c2) 32%, var(--wii-edge)); box-shadow: var(--glass-spec); line-height: 1.5; }
+.rd-box .eq sub { font-size: 0.7em; } .rd-box .eq sup { font-size: 0.72em; }
+
+/* results table */
+.rd-table-wrap { margin: 6px 0 22px; overflow-x: auto; }
+.rd-table { width: 100%; border-collapse: collapse; font-size: 0.95rem; color: var(--wii-ink-2); }
+.rd-table th { font-family: var(--font-display); font-weight: 700; color: var(--wii-ink); text-align: left;
+  padding: 8px 14px 9px; border-bottom: 2px solid var(--wii-ink); white-space: nowrap; }
+.rd-table td { padding: 8px 14px; border-bottom: 1px solid var(--wii-edge); vertical-align: baseline; }
+.rd-table tr:last-child td { border-bottom: 1.5px solid var(--wii-ink); }
+.rd-table td:first-child, .rd-table th:first-child { font-family: var(--font-serif, Georgia, serif); }
+.rd-table i { font-family: var(--font-serif, Georgia, serif); font-style: italic; }
+
+/* figure + caption */
+.rd-figure { margin: 8px 0 24px; }
+.rd-figure .rd-fig { margin: 0; }
+.rd-cap { margin: 10px 2px 0; font-size: 0.86rem; line-height: 1.5; color: var(--wii-ink-2); text-wrap: pretty; }
+.rd-cap b { color: var(--wii-ink); font-weight: 700; }
+.rd-cap i { font-family: var(--font-serif, Georgia, serif); font-style: italic; }
+
+/* ordered summary list */
+.rd-olist { margin: 6px 0 12px; padding: 0; list-style: none; counter-reset: rdo; display: flex; flex-direction: column; gap: 11px; }
+.rd-olist li { position: relative; padding-left: 34px; color: var(--wii-ink-2); line-height: 1.6; font-size: 1.0rem; counter-increment: rdo; text-wrap: pretty; }
+.rd-olist li::before { content: counter(rdo); position: absolute; left: 0; top: 0.05em; width: 22px; height: 22px; border-radius: 7px;
+  font-family: var(--font-ui); font-weight: 800; font-size: 0.74rem; color: #fff; display: flex; align-items: center; justify-content: center;
+  background: linear-gradient(150deg, var(--c1), var(--c2)); box-shadow: inset 0 1px 1px rgba(255,255,255,0.4); }
+.rd-olist strong { color: var(--wii-ink); }
+.rd-olist i { font-family: var(--font-serif, Georgia, serif); font-style: italic; }
+
+/* figure internal labels */
+.fig-svg.wide { width: 100%; max-width: 460px; }
+.fg-lab { font-family: var(--font-serif, Georgia, serif); font-style: italic; font-size: 12px; fill: #26345f; }
+.fg-num { font-family: var(--font-serif, Georgia, serif); font-style: italic; font-size: 14px; fill: #bf3535; }
+.fg-cap-in { font-family: var(--font-serif, Georgia, serif); font-style: italic; font-size: 11px; fill: #50607f; }
+.fg-sm { font-family: var(--font-serif, Georgia, serif); font-style: italic; font-size: 10.5px; fill: #50607f; }
+.fg-ax { font-family: var(--font-serif, Georgia, serif); font-style: italic; font-size: 12px; fill: #50607f; }
+.fg-strong { font-family: var(--font-display); font-weight: 700; font-size: 12.5px; fill: #26345f; }
+.fg-vlab { font-family: var(--font-serif, Georgia, serif); font-weight: 700; font-style: italic; font-size: 14px; }
+.fg-note { font-family: var(--font-serif, Georgia, serif); font-style: italic; font-size: 12px; fill: #50607f; }
+
+/* responsive — tablet-to-desktop only; this app is not built for phones */
+@media (max-width: 980px) {
+  .mosaic, .grid-uniform { grid-template-columns: repeat(3, 1fr); }
+  .about-grid { grid-template-columns: 1fr; }
+}

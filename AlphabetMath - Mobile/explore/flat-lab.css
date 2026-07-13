@@ -1,0 +1,230 @@
+/* ============================================================
+   Design Lab — screen-level study
+   The Lab (Projects) screen rebuilt as a console library:
+   a rail of cover-art tiles, one selected tile popped with a
+   soft rainbow ring, metadata beside it, ghost line-art bleeding
+   into the paper, corner button hints.
+   Layout, driven by data-layout on .scr:
+     cart-flat — Spotlight, vertical rail of 1.9:1 cartridges wearing
+                 the flat material from the Tile + Icons studies
+                 (ink art on white, hard frames)
+   Page scaffolding (.page/.play/.tweaks/.seg/.drop/.compare)
+   comes from flat-tile.css; this file adds the screen itself.
+   ============================================================ */
+
+.page.wide { max-width: 1290px; }
+.labplay { align-items: flex-start; }
+.labplay .stageCol { flex: 1 1 560px; min-width: 420px; }
+
+/* hero scale wrapper — JS sets scale + height */
+.heroScale { position: relative; width: 100%; }
+.heroScale .scr { transform-origin: top left; }
+
+/* ---- THE SCREEN ------------------------------------------------------- */
+.scr { width: 980px; height: 612px; position: relative; overflow: hidden; isolation: isolate;
+  border-radius: 34px;
+  background: radial-gradient(120% 90% at 50% -10%, var(--wii-bg-1), var(--wii-bg-2) 55%, var(--wii-bg-3) 100%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 26px 60px rgba(40,50,80,0.12),
+    inset 0 0 0 1px rgba(0,0,0,0.045), inset 0 2px 6px rgba(255,255,255,0.9);
+  font-family: var(--font-ui); user-select: none; -webkit-user-select: none; }
+
+/* ---- GHOST ART (selected project's art anchored in the corner, bleeding
+   off the paper's bottom-right edge) -- */
+.ghost { position: absolute; z-index: 1; right: -5%; bottom: -18%; width: 64%; aspect-ratio: 1;
+  pointer-events: none; filter: saturate(1.2); }
+.scr[data-ghost="off"]   .ghost { display: none; }
+.scr[data-ghost="faint"] .ghost { opacity: 0.09; }
+.scr[data-ghost="bold"]  .ghost { opacity: 0.2; }
+
+/* Composed material: same classic paper ground. */
+.ghost svg { width: 100%; height: 100%; display: block; animation: ghostIn 0.55s var(--ease-smooth); }
+@keyframes ghostIn { from { opacity: 0; transform: translateY(10px) scale(0.985); } }
+
+/* ---- PROJECT TILE (cover art on vivid gradient, white border) ---------
+   Selection = quiet frosted-glass halo (no rainbow ring). */
+.ptile { position: relative; flex: 0 0 auto; cursor: pointer;
+  transition: width 0.32s var(--ease-bounce), height 0.32s var(--ease-bounce); }
+.pring { position: absolute; inset: -9px; border-radius: 31px; opacity: 0; z-index: 0;
+  background: rgba(255,255,255,0.6);
+  -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.75);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 18px 40px rgba(40,50,80,0.13),
+    inset 0 2px 4px rgba(255,255,255,0.9);
+  transition: opacity 0.25s var(--ease-smooth); }
+.ptile.sel .pring { opacity: 1; }
+.pcard { position: relative; z-index: 1; width: 100%; height: 100%; overflow: hidden;
+  border-radius: 24px; border: 3px solid #fff;
+  background: linear-gradient(160deg, var(--c1), var(--c2));
+  box-shadow: 0 2px 5px rgba(0,0,0,0.10), 0 10px 22px rgba(40,50,80,0.10); }
+.coverwrap { position: absolute; inset: 0; }
+.coverwrap svg { width: 100%; height: 100%; display: block; }
+.psym { position: absolute; top: 10px; left: 10px; z-index: 2; min-width: 26px; height: 21px; padding: 0 6px;
+  border-radius: 8px 4px 8px 4px; background: #fff; display: flex; align-items: center; justify-content: center;
+  font: 800 11px var(--font-display); box-shadow: 0 1px 2px rgba(40,50,80,0.18); }
+.psym span { background: linear-gradient(150deg, var(--c1), var(--c2));
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Knot Atlas "Flat + Composed" build (Tile study): hard gradient frame,
+   white label, composed ink art — words live inside the drawing.
+   The frame lives on a ::before layer ABOVE the glass pick ring (z 0) and
+   below the white card (z 1, later in tree) — so the ring can't veil it. */
+.ptile.fc, .ptile.flat { box-sizing: border-box; border-radius: 15px; padding: 2.5px;
+  transition: width 0.32s var(--ease-bounce), height 0.32s var(--ease-bounce),
+    padding 0.32s var(--ease-bounce), border-radius 0.32s var(--ease-bounce); }
+.ptile.fc.sel, .ptile.flat.sel { border-radius: 19px; padding: 5px; }
+.ptile.fc::before, .ptile.flat::before { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit;
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(var(--deep),0.18); }
+.ptile.fc .pcard, .ptile.flat .pcard { border: 0; border-radius: 12.5px; background: #fff; box-shadow: none;
+  transition: border-radius 0.32s var(--ease-bounce); }
+.ptile.fc.sel .pcard, .ptile.flat.sel .pcard { border-radius: 14px; }
+/* mini badge = the big badge shrunk, same cut-corner shape */
+.ptile.fc .psym, .ptile.flat .psym { top: 6px; left: 6px; min-width: 23px; height: 18px; padding: 0 5px;
+  border-radius: 8px 3.5px 7.5px 3.5px; font-size: 9.5px;
+  box-shadow: inset 0 0 0 1px rgba(var(--deep),0.16);
+  transition: min-width 0.32s var(--ease-bounce), height 0.32s var(--ease-bounce),
+    padding 0.32s var(--ease-bounce),
+    font-size 0.32s var(--ease-bounce), top 0.32s var(--ease-bounce),
+    left 0.32s var(--ease-bounce), border-radius 0.32s var(--ease-bounce); }
+/* spotlight fc badge = the Tile study's flat cartridge badge, verbatim */
+.ptile.fc.sel .psym, .ptile.flat.sel .psym { top: 6px; left: 6px; min-width: 44px; height: 36px; padding: 0 9px;
+  border-radius: 16px 7px 15px 7px; font-size: 0.92rem; }
+
+/* "open" pulse on A / tapping the selected tile */
+.ptile.pulse .pcard, .ptile.pulse .pring, .ptile.fc.pulse::before, .ptile.flat.pulse::before { animation: openPulse 0.45s var(--ease-bounce); }
+@keyframes openPulse { 0% { transform: scale(1); } 35% { transform: scale(1.055); } 100% { transform: scale(1); } }
+
+/* ---- LAYOUT: SPOTLIGHT, VERTICAL RAIL --------------------------------- */
+.railv { position: absolute; z-index: 10; left: 38px; top: 0; bottom: 0; }
+.railcol { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 14px;
+  align-items: flex-start; transition: transform 0.38s var(--ease-smooth); }
+
+/* ---- LAYOUT: SPOTLIGHT, HORIZONTAL RAIL ------------------------------- */
+.railh { position: absolute; z-index: 10; left: 0; right: 0; bottom: 30px;
+  display: flex; gap: 14px; justify-content: center; align-items: flex-end; }
+
+/* ---- LAYOUT: DIAMOND PICKER ------------------------------------------- */
+.raild { position: absolute; z-index: 10; left: 212px; top: 0; bottom: 0; }
+.ptile.diam .pcard { position: absolute; left: 50%; top: 50%; width: 70.7%; height: 70.7%;
+  transform: translate(-50%, -50%) rotate(45deg); border-radius: 26px; }
+.ptile.diam .pring { inset: 14.8%; transform: rotate(45deg); border-radius: 28px; }
+.ptile.diam .coverwrap { inset: -32%; transform: rotate(-45deg); }
+.ptile.diam .psym { top: 4px; left: 4px; z-index: 3; }
+
+/* ---- LAYOUT: CROSSBAR (XMB) ------------------------------------------- */
+.xrow { position: absolute; top: 52px; left: 44px; display: flex; gap: 16px; z-index: 15; }
+.xtop { position: relative; width: 54px; height: 54px; border-radius: 15px; cursor: pointer;
+  background: linear-gradient(160deg, var(--c1), var(--c2)); border: 2.5px solid #fff;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.10), 0 8px 18px rgba(40,50,80,0.10);
+  display: flex; align-items: center; justify-content: center;
+  font: 800 20px var(--font-display); color: #fff;
+  transition: transform 0.25s var(--ease-bounce); }
+.xtop.on { transform: scale(1.16); }
+.xtop.on::after { content: ""; position: absolute; inset: -7.5px; border-radius: 21px; z-index: -1;
+  background: conic-gradient(from 210deg, #b18cff, #6fa9ff, #62d3e6, #7fe3b1, #ffd08a, #ff9fc7, #b18cff);
+  box-shadow: 0 6px 16px rgba(120,120,200,0.28); }
+.xlist { position: absolute; top: 158px; display: flex; flex-direction: column; gap: 18px; z-index: 15; }
+.xitem { display: flex; align-items: center; gap: 18px; cursor: pointer; }
+.xthumb { position: relative; flex: 0 0 auto;
+  transition: width 0.32s var(--ease-bounce), height 0.32s var(--ease-bounce); }
+.xthumb .pring { inset: -6px; border-radius: 24px; }
+.xthumb .pcard { border-radius: 18px; border-width: 2.5px; }
+.xthumb .psym { display: none; }
+.xbody { display: flex; flex-direction: column; gap: 10px; }
+.xtitle { font: 700 21px/1.1 var(--font-display); color: var(--wii-ink-2);
+  transition: font-size 0.25s var(--ease-smooth), color 0.2s ease; }
+.xitem.sel .xtitle { font-size: 33px; color: var(--wii-ink); }
+
+/* ---- METADATA (title · stat pill · desc · topic chip) ------------------ */
+.meta { position: absolute; z-index: 20; display: flex; flex-direction: column; gap: 15px;
+  align-items: flex-start; animation: metaIn 0.4s var(--ease-smooth); }
+@keyframes metaIn { from { opacity: 0; transform: translateX(12px); } }
+@keyframes metaInV { from { opacity: 0; transform: translateY(calc(-50% + 12px)); } to { transform: translateY(-50%); } }
+.scr[data-layout="spot-h"] .meta { left: 64px; top: 92px; max-width: 620px; }
+.scr[data-layout="cart-flat"] .meta { left: 424px; top: 50%; transform: translateY(-50%);
+  max-width: 500px; animation-name: metaInV; }
+.scr[data-layout="diamond"] .meta { left: 452px; top: 50%; transform: translateY(-50%); max-width: 470px; }
+.scr[data-layout="diamond"] .meta { animation-name: metaInV; }
+.m-title { font: 700 42px/1.04 var(--font-display); color: var(--wii-ink); letter-spacing: -0.5px;
+  text-wrap: balance; }
+.scr[data-layout="diamond"] .m-title { font-size: 37px; }
+.m-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+.spill { display: inline-flex; white-space: nowrap; align-items: center; gap: 9px; padding: 6px 7px 6px 15px;
+  border-radius: 999px; background: var(--wii-ink); color: #fff;
+  font: 700 13px var(--font-ui); letter-spacing: 0.01em;
+  box-shadow: 0 2px 5px rgba(44,36,32,0.22); }
+.spill b { background: #fff; color: var(--wii-ink); border-radius: 999px; padding: 4px 13px;
+  font-weight: 700; font-variant-numeric: tabular-nums; }
+.m-desc { font: 500 15.5px/1.55 var(--font-ui); color: var(--wii-ink-2); max-width: 46ch; margin: 0;
+  text-wrap: pretty; }
+.xbody .m-desc { max-width: 52ch; }
+
+/* ---- CORNER BUTTON HINTS ---------------------------------------------- */
+.cch { position: absolute; z-index: 30; bottom: 24px; display: flex; gap: 10px; }
+.cch.l { left: 30px; } .cch.r { right: 30px; }
+.cbtn { display: flex; align-items: center; gap: 8px; padding: 8px 15px 8px 9px; border: 0;
+  border-radius: 999px; background: rgba(255,255,255,0.88); cursor: default;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05), 0 6px 16px rgba(40,50,80,0.08);
+  font: 700 13px var(--font-ui); color: var(--wii-ink-2); }
+.cbtn .g { width: 21px; height: 21px; border-radius: 50%; background: var(--wii-ink); color: #fff;
+  display: flex; align-items: center; justify-content: center; font: 800 11px var(--font-ui); }
+.scr[data-chrome="off"] .cch { display: none; }
+.scr[data-chrome="hint"] .cbtn { pointer-events: none; }
+.scr[data-chrome="live"] .cbtn.act { cursor: pointer; }
+.scr[data-chrome="live"] .cbtn.act:hover { background: #fff; color: var(--wii-ink); }
+.scr[data-chrome="live"] .cbtn.act:active { transform: scale(0.95); }
+.cbtn.on { background: var(--wii-ink); color: #fff; }
+.cbtn.on .g { background: #fff; color: var(--wii-ink); }
+
+/* details card (chrome = live, "− Details") */
+.dcard { position: absolute; z-index: 28; left: 30px; bottom: 78px; width: 350px;
+  padding: 16px 19px; border-radius: 18px;
+  background: rgba(255,255,255,0.94);
+  -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 18px 40px rgba(40,50,80,0.16);
+  opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: opacity 0.28s var(--ease-soft), transform 0.28s var(--ease-soft); }
+.dcard.open { opacity: 1; transform: none; }
+.dcard .d-eyebrow { font: 800 10.5px var(--font-ui); letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink, var(--wii-ink-2)); margin-bottom: 7px; }
+.dcard .d-body { font: 500 13.5px/1.5 var(--font-ui); color: var(--wii-ink-2); margin: 0; }
+
+/* ---- LAYOUT: SPOTLIGHT, FLAT CARTRIDGES --------------------------------
+   Vertical rail, side meta, ghost, corner chrome —
+   but wearing the flat material from the Tile + Icons studies: every
+   cartridge gets the hard gradient frame + ink-on-white label (the .fc
+   build, applied via .flat), the pick halo becomes a quiet deep-color
+   outline, and the chrome drops its frost for flat white chips with one
+   neutral contact shadow. */
+.scr[data-layout="cart-flat"] .pring { background: transparent;
+  -webkit-backdrop-filter: none; backdrop-filter: none; border: 0;
+  inset: -8px; border-radius: 27px;
+  box-shadow: 0 0 0 2px rgba(var(--deep), 0.15); }
+.scr[data-layout="cart-flat"] .cbtn { background: #ffffff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), 0 1.5px 2.5px rgba(0,0,0,0.10); }
+.scr[data-layout="cart-flat"] .cbtn.on { background: var(--wii-ink);
+  box-shadow: 0 1.5px 2.5px rgba(0,0,0,0.16); }
+.scr[data-layout="cart-flat"] .dcard { background: #ffffff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.14); }
+
+/* ---- COMPARISON RAIL — four pinned layouts ----------------------------- */
+.sheet.labs { display: flex; gap: 16px; overflow-x: auto; padding: 12px 18px 10px;
+  scrollbar-width: none; }
+.sheet.labs::-webkit-scrollbar { display: none; }
+.sheet.labs .cell { flex: 0 0 244px; cursor: pointer; }
+.mini { width: 244px; height: 153px; overflow: hidden; border-radius: 13px;
+  outline: 2px solid transparent; outline-offset: 3px; transition: outline-color 0.2s ease; }
+.cell.pickedL .mini { outline-color: rgba(111,169,255,0.55); }
+.miniScale { width: 980px; height: 612px; transform: scale(0.249); transform-origin: top left; }
+.miniScale, .miniScale * { pointer-events: none; }
+.mini .scr, .mini .scr * { transition: none !important; animation: none !important; }
+.cellcap { font: 600 12px var(--font-ui); color: var(--wii-ink-2); text-align: center; }
+.cell.pickedL .cellcap { color: var(--wii-ink); }
+
+@media (prefers-reduced-motion: reduce) {
+  .scr *, .scr::after { transition: none !important; animation: none !important; }
+}

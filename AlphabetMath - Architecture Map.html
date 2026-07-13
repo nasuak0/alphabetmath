@@ -1,0 +1,439 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — Architecture Map</title>
+<style>
+  :root{
+    --ink:#1b1b1b; --soft:#555; --faint:#8a8a8a;
+    --rule:#e2e2e2; --paper:#ffffff; --panel:#fafafa;
+    /* category colors */
+    --c-boot:#64748b;   --c-boot-bg:#f1f3f5;
+    --c-shell:#4f46e5;  --c-shell-bg:#eeecfb;
+    --c-comp:#7c3aed;   --c-comp-bg:#f2ecfc;
+    --c-help:#0d9488;   --c-help-bg:#e7f5f3;
+    --c-data:#d97706;   --c-data-bg:#fbf1e2;
+    --c-style:#e11d48;  --c-style-bg:#fcecf0;
+  }
+  *{ box-sizing:border-box; }
+  body{
+    margin:0; background:#eceef1; color:var(--ink);
+    font-family:-apple-system,BlinkMacSystemFont,"Segoe UI",Helvetica,Arial,sans-serif;
+    line-height:1.5;
+  }
+  .sheet{
+    width:1040px; margin:28px auto; background:var(--paper);
+    border:1px solid var(--rule); border-radius:10px;
+    padding:44px 48px 56px;
+  }
+  code, .mono{ font-family:ui-monospace,"SF Mono",Menlo,Consolas,monospace; }
+
+  /* ---- header ---- */
+  .kicker{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11px; letter-spacing:.16em;
+    text-transform:uppercase; color:var(--faint); margin:0 0 8px; }
+  h1{ font-size:27px; margin:0 0 6px; font-weight:750; letter-spacing:-.01em; }
+  h1 .z{ color:var(--c-shell); }
+  .lede{ color:var(--soft); font-size:15px; margin:0; max-width:66ch; }
+  .callout{ margin:18px 0 0; background:#fffaf0; border:1px solid #f0dfb8; border-radius:8px;
+    padding:11px 14px; font-size:13.5px; color:#6b5218; }
+  .callout b{ color:#4a3a10; }
+
+  /* ---- legend ---- */
+  .legend{ display:flex; flex-wrap:wrap; gap:8px 18px; margin:22px 0 0; padding:14px 16px;
+    background:var(--panel); border:1px solid var(--rule); border-radius:8px; }
+  .legend .it{ display:flex; align-items:center; gap:7px; font-size:12.5px; color:var(--soft); }
+  .legend .sw{ width:11px; height:11px; border-radius:3px; }
+
+  /* ---- section headers ---- */
+  h2{ font-size:16px; margin:40px 0 4px; font-weight:700; display:flex; align-items:center; gap:10px; }
+  h2 .idx{ width:22px; height:22px; border-radius:6px; background:var(--ink); color:#fff;
+    font-size:12px; font-weight:700; display:flex; align-items:center; justify-content:center; }
+  h2 .hint{ font-weight:400; color:var(--faint); font-size:13px; }
+  .rule{ border:0; border-top:1px solid var(--rule); margin:6px 0 18px; }
+
+  /* ---- pipeline (boot) ---- */
+  ol.pipe{ list-style:none; counter-reset:p; margin:0; padding:0; }
+  ol.pipe li{ counter-increment:p; position:relative; padding:0 0 16px 40px; }
+  ol.pipe li::before{ content:counter(p); position:absolute; left:0; top:-1px;
+    width:26px; height:26px; border-radius:50%; background:var(--c-boot-bg); color:var(--c-boot);
+    border:1.5px solid var(--c-boot); font-size:12px; font-weight:700; font-family:ui-monospace,monospace;
+    display:flex; align-items:center; justify-content:center; }
+  ol.pipe li:not(:last-child)::after{ content:""; position:absolute; left:12.5px; top:26px; bottom:0;
+    width:1.5px; background:var(--rule); }
+  ol.pipe .t{ font-weight:650; font-size:14px; }
+  ol.pipe .d{ color:var(--soft); font-size:13px; margin-top:1px; }
+
+  /* ---- module tree ---- */
+  .tree{ font-size:13.5px; }
+  .node{ position:relative; }
+  .kids{ margin-left:20px; border-left:1.5px solid var(--rule); padding-left:18px; }
+  .chip{ display:inline-flex; align-items:center; gap:8px; padding:5px 11px; margin:4px 0;
+    border-radius:7px; border:1px solid var(--rule); background:#fff; }
+  .chip .fn{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px; font-weight:600; }
+  .chip .role{ color:var(--soft); font-size:12px; }
+  .chip .dot{ width:9px; height:9px; border-radius:50%; flex:none; }
+  /* category tints on chips */
+  .boot  { border-color:var(--c-boot);  background:var(--c-boot-bg);  } .boot  .dot{ background:var(--c-boot);  }
+  .shell { border-color:var(--c-shell); background:var(--c-shell-bg); } .shell .dot{ background:var(--c-shell); }
+  .comp  { border-color:var(--c-comp);  background:var(--c-comp-bg);  } .comp  .dot{ background:var(--c-comp);  }
+  .help  { border-color:var(--c-help);  background:var(--c-help-bg);  } .help  .dot{ background:var(--c-help);  }
+  .data  { border-color:var(--c-data);  background:var(--c-data-bg);  } .data  .dot{ background:var(--c-data);  }
+  .style { border-color:var(--c-style); background:var(--c-style-bg); } .style .dot{ background:var(--c-style); }
+  .reuse{ font-size:11px; color:var(--faint); font-style:italic; margin-left:2px; }
+
+  /* ---- style chain ---- */
+  .chain{ display:flex; align-items:center; flex-wrap:wrap; gap:8px; }
+  .chain .box{ border:1px solid var(--c-style); background:var(--c-style-bg); border-radius:7px;
+    padding:8px 12px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:12.5px; font-weight:600; }
+  .chain .box small{ display:block; font-family:inherit; font-weight:400; color:var(--soft); font-size:11px; }
+  .chain .arw{ color:var(--faint); font-size:16px; }
+
+  /* ---- owns grid ---- */
+  .grid{ display:grid; grid-template-columns:repeat(3,1fr); gap:12px; }
+  .card{ border:1px solid var(--rule); border-top:3px solid var(--faint); border-radius:8px;
+    padding:12px 14px; background:#fff; }
+  .card h3{ margin:0 0 6px; font-family:ui-monospace,Menlo,Consolas,monospace; font-size:13px; font-weight:700; }
+  .card ul{ margin:0; padding-left:16px; }
+  .card li{ font-size:12.5px; color:var(--soft); margin:3px 0; }
+  .card.boot { border-top-color:var(--c-boot); }
+  .card.shell{ border-top-color:var(--c-shell); }
+  .card.comp { border-top-color:var(--c-comp); }
+  .card.help { border-top-color:var(--c-help); }
+  .card.data { border-top-color:var(--c-data); }
+  .card.style{ border-top-color:var(--c-style); }
+
+  .foot{ margin-top:34px; padding-top:14px; border-top:1px solid var(--rule);
+    display:flex; justify-content:space-between; font-size:12px; color:var(--faint); }
+
+  /* ---- anatomy wireframe ---- */
+  .anat{ display:grid; grid-template-columns:1.5fr 1fr; gap:22px; align-items:start; }
+  .screen{ position:relative; height:320px; background:var(--panel); border:1px solid var(--rule);
+    border-radius:10px; display:flex; overflow:hidden; }
+  .r-rail{ width:66px; flex:none; background:var(--c-comp-bg); border-right:1px solid var(--c-comp);
+    display:flex; flex-direction:column; align-items:center; gap:9px; padding:12px 0; }
+  .r-rail .brand{ width:30px; height:30px; border-radius:8px; background:#fff; border:1px solid var(--c-comp); }
+  .r-rail .ni{ width:34px; height:14px; border-radius:5px; background:#fff; border:1px solid #d9cdf3; }
+  .r-stage{ flex:1; position:relative; padding:14px; }
+  .r-stage .bar{ height:22px; border-radius:7px; background:#fff; border:1px dashed var(--c-shell); margin-bottom:12px; }
+  .r-tiles{ display:grid; grid-template-columns:repeat(3,1fr); gap:10px; }
+  .r-tiles .tl{ height:70px; border-radius:8px; border:1px solid var(--c-shell); background:#fff; }
+  .r-dock{ position:absolute; left:50%; bottom:12px; transform:translateX(-50%);
+    display:flex; gap:6px; padding:6px 10px; background:#fff; border:1px solid var(--c-data);
+    border-radius:20px; }
+  .r-dock i{ width:16px; height:16px; border-radius:5px; background:var(--c-data-bg); border:1px solid var(--c-data); display:block; }
+  .r-modal{ position:absolute; right:14px; top:36px; width:150px; height:150px; background:#fff;
+    border:1.5px solid var(--c-style); border-radius:10px; box-shadow:0 8px 20px rgba(0,0,0,.10); padding:12px; }
+  .r-modal .l1{ height:9px; border-radius:4px; background:var(--c-style-bg); margin:4px 0; }
+  .r-modal .l1.s{ width:60%; }
+  .tag{ position:absolute; width:20px; height:20px; border-radius:50%; color:#fff; font-size:11px;
+    font-weight:700; font-family:ui-monospace,monospace; display:flex; align-items:center; justify-content:center; }
+  .callouts{ margin:0; padding:0; list-style:none; }
+  .callouts li{ position:relative; padding:0 0 14px 34px; }
+  .callouts .n{ position:absolute; left:0; top:0; width:22px; height:22px; border-radius:50%;
+    color:#fff; font-size:12px; font-weight:700; font-family:ui-monospace,monospace;
+    display:flex; align-items:center; justify-content:center; }
+  .callouts .t{ font-weight:650; font-size:13.5px; }
+  .callouts .f{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:11.5px; color:var(--faint); }
+  .callouts .d{ color:var(--soft); font-size:12.5px; margin-top:1px; }
+  .n1,.tag.t1{ background:var(--c-comp); }  .n2,.tag.t2{ background:var(--c-shell); }
+  .n3,.tag.t3{ background:var(--c-data); }  .n4,.tag.t4{ background:var(--c-style); }
+
+  /* ---- per-page stage minis ---- */
+  .screens-grid{ display:grid; grid-template-columns:1fr 1fr; gap:16px; margin-top:8px; }
+  .mini{ border:1px solid var(--rule); border-radius:10px; overflow:hidden; background:var(--panel); }
+  .mini .cap{ display:flex; align-items:baseline; gap:10px; padding:9px 13px; background:#fff; border-bottom:1px solid var(--rule); }
+  .mini .cap b{ font-size:13.5px; }
+  .mini .cap .e{ font-family:ui-monospace,Menlo,Consolas,monospace; font-size:10.5px; color:var(--faint); margin-left:auto; }
+  .mini .body{ display:flex; height:196px; }
+  .mini .rail{ width:26px; flex:none; background:var(--c-comp-bg); border-right:1px solid var(--c-comp); }
+  .mini .stg{ flex:1; padding:11px; position:relative; }
+  .m-hero{ height:24px; border-radius:6px; background:#fff; border:1px dashed var(--c-shell);
+    display:flex; align-items:center; padding:0 8px; margin-bottom:9px; }
+  .m-hero .eb{ font-size:9.5px; font-weight:700; color:var(--c-shell); letter-spacing:.04em; }
+  .seg-mini{ margin-left:auto; display:flex; gap:3px; }
+  .seg-mini i{ display:block; width:20px; height:11px; border-radius:4px; background:var(--c-shell-bg); border:1px solid var(--c-shell); }
+  .rlbl{ font-size:9.5px; font-weight:700; letter-spacing:.05em; text-transform:uppercase; color:var(--soft); margin:7px 0 4px; }
+  .trow{ display:flex; gap:6px; }
+  .sq{ width:34px; height:34px; border-radius:7px; border:1px solid var(--c-shell); background:#fff; flex:none; }
+  .wide{ width:60px; height:30px; border-radius:7px; border:1px solid var(--c-shell); background:#fff; flex:none; }
+  .tgrid{ display:grid; grid-template-columns:repeat(4,1fr); gap:7px; }
+  .tgrid .cell{ height:34px; border-radius:7px; border:1px solid var(--c-shell); background:#fff; }
+  /* lab */
+  .lab-body{ display:flex; gap:12px; height:calc(100% - 33px); }
+  .lab-rail{ display:flex; flex-direction:column; gap:5px; align-items:center; justify-content:center; }
+  .cart-m{ width:42px; height:20px; border-radius:6px; border:1px solid var(--c-data); background:var(--c-data-bg); }
+  .cart-s{ width:66px; height:40px; border-radius:7px; border:1.5px solid var(--c-data); background:#fff; }
+  .lab-meta{ flex:1; padding-top:8px; }
+  .lab-meta .tt{ height:9px; width:62%; border-radius:4px; background:#e2e2e2; margin-bottom:9px; }
+  .lab-meta .ds{ height:6px; border-radius:3px; background:#ededed; margin:5px 0; }
+  .lab-corner{ position:absolute; bottom:9px; display:flex; gap:5px; }
+  .lab-corner.l{ left:11px; } .lab-corner.r{ right:11px; }
+  .cbtn-m{ width:30px; height:12px; border-radius:5px; background:#fff; border:1px solid var(--rule); }
+  /* notes */
+  .nrow{ display:flex; align-items:center; gap:7px; padding:6px 7px; border:1px solid var(--rule);
+    border-radius:7px; background:#fff; margin-bottom:6px; }
+  .nrow .g{ width:17px; height:17px; border-radius:5px; flex:none; background:linear-gradient(155deg,#f5a623,#d97706); }
+  .nrow .ln{ flex:1; height:6px; border-radius:3px; background:#ececec; }
+  .nrow .bd{ width:26px; height:11px; border-radius:5px; flex:none; background:var(--c-style-bg); border:1px solid var(--c-style); }
+  .reader-card{ position:absolute; right:10px; top:36px; width:120px; height:148px; background:#fff;
+    border:1.5px solid var(--c-style); border-radius:9px; box-shadow:0 8px 18px rgba(0,0,0,.10); overflow:hidden; }
+  .reader-card .rh{ height:38px; background:var(--c-style-bg); border-bottom:1px solid var(--c-style); }
+  .reader-card .rp{ padding:9px 10px; }
+  .reader-card .rp i{ display:block; height:5px; border-radius:3px; background:#ececec; margin:5px 0; }
+  .reader-card .rp i.s{ width:55%; }
+  .mini-note{ font-size:11px; color:var(--faint); margin:7px 0 0; font-style:italic; }
+
+  @media print{
+    body{ background:#fff; } .sheet{ margin:0; border:0; width:auto; border-radius:0; padding:0; }
+    h2, .card, ol.pipe li, .chip{ break-inside:avoid; }
+  }
+</style>
+</head>
+<body>
+<div class="sheet">
+
+  <!-- ===== HEADER ===== -->
+  <p class="kicker">Architecture Map · AlphabetMath · Mobile / index.html</p>
+  <h1><span class="z">index.html</span> — how the app boots and fits together</h1>
+  <p class="lede">One page showing what <code>index.html</code> loads, the order it runs in, which file imports which, and what each file is responsible for. All app code lives in <code>zmath/</code>.</p>
+
+  <div class="callout">
+    <b>Note:</b> this <code>index.html</code> uses <b>real ES modules</b> (<code>import</code> / <code>export</code>) resolved by a small in-page loader — <i>not</i> the old "Babel script tags + <code>window.X = X</code> globals" setup. Files share code by importing it directly, not through <code>window</code>.
+  </div>
+
+  <!-- ===== LEGEND ===== -->
+  <div class="legend">
+    <span class="it"><span class="sw" style="background:var(--c-boot)"></span> Boot &amp; runtime</span>
+    <span class="it"><span class="sw" style="background:var(--c-shell)"></span> App shell</span>
+    <span class="it"><span class="sw" style="background:var(--c-comp)"></span> Components</span>
+    <span class="it"><span class="sw" style="background:var(--c-help)"></span> UI helpers</span>
+    <span class="it"><span class="sw" style="background:var(--c-data)"></span> Content / data</span>
+    <span class="it"><span class="sw" style="background:var(--c-style)"></span> Styles</span>
+  </div>
+
+  <!-- ===== A: ANATOMY ===== -->
+  <h2><span class="idx">A</span> Anatomy of the screen <span class="hint">four regions, and the file that draws each</span></h2>
+  <hr class="rule" />
+  <div class="anat">
+    <div class="screen">
+      <div class="r-rail">
+        <div class="brand"></div>
+        <div class="ni"></div><div class="ni"></div><div class="ni"></div><div class="ni"></div>
+        <span class="tag t1" style="left:8px; top:8px;">1</span>
+      </div>
+      <div class="r-stage">
+        <div class="bar"></div>
+        <div class="r-tiles">
+          <div class="tl"></div><div class="tl"></div><div class="tl"></div>
+          <div class="tl"></div><div class="tl"></div><div class="tl"></div>
+        </div>
+        <span class="tag t2" style="left:14px; top:44px;">2</span>
+        <div class="r-modal">
+          <span class="tag t3" style="left:-9px; top:-9px;">3</span>
+          <div class="l1" style="width:40%"></div>
+          <div class="l1"></div><div class="l1"></div><div class="l1 s"></div>
+        </div>
+      </div>
+    </div>
+    <ul class="callouts">
+      <li><span class="n n1">1</span><span class="t">Left rail</span> · <span class="f">components.jsx</span><div class="d">Brand mark, profile, nav buttons. Drag the grip to expand 90→248px.</div></li>
+      <li><span class="n n2">2</span><span class="t">Stage</span> · <span class="f">app.jsx</span><div class="d">The active screen renders here — Home / Topics / Projects / Notes / About. Tiles come from <code>Tile</code>.</div></li>
+      <li><span class="n n3">3</span><span class="t">Modal</span> · <span class="f">components.jsx</span><div class="d">Opens centered when a tile is clicked; closes on backdrop, ×, or Escape.</div></li>
+    </ul>
+  </div>
+
+  <h3 style="font-size:14px; margin:26px 0 4px; font-weight:700;">What fills the stage on each page</h3>
+  <p style="color:var(--soft); font-size:13px; margin:0 0 14px;">The rail (1) stays put; only region 2 — the stage — changes per page.</p>
+  <div class="screens-grid">
+
+    <!-- HOME -->
+    <div class="mini">
+      <div class="cap"><b>Home</b> <span class="e">app.jsx · Tile · data.js</span></div>
+      <div class="body">
+        <div class="rail"></div>
+        <div class="stg">
+          <div class="m-hero"><span class="eb">MENU</span></div>
+          <div class="rlbl">Topics</div>
+          <div class="trow"><div class="sq"></div><div class="sq"></div><div class="sq"></div><div class="sq"></div><div class="sq"></div></div>
+          <div class="rlbl">Projects</div>
+          <div class="trow"><div class="wide"></div><div class="wide"></div><div class="wide"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- LIBRARY (Topics) -->
+    <div class="mini">
+      <div class="cap"><b>Library</b> <span style="font-size:11px;color:var(--faint)">(Topics screen)</span> <span class="e">app.jsx · Tile · data.js</span></div>
+      <div class="body">
+        <div class="rail"></div>
+        <div class="stg">
+          <div class="m-hero"><span class="eb">LIBRARY</span><span class="seg-mini"><i></i><i></i><i></i></span></div>
+          <div class="tgrid">
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+            <div class="cell"></div><div class="cell"></div><div class="cell"></div><div class="cell"></div>
+          </div>
+          <p class="mini-note">Segmented filter: All / Pure / Applied → uniform tile grid.</p>
+        </div>
+      </div>
+    </div>
+
+    <!-- LAB (Projects) -->
+    <div class="mini">
+      <div class="cap"><b>Lab</b> <span style="font-size:11px;color:var(--faint)">(Projects screen)</span> <span class="e">lab-screen.jsx · lab-scenes.js</span></div>
+      <div class="body">
+        <div class="rail"></div>
+        <div class="stg">
+          <div class="m-hero"><span class="eb">LAB</span></div>
+          <div class="lab-body">
+            <div class="lab-rail">
+              <div class="cart-m"></div><div class="cart-m"></div>
+              <div class="cart-s"></div>
+              <div class="cart-m"></div><div class="cart-m"></div>
+            </div>
+            <div class="lab-meta">
+              <div class="tt"></div>
+              <div class="ds"></div><div class="ds"></div><div class="ds" style="width:70%"></div>
+            </div>
+          </div>
+          <div class="lab-corner l"><div class="cbtn-m"></div><div class="cbtn-m"></div></div>
+          <div class="lab-corner r"><div class="cbtn-m"></div><div class="cbtn-m"></div></div>
+        </div>
+      </div>
+    </div>
+
+    <!-- NOTEBOOK -->
+    <div class="mini">
+      <div class="cap"><b>Notebook</b> <span style="font-size:11px;color:var(--faint)">(Notes screen)</span> <span class="e">app.jsx · NoteBlock · data.js</span></div>
+      <div class="body">
+        <div class="rail"></div>
+        <div class="stg">
+          <div class="m-hero"><span class="eb">NOTEBOOK</span></div>
+          <div class="nrow"><span class="g"></span><span class="ln"></span><span class="bd"></span></div>
+          <div class="nrow"><span class="g"></span><span class="ln"></span><span class="bd"></span></div>
+          <div class="nrow"><span class="g"></span><span class="ln"></span><span class="bd"></span></div>
+          <div class="reader-card">
+            <div class="rh"></div>
+            <div class="rp"><i style="width:45%"></i><i></i><i></i><i class="s"></i></div>
+          </div>
+          <p class="mini-note">Click a row → article card slides in from the right (prose + exercises).</p>
+        </div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ===== B: BOOT SEQUENCE ===== -->
+  <h2><span class="idx">B</span> Boot sequence <span class="hint">what index.html does, top to bottom</span></h2>
+  <hr class="rule" />
+  <ol class="pipe">
+    <li><span class="t">Load the one stylesheet</span><div class="d"><code>zmath/styles.css</code> — the brain owns the full CSS list; the shell links only this file.</div></li>
+    <li><span class="t">Register the import map</span><div class="d">Points the bare names <code>react</code> and <code>react-dom</code> at esm.sh — the same specifiers the Vite build uses, so source files are identical for both readers.</div></li>
+    <li><span class="t">Load Babel standalone</span><div class="d">From unpkg (pinned). Used by the loader to compile JSX in the browser.</div></li>
+    <li><span class="t">Run the graph loader on <code>./zmath/main.jsx</code></span><div class="d">Walks the import graph: fetches each relative module, Babel-transforms its JSX, rewrites relative imports to blob URLs, then imports the entry. Bare names fall through to the import map.</div></li>
+    <li><span class="t"><code>main.jsx</code> mounts the app</span><div class="d">Sets the document title, wraps in an error boundary, and <code>createRoot(#root).render(&lt;App/&gt;)</code>.</div></li>
+  </ol>
+
+  <!-- ===== C: MODULE TREE ===== -->
+  <h2><span class="idx">C</span> Module tree <span class="hint">who imports whom (react &amp; react-dom omitted — every file uses them)</span></h2>
+  <hr class="rule" />
+  <div class="tree">
+    <div class="node">
+      <span class="chip shell"><span class="dot"></span><span class="fn">main.jsx</span><span class="role">entry · mounts to #root</span></span>
+      <div class="kids">
+        <div class="node">
+          <span class="chip shell"><span class="dot"></span><span class="fn">app.jsx</span><span class="role">App shell + the 5 screens</span></span>
+          <div class="kids">
+            <div class="node">
+              <span class="chip comp"><span class="dot"></span><span class="fn">components.jsx</span><span class="role">Sidebar · Tile · Modal · NoteBlock</span></span>
+              <div class="kids">
+                <span class="chip help"><span class="dot"></span><span class="fn">icons.jsx</span><span class="role">Icon · GlyphIcon · CapsuleIcon</span></span><br />
+                <span class="chip help"><span class="dot"></span><span class="fn">coverart.jsx</span><span class="role">CoverArt — generative tile art</span></span><br />
+                <span class="chip data"><span class="dot"></span><span class="fn">data.js</span><span class="role">topics · projects · notes · lookup maps</span></span><br />
+                <span class="chip help"><span class="dot"></span><span class="fn">figures-registry.js</span><span class="role">ZFIGURES registry</span></span><br />
+                <span class="chip help"><span class="dot"></span><span class="fn">figures.jsx</span><span class="role">registers 8 note figures</span> <span class="reuse">→ figures-registry.js</span></span>
+              </div>
+            </div>
+            <span class="chip help"><span class="dot"></span><span class="fn">icons.jsx</span> <span class="reuse">(reused)</span></span><br />
+            <span class="chip help"><span class="dot"></span><span class="fn">coverart.jsx</span> <span class="reuse">(reused)</span></span><br />
+            <span class="chip data"><span class="dot"></span><span class="fn">data.js</span> <span class="reuse">(reused)</span></span><br />
+            <div class="node">
+              <span class="chip comp"><span class="dot"></span><span class="fn">lab-screen.jsx</span><span class="role">LabSpotlight — the Projects screen</span></span>
+              <div class="kids">
+                <span class="chip data"><span class="dot"></span><span class="fn">data.js</span> <span class="reuse">(reused)</span></span><br />
+                <span class="chip data"><span class="dot"></span><span class="fn">lab-scenes.js</span><span class="role">LabScenes — animated scenes</span></span><br />
+                <span class="chip data"><span class="dot"></span><span class="fn">lab-cover-art.js</span><span class="role">cover defs + ids</span></span>
+              </div>
+            </div>
+            <span class="chip comp"><span class="dot"></span><span class="fn">tweaks-panel.jsx</span><span class="role">useTweaks + Tweaks UI controls</span></span>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- ===== D: STYLE CHAIN ===== -->
+  <h2><span class="idx">D</span> Stylesheet chain <span class="hint">styles.css @imports these in order — foundation first, overrides last</span></h2>
+  <hr class="rule" />
+  <div class="chain">
+    <div class="box">styles.css<small>the one entry</small></div>
+    <span class="arw">→</span>
+    <div class="box">tokens.css<small>colors · type · glass</small></div>
+    <span class="arw">→</span>
+    <div class="box">app.css<small>layout · components</small></div>
+    <span class="arw">→</span>
+    <div class="box">lab.css<small>Projects/Lab screen</small></div>
+    <span class="arw">→</span>
+    <div class="box">tweaks-overrides.css<small>last-word overrides</small></div>
+  </div>
+
+  <!-- ===== E: WHAT EACH FILE OWNS ===== -->
+  <h2><span class="idx">E</span> What each file owns <span class="hint">"I want to change X → edit Y"</span></h2>
+  <hr class="rule" />
+  <div class="grid">
+    <div class="card data">
+      <h3>data.js</h3>
+      <ul><li>All topics, projects, notes</li><li>Copy, colors-by-name, symbols</li><li>Lookup maps + home layout</li></ul>
+    </div>
+    <div class="card shell">
+      <h3>app.jsx</h3>
+      <ul><li>App shell + page state</li><li>The 5 screens (Home/Topics/Projects/Notes/About)</li><li>Wires in the Tweaks panel</li></ul>
+    </div>
+    <div class="card comp">
+      <h3>components.jsx</h3>
+      <ul><li>Sidebar (left rail)</li><li>Tile · Modal · NoteBlock</li><li>NAV config</li></ul>
+    </div>
+    <div class="card help">
+      <h3>icons.jsx</h3>
+      <ul><li>Line icons (Icon)</li><li>Glossy glyphs (GlyphIcon)</li><li>Capsule nav icons</li></ul>
+    </div>
+    <div class="card help">
+      <h3>coverart.jsx</h3>
+      <ul><li>Generative SVG tile art</li><li>Per-topic scenes</li><li>Deterministic, no images</li></ul>
+    </div>
+    <div class="card comp">
+      <h3>lab-screen.jsx</h3>
+      <ul><li>The Projects / Lab screen</li><li>Its own scaled canvas</li><li>Uses lab-scenes + lab-cover-art</li></ul>
+    </div>
+    <div class="card style">
+      <h3>tokens.css</h3>
+      <ul><li>Palette · type · glass</li><li>Radii · shadow · motion</li><li>Design foundation</li></ul>
+    </div>
+    <div class="card style">
+      <h3>app.css</h3>
+      <ul><li>All screen layout</li><li>Component styling · fit modes</li><li>Motion fallbacks</li></ul>
+    </div>
+    <div class="card boot">
+      <h3>index.html</h3>
+      <ul><li>Loads styles + React runtime</li><li>Runs the module loader</li><li>#root mount point</li></ul>
+    </div>
+  </div>
+
+  <div class="foot">
+    <span>AlphabetMath · architecture map</span>
+    <span class="mono">AlphabetMath - Mobile/ · read alongside GUIDE.md &amp; CLAUDE.md</span>
+  </div>
+
+</div>
+</body>
+</html>

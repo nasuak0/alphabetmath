@@ -1,0 +1,164 @@
+/* ============================================================
+   Lab spotlight screen — ported from explore/flat-lab.css
+   (the Design Lab study, "Spotlight — flat cartridges" layout,
+   Composed material). Values are VERBATIM from the study; the
+   only change is scoping: every rule lives under .lab-spot so
+   nothing leaks into the rest of the app.
+   The screen keeps the study's exact 980×612 canvas and is
+   scaled to fit the Lab tray area by lab-screen.jsx.
+   ============================================================ */
+
+/* ---- page plumbing (app-side, not from the study) ----------------------
+   .lab-spot fills the Lab page column below the hero; the stage centers
+   the scaled screen. 84px bottom padding keeps the screen's corner chrome
+   clear of the floating dock (same clearance the tile grids use). */
+.lab-spot { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
+.lab-spot .lab-stage { flex: 1 1 auto; min-height: 0; position: relative;
+  display: flex; align-items: center; justify-content: center;
+  padding: 0; }
+
+/* hero scale wrapper — JS sets scale + width/height */
+.lab-spot .heroScale { position: relative; }
+.lab-spot .heroScale .scr { transform-origin: top left; }
+
+/* ---- THE SCREEN (study-exact: 980×612, r34, paper ground) -------------- */
+.lab-spot .scr { width: 980px; height: 612px; position: relative; overflow: hidden; isolation: isolate;
+  border-radius: 34px;
+  background: radial-gradient(120% 90% at 50% -10%, var(--wii-bg-1), var(--wii-bg-2) 55%, var(--wii-bg-3) 100%);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 26px 60px rgba(40,50,80,0.12),
+    inset 0 0 0 1px rgba(0,0,0,0.045), inset 0 2px 6px rgba(255,255,255,0.9);
+  font-family: var(--font-ui); user-select: none; -webkit-user-select: none; }
+
+/* ---- GHOST ART (selected project's world washing the whole paper) -----
+   Reference: full-bleed, very faint backdrop behind ALL UI — atmosphere,
+   not an object. Art is oversized ~150% and center-cropped; opacity keeps
+   it a watermark so chips/meta stay legible. */
+.lab-spot .ghost { position: absolute; z-index: 1; inset: 0;
+  pointer-events: none; filter: saturate(1.2); }
+.lab-spot .scr[data-ghost="bold"] .ghost { opacity: 0.09; }
+.lab-spot .ghost svg { width: 100%; height: 100%; display: block; animation: labGhostIn 0.55s var(--ease-smooth); }
+@keyframes labGhostIn { from { opacity: 0; transform: scale(1.015); } }
+
+/* ---- PROJECT TILE ------------------------------------------------------ */
+.lab-spot .ptile { position: relative; flex: 0 0 auto; cursor: pointer;
+  transition: width 0.32s var(--ease-bounce), height 0.32s var(--ease-bounce); }
+.lab-spot .pring { position: absolute; inset: -9px; border-radius: 31px; opacity: 0; z-index: 0;
+  background: rgba(255,255,255,0.6);
+  -webkit-backdrop-filter: blur(14px) saturate(160%); backdrop-filter: blur(14px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.75);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 18px 40px rgba(40,50,80,0.13),
+    inset 0 2px 4px rgba(255,255,255,0.9);
+  transition: opacity 0.25s var(--ease-smooth); }
+.lab-spot .ptile.sel .pring { opacity: 1; }
+.lab-spot .pcard { position: relative; z-index: 1; width: 100%; height: 100%; overflow: hidden;
+  border-radius: 24px; border: 3px solid #fff;
+  background: linear-gradient(160deg, var(--c1), var(--c2));
+  box-shadow: 0 2px 5px rgba(0,0,0,0.10), 0 10px 22px rgba(40,50,80,0.10); }
+.lab-spot .coverwrap { position: absolute; inset: 0; }
+.lab-spot .coverwrap svg { width: 100%; height: 100%; display: block; }
+.lab-spot .psym { position: absolute; top: 10px; left: 10px; z-index: 2; min-width: 26px; height: 21px; padding: 0 6px;
+  border-radius: 8px 4px 8px 4px; background: #fff; display: flex; align-items: center; justify-content: center;
+  font: 800 11px var(--font-display); box-shadow: 0 1px 2px rgba(40,50,80,0.18); }
+.lab-spot .psym span { background: linear-gradient(150deg, var(--c1), var(--c2));
+  -webkit-background-clip: text; background-clip: text; color: transparent; }
+
+/* Composed / flat cartridge material: hard gradient frame, white card,
+   ink art — words live inside the drawing. Frame on ::before ABOVE the
+   glass pick ring (z 0) and below the white card (z 1). */
+.lab-spot .ptile.fc { box-sizing: border-box; border-radius: 15px; padding: 2.5px;
+  transition: width 0.32s var(--ease-bounce), height 0.32s var(--ease-bounce),
+    padding 0.32s var(--ease-bounce), border-radius 0.32s var(--ease-bounce); }
+.lab-spot .ptile.fc.sel { border-radius: 19px; padding: 5px; }
+.lab-spot .ptile.fc::before { content: ""; position: absolute; inset: 0; z-index: 1; border-radius: inherit;
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(var(--deep),0.18); }
+.lab-spot .ptile.fc .pcard { border: 0; border-radius: 12.5px; background: #fff; box-shadow: none;
+  transition: border-radius 0.32s var(--ease-bounce); }
+.lab-spot .ptile.fc.sel .pcard { border-radius: 14px; }
+/* mini badge = the big badge shrunk, same cut-corner shape */
+.lab-spot .ptile.fc .psym { top: 6px; left: 6px; min-width: 23px; height: 18px; padding: 0 5px;
+  border-radius: 8px 3.5px 7.5px 3.5px; font-size: 9.5px;
+  box-shadow: inset 0 0 0 1px rgba(var(--deep),0.16);
+  transition: min-width 0.32s var(--ease-bounce), height 0.32s var(--ease-bounce),
+    padding 0.32s var(--ease-bounce),
+    font-size 0.32s var(--ease-bounce), top 0.32s var(--ease-bounce),
+    left 0.32s var(--ease-bounce), border-radius 0.32s var(--ease-bounce); }
+.lab-spot .ptile.fc.sel .psym { top: 6px; left: 6px; min-width: 44px; height: 36px; padding: 0 9px;
+  border-radius: 16px 7px 15px 7px; font-size: 0.92rem; }
+
+/* "open" pulse on A / tapping the selected tile */
+.lab-spot .ptile.pulse .pcard, .lab-spot .ptile.pulse .pring,
+.lab-spot .ptile.fc.pulse::before { animation: labOpenPulse 0.45s var(--ease-bounce); }
+@keyframes labOpenPulse { 0% { transform: scale(1); } 35% { transform: scale(1.055); } 100% { transform: scale(1); } }
+
+/* ---- SPOTLIGHT: VERTICAL RAIL ------------------------------------------ */
+.lab-spot .railv { position: absolute; z-index: 10; left: 38px; top: 0; bottom: 0; }
+.lab-spot .railcol { position: absolute; left: 0; top: 0; display: flex; flex-direction: column; gap: 14px;
+  align-items: flex-start; transition: transform 0.38s var(--ease-smooth); }
+
+/* ---- METADATA (title · stat pill · desc) ------------------------------- */
+.lab-spot .meta { position: absolute; z-index: 20; display: flex; flex-direction: column; gap: 15px;
+  align-items: flex-start; animation: labMetaIn 0.4s var(--ease-smooth); }
+@keyframes labMetaIn { from { opacity: 0; transform: translateX(12px); } }
+@keyframes labMetaInV { from { opacity: 0; transform: translateY(calc(-50% + 12px)); } to { transform: translateY(-50%); } }
+.lab-spot .scr[data-layout="cart-flat"] .meta { left: 460px; top: 50%; transform: translateY(-50%);
+  max-width: 500px; animation-name: labMetaInV; }
+.lab-spot .m-title { font: 700 42px/1.04 var(--font-display); color: var(--wii-ink); letter-spacing: -0.5px;
+  text-wrap: balance; }
+.lab-spot .m-pills { display: flex; gap: 10px; flex-wrap: wrap; }
+.lab-spot .spill { display: inline-flex; white-space: nowrap; align-items: center; gap: 9px; padding: 6px 7px 6px 15px;
+  border-radius: 999px; background: var(--wii-ink); color: #fff;
+  font: 700 13px var(--font-ui); letter-spacing: 0.01em;
+  box-shadow: 0 2px 5px rgba(44,36,32,0.22); }
+.lab-spot .spill b { background: #fff; color: var(--wii-ink); border-radius: 999px; padding: 4px 13px;
+  font-weight: 700; font-variant-numeric: tabular-nums; }
+.lab-spot .m-desc { font: 500 15.5px/1.55 var(--font-ui); color: var(--wii-ink-2); max-width: 46ch; margin: 0;
+  text-wrap: pretty; }
+
+/* ---- CORNER BUTTON HINTS ----------------------------------------------- */
+.lab-spot .cch { position: absolute; z-index: 30; bottom: 24px; display: flex; gap: 10px; }
+.lab-spot .cch.l { left: 30px; } .lab-spot .cch.r { right: 30px; }
+.lab-spot .cbtn { display: flex; align-items: center; gap: 8px; padding: 8px 15px 8px 9px; border: 0;
+  border-radius: 999px; background: rgba(255,255,255,0.88); cursor: default;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.05), 0 1px 2px rgba(0,0,0,0.05), 0 6px 16px rgba(40,50,80,0.08);
+  font: 700 13px var(--font-ui); color: var(--wii-ink-2); }
+.lab-spot .cbtn .g { width: 21px; height: 21px; border-radius: 50%; background: var(--wii-ink); color: #fff;
+  display: flex; align-items: center; justify-content: center; font: 800 11px var(--font-ui); }
+.lab-spot .scr[data-chrome="live"] .cbtn.act { cursor: pointer; }
+.lab-spot .scr[data-chrome="live"] .cbtn.act:hover { background: #fff; color: var(--wii-ink); }
+.lab-spot .scr[data-chrome="live"] .cbtn.act:active { transform: scale(0.95); }
+.lab-spot .cbtn.on { background: var(--wii-ink); color: #fff; }
+.lab-spot .cbtn.on .g { background: #fff; color: var(--wii-ink); }
+
+/* details card ("− Details") */
+.lab-spot .dcard { position: absolute; z-index: 28; left: 30px; bottom: 78px; width: 350px;
+  padding: 16px 19px; border-radius: 18px;
+  background: rgba(255,255,255,0.94);
+  -webkit-backdrop-filter: blur(16px) saturate(160%); backdrop-filter: blur(16px) saturate(160%);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow: 0 2px 6px rgba(0,0,0,0.05), 0 18px 40px rgba(40,50,80,0.16);
+  opacity: 0; transform: translateY(12px); pointer-events: none;
+  transition: opacity 0.28s var(--ease-soft), transform 0.28s var(--ease-soft); }
+.lab-spot .dcard.open { opacity: 1; transform: none; }
+.lab-spot .dcard .d-eyebrow { font: 800 10.5px var(--font-ui); letter-spacing: 0.12em; text-transform: uppercase;
+  color: var(--ink, var(--wii-ink-2)); margin-bottom: 7px; }
+.lab-spot .dcard .d-body { font: 500 13.5px/1.5 var(--font-ui); color: var(--wii-ink-2); margin: 0; }
+
+/* ---- cart-flat chrome overrides (flat white chips, quiet deep outline) -- */
+.lab-spot .scr[data-layout="cart-flat"] .pring { background: transparent;
+  -webkit-backdrop-filter: none; backdrop-filter: none; border: 0;
+  inset: -8px; border-radius: 27px;
+  box-shadow: 0 0 0 2px rgba(var(--deep), 0.15); }
+.lab-spot .scr[data-layout="cart-flat"] .cbtn { background: #ffffff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(0,0,0,0.08), 0 1.5px 2.5px rgba(0,0,0,0.10); }
+.lab-spot .scr[data-layout="cart-flat"] .cbtn.on { background: var(--wii-ink);
+  box-shadow: 0 1.5px 2.5px rgba(0,0,0,0.16); }
+.lab-spot .scr[data-layout="cart-flat"] .dcard { background: #ffffff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 1px solid rgba(0,0,0,0.08);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.14); }
+
+@media (prefers-reduced-motion: reduce) {
+  .lab-spot .scr *, .lab-spot .scr::after { transition: none !important; animation: none !important; }
+}

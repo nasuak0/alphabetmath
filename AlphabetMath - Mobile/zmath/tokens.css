@@ -1,0 +1,295 @@
+/* ============================================================
+   Zmath Design System — colors_and_type.css
+   Foundation tokens: color, type, radii, glass, elevation, motion.
+
+   Synthesis:
+   - PALETTE + GLASS borrowed from Zperiod (warm paper, pastel
+     subject colors, frosted glass, dark primary buttons).
+   - LAYOUT MOOD borrowed from the iisu emulator's 3DS / Wii U
+     home-menu (glossy tiles, dock, floating glass blobs).
+   - CORNERS / SPECULAR LIGHT borrowed from Apple "Liquid Glass".
+
+   Load this once, then use the CSS vars + .helper classes below.
+   Fonts load from Google Fonts (see @import at top, or link in HTML).
+   ============================================================ */
+
+@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
+
+:root {
+  /* ---------------------------------------------------------
+     1. SURFACES  (warm paper foundation, from Zperiod)
+     --------------------------------------------------------- */
+  --paper:           #fdfbf7;  /* app background — warm off-white   */
+  --paper-2:         #f7f3ec;  /* slightly deeper paper band        */
+  --surface:         #f5efe6;  /* default resting tile / element bg */
+  --surface-hover:   #ebe0d0;  /* tile hover                        */
+  --surface-sunken:  #ebe5dc;  /* lanthanide row / inset wells      */
+  --ink-button:      #111827;  /* primary (dark) button fill        */
+  --ink-button-2:    #1f2937;  /* primary button hover              */
+
+  /* ---------------------------------------------------------
+     2. TEXT  (warm near-black, from Zperiod)
+     --------------------------------------------------------- */
+  --fg1:        #2c2420;  /* primary text — warm espresso          */
+  --fg2:        #5d544f;  /* secondary text                        */
+  --fg3:        #9ca3af;  /* muted / captions / placeholders       */
+  --fg-accent:  #78350f;  /* warm highlight (amber-brown)          */
+  --fg-on-dark: #ffffff;  /* text on dark buttons / dark tiles      */
+
+  /* ---------------------------------------------------------
+     3. HAIRLINES & SCRIMS
+     --------------------------------------------------------- */
+  --hairline:        rgba(0, 0, 0, 0.06);
+  --hairline-strong: rgba(0, 0, 0, 0.10);
+  --scrim:           rgba(0, 0, 0, 0.04);  /* sunk pill / chip wells */
+  --scrim-hover:     rgba(0, 0, 0, 0.07);
+
+  /* ---------------------------------------------------------
+     4. BRAND SPECTRUM  (the pixel-Z logo gradient)
+        purple → violet → blue → cyan → teal → green
+     --------------------------------------------------------- */
+  --z-purple: #380c6d;
+  --z-violet: #4c209e;
+  --z-indigo: #4053bc;
+  --z-blue:   #3384dc;
+  --z-cyan:   #05a3df;
+  --z-teal:   #19c3c0;
+  --z-green:  #3dd290;
+  --brand-spectrum: linear-gradient(135deg,
+      #380c6d 0%, #4c209e 22%, #3384dc 52%, #05a3df 70%, #19c3c0 85%, #3dd290 100%);
+  /* compact 2-stop version for small marks */
+  --brand-grad: linear-gradient(135deg, #4c209e 0%, #05a3df 60%, #3dd290 100%);
+
+  /* ---------------------------------------------------------
+     5. SEMANTIC ACCENTS  (from Zperiod's UI accents)
+     --------------------------------------------------------- */
+  --blue:    #007aff;  /* focus rings, links, active search        */
+  --indigo:  #667eea;  /* premium / featured                       */
+  --violet:  #764ba2;
+  --green:   #10b981;  /* success, toggles ON                      */
+  --green-2: #059669;
+  --amber:   #d97706;  /* warm tool accent                         */
+  --red:     #dc2626;  /* danger / destructive                     */
+  --discord: #5865f2;
+  --reddit:  #ff4500;
+
+  /* premium gradient (Zperiod settings ambient) */
+  --premium-grad: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+
+  /* ---------------------------------------------------------
+     6. SUBJECT PASTELS  (Zperiod periodic categories,
+        re-purposed as math topic colors). Each pairs a soft
+        fill with a deep readable ink.
+     --------------------------------------------------------- */
+  --rose:   #ffcccc;  --rose-ink:   #b51f57;  /* e.g. Algebra        */
+  --peach:  #ffe5cc;  --peach-ink:  #bd5410;  /* e.g. Geometry       */
+  --butter: #fff2cc;  --butter-ink: #a76c06;  /* e.g. Calculus       */
+  --sky:    #d9e2f3;  --sky-ink:    #2a3db0;  /* e.g. Linear Algebra */
+  --mint:   #d1e7dd;  --mint-ink:   #0e7d64;  /* e.g. Number Theory  */
+  --sage:   #e2f0d9;  --sage-ink:   #338530;  /* e.g. Combinatorics  */
+  --lemon:  #ffffcc;  --lemon-ink:  #9a6e00;  /* e.g. Probability    */
+  --lilac:  #e0ccff;  --lilac-ink:  #5e2ba6;  /* e.g. Topology       */
+  --blush:  #fce4d6;  --blush-ink:  #c4441f;  /* e.g. Analysis       */
+  --coral:  #fddddd;  --coral-ink:  #b5232a;  /* e.g. Logic          */
+
+  /* ---------------------------------------------------------
+     7. GLASS  (frosted "liquid glass" layers)
+     --------------------------------------------------------- */
+  --glass-bg:        rgba(255, 255, 255, 0.65);
+  --glass-bg-strong: rgba(255, 255, 255, 0.85);
+  --glass-bg-nav:    rgba(255, 255, 255, 0.72);
+  --glass-border:    rgba(255, 255, 255, 0.55);
+  --glass-blur:      blur(24px) saturate(180%);
+  --glass-blur-lg:   blur(40px) saturate(200%);
+  /* specular top highlight that sells the "liquid glass" look */
+  --glass-spec: inset 0 2px 4px rgba(255, 255, 255, 0.8);
+
+  /* ---------------------------------------------------------
+     8. RADII  (large, continuous — Liquid Glass / home menu)
+     --------------------------------------------------------- */
+  --r-tile:   28px;   /* home-menu tiles, nav bar                */
+  --r-card:   18px;   /* standard content cards                  */
+  --r-modal:  24px;   /* dialogs / sheets                        */
+  --r-button: 20px;   /* buttons                                 */
+  --r-chip:   999px;  /* pills, chips, toggles, dock icons       */
+  --r-icon:   12px;   /* small square icon badges                */
+  --r-field:  16px;   /* inputs / textareas                      */
+
+  /* ---------------------------------------------------------
+     9. ELEVATION  (soft, low-contrast; warm shadows)
+     --------------------------------------------------------- */
+  --shadow-xs:   0 0.5px 1px rgba(0, 0, 0, 0.04);
+  --shadow-card: 0 1px 3px rgba(0, 0, 0, 0.03), 0 8px 24px rgba(0, 0, 0, 0.06);
+  --shadow-pop:  0 2px 6px rgba(0, 0, 0, 0.04), 0 12px 32px rgba(0, 0, 0, 0.09);
+  --shadow-tile: 0 1px 3px rgba(0, 0, 0, 0.04), 0 10px 28px rgba(0, 0, 0, 0.08), var(--glass-spec);
+  --shadow-float:0 12px 40px rgba(0, 0, 0, 0.12), 0 4px 12px rgba(0, 0, 0, 0.06);
+  --shadow-nav:  0 4px 24px rgba(0, 0, 0, 0.06), 0 1px 2px rgba(0, 0, 0, 0.04);
+  --shadow-lift: 0 15px 30px -5px rgba(0, 0, 0, 0.15);  /* element hover */
+  --ring-focus:  0 0 0 2px rgba(0, 122, 255, 0.25);
+
+  /* ---------------------------------------------------------
+     10. SPACING SCALE  (4px base)
+     --------------------------------------------------------- */
+  --sp-1: 4px;   --sp-2: 8px;   --sp-3: 12px;  --sp-4: 16px;
+  --sp-5: 20px;  --sp-6: 24px;  --sp-7: 32px;  --sp-8: 40px;
+  --sp-9: 56px;  --sp-10: 72px;
+  --gutter: 24px;          /* default page gutter */
+  --tile-gap: 18px;        /* gap between home-menu tiles */
+
+  /* ---------------------------------------------------------
+     11. MOTION  (bouncy + soft — defining Zperiod feel)
+     --------------------------------------------------------- */
+  --ease-bounce: cubic-bezier(0.34, 1.56, 0.64, 1);  /* pill sliders, pops */
+  --ease-smooth: cubic-bezier(0.25, 1, 0.5, 1);       /* cards, hovers      */
+  --ease-soft:   cubic-bezier(0.16, 1, 0.3, 1);       /* menus appearing    */
+  --ease-snap:   cubic-bezier(0.25, 0.46, 0.45, 0.94);
+  --dur-fast:    0.15s;
+  --dur-base:    0.25s;
+  --dur-slow:    0.35s;
+
+  /* ---------------------------------------------------------
+     12. TYPE FAMILIES
+     --------------------------------------------------------- */
+  --font-ui:      "Inter", -apple-system, BlinkMacSystemFont, sans-serif;
+  --font-display: "Baloo 2", "Fredoka", "Inter", sans-serif;  /* chunky console display */
+  --font-display-soft: "Fredoka", "Inter", sans-serif;        /* softer rounded alt */
+  --font-mono:    "JetBrains Mono", ui-monospace, "SF Mono", monospace;
+
+  /* ---------------------------------------------------------
+     13. WHITE DOTTED GROUND + glass-nav chrome  (Zmath home-menu)
+        Main aesthetic: clean white paper + faint dot grid, with
+        frosted-white .glass-nav panels floating on top. Pastels
+        (§6) survive as accents in tiles / badges only.
+     --------------------------------------------------------- */
+  --wii-bg-1:   #ffffff;   /* white ground (top)                */
+  --wii-bg-2:   #fcfdff;   /* white ground (mid)                */
+  --wii-bg-3:   #f6f7fb;   /* faintest cool wash (bottom)        */
+  --wii-panel:  var(--glass-bg-nav);          /* rgba(255,255,255,.72) */
+  --wii-panel-strong: var(--glass-bg-strong); /* rgba(255,255,255,.85) */
+  --wii-edge:   var(--glass-border);          /* translucent white edge */
+  --wii-edge-2: rgba(0,0,0,0.09);             /* hairline for chip borders */
+  --wii-ink:    #2c2420;   /* warm espresso text (Zperiod)      */
+  --wii-ink-2:  #6a615b;   /* secondary warm grey               */
+  --wii-dot:    rgba(0,0,0,0.07);             /* visible dot grid */
+  --shadow-wii: 0 1px 3px rgba(0,0,0,0.04), 0 10px 28px rgba(0,0,0,0.07);
+  --shadow-wii-lift: 0 2px 6px rgba(0,0,0,0.06), 0 22px 46px rgba(0,0,0,0.14);
+  --spec-strong: inset 0 2px 4px rgba(255,255,255,0.9);
+}
+
+/* ============================================================
+   SEMANTIC TYPE  — apply as classes or copy the rules.
+   Display/menu headers use Fredoka (rounded, playful — iisu).
+   Everything functional uses Inter (Zperiod).
+   ============================================================ */
+
+.t-display {                       /* hero / menu wordmark */
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(2.4rem, 5vw, 3.5rem);
+  line-height: 1.04;
+  letter-spacing: -0.01em;
+  color: var(--fg1);
+}
+
+.t-h1 {                            /* page title (e.g. "Chemistry Tools") */
+  font-family: var(--font-display);
+  font-weight: 600;
+  font-size: clamp(1.9rem, 3.5vw, 2.75rem);
+  line-height: 1.1;
+  letter-spacing: -0.01em;
+  color: var(--fg1);
+}
+
+.t-h2 {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 1.5rem;
+  line-height: 1.2;
+  letter-spacing: -0.02em;
+  color: var(--fg1);
+}
+
+.t-h3 {
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 1.08rem;
+  line-height: 1.3;
+  letter-spacing: -0.01em;
+  color: var(--fg1);
+}
+
+.t-eyebrow {                       /* "GRADE 9–12 …" tracked caps */
+  font-family: var(--font-ui);
+  font-weight: 700;
+  font-size: 0.82rem;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--fg2);
+}
+
+.t-body {
+  font-family: var(--font-ui);
+  font-weight: 450;
+  font-size: 1rem;
+  line-height: 1.55;
+  color: var(--fg2);
+}
+
+.t-body-strong {
+  font-family: var(--font-ui);
+  font-weight: 600;
+  font-size: 1rem;
+  line-height: 1.5;
+  color: var(--fg1);
+}
+
+.t-small {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 0.85rem;
+  line-height: 1.45;
+  color: var(--fg2);
+}
+
+.t-caption {
+  font-family: var(--font-ui);
+  font-weight: 500;
+  font-size: 0.72rem;
+  letter-spacing: 0.02em;
+  color: var(--fg3);
+}
+
+.t-mono {                          /* equations, values, the LCD readout */
+  font-family: var(--font-mono);
+  font-weight: 500;
+  font-size: 0.95rem;
+  letter-spacing: -0.01em;
+  font-variant-numeric: tabular-nums;
+  color: var(--fg1);
+}
+
+/* Gradient text using the brand spectrum (use sparingly — wordmarks). */
+.t-brand-grad {
+  background: var(--brand-spectrum);
+  -webkit-background-clip: text;
+  background-clip: text;
+  color: transparent;
+}
+
+/* ============================================================
+   GLASS HELPERS
+   ============================================================ */
+.glass {
+  background: var(--glass-bg);
+  -webkit-backdrop-filter: var(--glass-blur);
+  backdrop-filter: var(--glass-blur);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-card), var(--glass-spec);
+}
+.glass-nav {
+  background: var(--glass-bg-nav);
+  -webkit-backdrop-filter: blur(20px) saturate(180%);
+  backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid var(--glass-border);
+  box-shadow: var(--shadow-nav);
+}

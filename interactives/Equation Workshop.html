@@ -1,0 +1,321 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Equation Workshop — Zmath</title>
+<link rel="stylesheet" href="../AlphabetMath - Mobile/zmath/tokens.css" />
+<link rel="stylesheet" href="lab.css" />
+<style>
+  .lab { --accent: #3dd290; --accent-ink: #0e7d64; --accent-2: #159c7e; }
+  body { --amb-1: rgba(60,210,176,0.12); --amb-2: rgba(120,140,240,0.07); }
+
+  /* the worksheet "paper" */
+  .sheet { position: relative; padding: 26px 26px 30px; background:
+      linear-gradient(180deg, rgba(255,255,255,0.85), rgba(255,255,255,0.7)); }
+  .sheet-head { display: none; }   /* shown only in print */
+
+  .prob-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 13px; }
+  @media (max-width: 620px) { .prob-grid { grid-template-columns: 1fr; } }
+
+  .prob {
+    position: relative; border-radius: var(--r-card); padding: 14px 15px 13px;
+    background: rgba(255,255,255,0.75); border: 1px solid var(--hairline);
+    box-shadow: var(--shadow-xs), inset 0 1px 1px rgba(255,255,255,0.7);
+  }
+  .prob-eq { display: flex; align-items: center; gap: 10px; font-family: var(--font-mono);
+    font-weight: 600; font-size: 1.06rem; color: var(--wii-ink); }
+  .pn { flex-shrink: 0; width: 26px; height: 26px; border-radius: 8px 4px 7px 4px;
+    display: inline-flex; align-items: center; justify-content: center;
+    background: linear-gradient(135deg, var(--accent), var(--accent-2)); color: #fff;
+    font-family: var(--font-display); font-weight: 800; font-size: 0.82rem;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.45), 0 2px 5px rgba(0,0,0,0.12); }
+
+  .prob-sol { margin-top: 12px; padding-top: 12px; border-top: 1px dashed var(--hairline-strong);
+    display: none; }
+  .prob.open .prob-sol { display: block; animation: solIn 0.3s var(--ease-smooth) both; }
+  @keyframes solIn { from { opacity: 0; transform: translateY(-4px); } to { opacity: 1; transform: none; } }
+
+  .step { display: flex; align-items: baseline; gap: 10px; padding: 3px 0; }
+  .step .note { flex: 1; font-size: 0.76rem; color: var(--wii-ink-2); font-weight: 500; }
+  .step .line { font-family: var(--font-mono); font-weight: 600; font-size: 0.92rem; color: var(--wii-ink);
+    white-space: nowrap; }
+  .ans { margin-top: 9px; display: inline-flex; align-items: center; gap: 7px;
+    padding: 6px 13px; border-radius: 999px; font-family: var(--font-mono); font-weight: 700; font-size: 0.95rem;
+    background: rgba(61,210,144,0.16); color: var(--accent-ink); border: 1px solid rgba(61,210,144,0.3); }
+  .ans .lbl { font-family: var(--font-ui); font-size: 0.66rem; letter-spacing: 0.08em; text-transform: uppercase; opacity: 0.8; }
+
+  .reveal-btn { margin-top: 10px; font-family: inherit; font-weight: 700; font-size: 0.76rem;
+    color: var(--accent-ink); background: none; border: none; cursor: pointer; padding: 2px 0;
+    display: inline-flex; align-items: center; gap: 5px; }
+  .reveal-btn svg { width: 13px; height: 13px; transition: transform var(--dur-base) var(--ease-bounce); }
+  .prob.open .reveal-btn svg { transform: rotate(90deg); }
+  .prob.open .reveal-btn .show-tx { display: none; }
+  .reveal-btn .hide-tx { display: none; }
+  .prob.open .reveal-btn .hide-tx { display: inline; }
+
+  /* fractions */
+  .frac { display: inline-flex; flex-direction: column; vertical-align: middle; text-align: center; margin: 0 2px; line-height: 1; }
+  .frac .fn { padding: 0 4px 1px; border-bottom: 1.6px solid currentColor; font-size: 0.84em; }
+  .frac .fd { padding: 1px 4px 0; font-size: 0.84em; }
+
+  .meta-row { display: flex; align-items: center; gap: 10px; padding: 4px 2px 16px; }
+  .meta-row .count-tag { font-size: 0.8rem; color: var(--wii-ink-2); font-weight: 600; }
+  .meta-row .count-tag b { color: var(--wii-ink); }
+
+  @media print {
+    body::before, body::after { display: none; }
+    .lab-top, .ctrl-col, .lineage, .reveal-btn, .lab-intro { display: none !important; }
+    .lab { max-width: none; padding: 0; }
+    .panel { box-shadow: none; border: none; border-radius: 0; background: #fff; }
+    .split { display: block; }
+    .sheet { padding: 0; background: #fff; }
+    .sheet-head { display: block; margin-bottom: 18px; border-bottom: 2px solid #111; padding-bottom: 10px; }
+    .sheet-head h2 { font-family: var(--font-display); margin: 0 0 4px; font-size: 1.4rem; }
+    .sheet-head .nm { display: flex; justify-content: space-between; font-size: 0.85rem; color: #444; margin-top: 8px; }
+    .prob { break-inside: avoid; box-shadow: none; border: 1px solid #ddd; background: #fff; }
+    .prob-sol { display: none !important; }
+    .prob.open .prob-sol { display: none !important; }
+    .lab-head { margin-bottom: 0; }
+    .accent-lip::before { display: none; }
+    @page { margin: 16mm; }
+  }
+</style>
+</head>
+<body>
+<div class="lab">
+  <div class="lab-top">
+    <a class="back-chip" href="index.html">
+      <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M15 18l-6-6 6-6"/></svg>
+      Interactives
+    </a>
+    <span class="lab-spacer"></span>
+    <span class="level-badge level-foundations" id="level-badge"><span class="dot"></span>Foundations</span>
+  </div>
+
+  <header class="lab-head">
+    <div class="lab-eyebrow"><span class="strand-sym">Eq</span>Solving Equations</div>
+    <h1 class="lab-title">Equation Workshop</h1>
+    <p class="lab-intro">A solver's gym. Generate a fresh set at the right level, reveal the working one balanced step at a time, then print a clean worksheet — answers off for class, on for marking.</p>
+  </header>
+
+  <div class="panel accent-lip">
+    <div class="split">
+      <div class="stage-col">
+        <div class="sheet">
+          <div class="sheet-head">
+            <h2 id="print-title">Linear Equations — Foundations</h2>
+            <div class="nm"><span>Name: ________________________</span><span>Date: ____________</span></div>
+          </div>
+          <div class="meta-row">
+            <span class="count-tag"><b id="count-n">8</b> problems · solve for x</span>
+          </div>
+          <div class="prob-grid" id="grid"></div>
+        </div>
+      </div>
+
+      <div class="ctrl-col">
+        <div class="ctrl-group">
+          <div class="ctrl-label">Level</div>
+          <div class="seg2" id="level-seg">
+            <div class="seg2-ind" id="lv-ind"></div>
+            <button class="on" data-lv="0">Foundations</button>
+            <button data-lv="1">Core</button>
+            <button data-lv="2">Pure</button>
+          </div>
+          <p class="ctrl-hint" id="lv-hint">One- and two-step equations. Whole-number answers — the IM Grade&nbsp;8 starting line.</p>
+        </div>
+
+        <div class="ctrl-group">
+          <div class="ctrl-label">Number of problems <span class="val" id="count-val">8</span></div>
+          <input type="range" class="rng" id="count" min="4" max="12" step="2" value="8" />
+        </div>
+
+        <div class="toggle-row">
+          <div class="tr-tx">Answer key<small>Reveal every solution at once</small></div>
+          <label class="switch"><input type="checkbox" id="key" /><span class="track"></span><span class="knob"></span></label>
+        </div>
+
+        <button class="btn btn-accent full" id="new-set">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 12a9 9 0 0 1 15-6.7L21 8"/><path d="M21 3v5h-5"/><path d="M21 12a9 9 0 0 1-15 6.7L3 16"/><path d="M3 21v-5h5"/></svg>
+          New set
+        </button>
+        <button class="btn btn-primary full" id="print">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9V2h12v7"/><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"/><rect x="6" y="14" width="12" height="8" rx="1"/></svg>
+          Print worksheet
+        </button>
+
+        <div class="intuition">
+          <div class="ic"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v18"/><path d="M5 7h14l-3 6H8L5 7Z"/><path d="M7 21h10"/></svg></div>
+          <p><b>An equation is a balance.</b> Whatever you do to one side, do to the other and it stays level. Every step here keeps both pans equal until x stands alone.</p>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <div class="lineage">
+    <span class="lin-lbl">Built from</span>
+    <span class="src">IM Grade 8 · Unit 4</span>
+    <span class="src">Sadler · Understanding Pure Mathematics</span>
+    <span class="src">Reese · algebra &amp; equations</span>
+  </div>
+</div>
+
+<script>
+(function () {
+  // ---------- helpers ----------
+  const rand = (a, b) => Math.floor(Math.random() * (b - a + 1)) + a;
+  const coin = () => Math.random() < 0.5;
+  const choice = a => a[Math.floor(Math.random() * a.length)];
+  const frac = (n, d) => `<span class="frac"><span class="fn">${n}</span><span class="fd">${d}</span></span>`;
+  const sgn = (n, sym) => (n >= 0 ? ` + ${n}` : ` − ${Math.abs(n)}`) + (sym ? sym : '');
+
+  // ---------- problem generators (each returns {eq, steps:[{note,line}], ans}) ----------
+  function genFoundations() {
+    const type = choice(['add', 'mul', 'two', 'two']);
+    if (type === 'add') {
+      const x0 = rand(3, 19), p = rand(2, 14);
+      if (coin()) {
+        const q = x0 + p;
+        return { eq: `x + ${p} = ${q}`, ans: `x = ${x0}`, steps: [
+          { note: `Subtract ${p} from both sides`, line: `x = ${q} − ${p}` },
+          { note: 'Simplify', line: `x = ${x0}` }] };
+      } else {
+        const q = x0 - p;
+        return { eq: `x − ${p} = ${q}`, ans: `x = ${x0}`, steps: [
+          { note: `Add ${p} to both sides`, line: `x = ${q} + ${p}` },
+          { note: 'Simplify', line: `x = ${x0}` }] };
+      }
+    }
+    if (type === 'mul') {
+      const m = rand(2, 9), x0 = rand(2, 12), q = m * x0;
+      return { eq: `${m}x = ${q}`, ans: `x = ${x0}`, steps: [
+        { note: `Divide both sides by ${m}`, line: `x = ${q} ÷ ${m}` },
+        { note: 'Simplify', line: `x = ${x0}` }] };
+    }
+    // two-step
+    const m = rand(2, 6), x0 = rand(2, 9), p = rand(1, 12), plus = coin();
+    const q = m * x0 + (plus ? p : -p);
+    return { eq: `${m}x${plus ? ` + ${p}` : ` − ${p}`} = ${q}`, ans: `x = ${x0}`, steps: [
+      { note: `${plus ? 'Subtract' : 'Add'} ${p} ${plus ? 'from' : 'to'} both sides`, line: `${m}x = ${m * x0}` },
+      { note: `Divide both sides by ${m}`, line: `x = ${x0}` }] };
+  }
+
+  function genCore() {
+    const type = choice(['both', 'both', 'bracket']);
+    if (type === 'both') {
+      const m = rand(4, 8), n = rand(1, m - 2), x0 = rand(2, 9), p = rand(1, 10);
+      const d = m - n, r = d * x0 + p;
+      const steps = [
+        { note: `Subtract ${n}x from both sides`, line: `${d === 1 ? '' : d}x + ${p} = ${r}` },
+        { note: `Subtract ${p} from both sides`, line: `${d === 1 ? '' : d}x = ${r - p}` }];
+      if (d !== 1) steps.push({ note: `Divide both sides by ${d}`, line: `x = ${x0}` });
+      else steps[steps.length - 1].line = `x = ${x0}`;
+      return { eq: `${m}x + ${p} = ${n}x + ${r}`, ans: `x = ${x0}`, steps };
+    }
+    // bracket
+    const m = rand(2, 6), x0 = rand(2, 9), p = rand(1, 8), q = m * (x0 + p);
+    return { eq: `${m}(x + ${p}) = ${q}`, ans: `x = ${x0}`, steps: [
+      { note: `Divide both sides by ${m}`, line: `x + ${p} = ${x0 + p}` },
+      { note: `Subtract ${p} from both sides`, line: `x = ${x0}` }] };
+  }
+
+  function genPure() {
+    const type = choice(['frac', 'overk', 'overk', 'literal']);
+    if (type === 'frac') {
+      const k = rand(2, 5), q = rand(2, 8), p = rand(1, 9), x0 = q * k - p;
+      return { eq: `${frac(`x + ${p}`, k)} = ${q}`, ans: `x = ${x0}`, steps: [
+        { note: `Multiply both sides by ${k}`, line: `x + ${p} = ${q * k}` },
+        { note: `Subtract ${p} from both sides`, line: `x = ${x0}` }] };
+    }
+    if (type === 'overk') {
+      const k = rand(2, 5), p = rand(1, 8), q = rand(p + 1, 11), x0 = k * (q - p);
+      return { eq: `${frac('x', k)} + ${p} = ${q}`, ans: `x = ${x0}`, steps: [
+        { note: `Subtract ${p} from both sides`, line: `${frac('x', k)} = ${q - p}` },
+        { note: `Multiply both sides by ${k}`, line: `x = ${x0}` }] };
+    }
+    // literal — make x the subject (Sadler / Reese flavour)
+    const m = rand(2, 6), c = rand(2, 12);
+    return { eq: `y = ${m}x + ${c}`, sub: true, ans: `x = ${frac(`y − ${c}`, m)}`, steps: [
+      { note: `Subtract ${c} from both sides`, line: `y − ${c} = ${m}x` },
+      { note: `Divide both sides by ${m}`, line: `x = ${frac(`y − ${c}`, m)}` }] };
+  }
+
+  const GENS = [genFoundations, genCore, genPure];
+  const LV = [
+    { name: 'Foundations', cls: 'level-foundations', title: 'Linear Equations — Foundations',
+      hint: 'One- and two-step equations. Whole-number answers — the IM Grade&nbsp;8 starting line.' },
+    { name: 'Core', cls: 'level-core', title: 'Linear Equations — Core',
+      hint: 'Variables on both sides and brackets. The bridge from Grade&nbsp;8 toward formal algebra.' },
+    { name: 'Pure', cls: 'level-pure', title: 'Linear Equations — Pure',
+      hint: 'Fractional equations and rearranging a subject — Sadler &amp; Reese territory.' },
+  ];
+
+  // ---------- state ----------
+  let level = 0, count = 8;
+  const grid = document.getElementById('grid');
+
+  function build() {
+    grid.innerHTML = '';
+    for (let i = 0; i < count; i++) {
+      const p = GENS[level]();
+      const solve = p.sub ? 'make x the subject' : 'solve for x';
+      const card = document.createElement('div');
+      card.className = 'prob';
+      const stepsHtml = p.steps.map(s => `<div class="step"><span class="line">${s.line}</span><span class="note">${s.note}</span></div>`).join('');
+      card.innerHTML =
+        `<div class="prob-eq"><span class="pn">${i + 1}</span><span>${p.eq}</span></div>
+         <div class="prob-sol">${stepsHtml}
+           <div class="ans"><span class="lbl">ans</span> ${p.ans}</div>
+         </div>
+         <button class="reveal-btn">
+           <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg>
+           <span class="show-tx">Show working</span><span class="hide-tx">Hide working</span>
+         </button>`;
+      card.querySelector('.reveal-btn').addEventListener('click', () => card.classList.toggle('open'));
+      grid.appendChild(card);
+    }
+    if (document.getElementById('key').checked) grid.querySelectorAll('.prob').forEach(c => c.classList.add('open'));
+    document.getElementById('count-n').textContent = count;
+  }
+
+  // ---------- level segmented control ----------
+  const seg = document.getElementById('level-seg'), ind = document.getElementById('lv-ind');
+  const segBtns = [...seg.querySelectorAll('button')];
+  function sizeInd() {
+    const b = segBtns[level];
+    ind.style.width = b.offsetWidth + 'px';
+    ind.style.transform = `translateX(${b.offsetLeft - 5}px)`;
+  }
+  function setLevel(lv) {
+    level = lv;
+    segBtns.forEach((b, i) => b.classList.toggle('on', i === lv));
+    sizeInd();
+    const L = LV[lv];
+    const badge = document.getElementById('level-badge');
+    badge.className = 'level-badge ' + L.cls;
+    badge.innerHTML = `<span class="dot"></span>${L.name}`;
+    document.getElementById('lv-hint').innerHTML = L.hint;
+    document.getElementById('print-title').textContent = L.title;
+    build();
+  }
+  seg.addEventListener('click', e => { const b = e.target.closest('button'); if (b) setLevel(+b.dataset.lv); });
+
+  // ---------- other controls ----------
+  document.getElementById('count').addEventListener('input', e => {
+    count = +e.target.value; document.getElementById('count-val').textContent = count; build();
+  });
+  document.getElementById('key').addEventListener('change', e => {
+    grid.querySelectorAll('.prob').forEach(c => c.classList.toggle('open', e.target.checked));
+  });
+  document.getElementById('new-set').addEventListener('click', build);
+  document.getElementById('print').addEventListener('click', () => window.print());
+
+  // init
+  build();
+  requestAnimationFrame(sizeInd);
+  window.addEventListener('resize', sizeInd);
+})();
+</script>
+</body>
+</html>

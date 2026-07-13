@@ -1,0 +1,178 @@
+/* ============================================================
+   Design icons — flat-material study (Home, rail icon)
+   One capsule icon, four stacked <use> layers of the same glyph:
+     .edge   deep hard outline (FLAT only — molded shell edge)
+     .rim    thick vertical-gradient stroke (the colored shell)
+     .ink    white interior fill (the inset label)
+     .recess hairline deep line at the white/rim boundary (FLAT only)
+   Material driven by data-mat on the wrapper:
+     glossy = CURRENT app icon (CapsuleIcon depth:raised) — gradient rim
+              + 1px deep extrude + colored glow + dark micro-shadow.
+     flat   = molded-cartridge recipe — hard rim, recess hairline,
+              ONE neutral contact shadow. No glow, no extrude.
+   Home palette from zmath NAV: #6a8cff → #2f54c8, glow rgba(50,90,220,.42).
+   ============================================================ */
+
+.icoWrap { display: inline-grid; place-items: center; }
+
+.cap { display: block; overflow: visible; }
+.cap use { stroke-linejoin: round; stroke-linecap: round; }
+.cap .rim    { fill: none; stroke: url(#icg); stroke-width: 4.2; }
+.cap .ink    { fill: #ffffff; stroke: none; }
+.cap .edge   { display: none; }  /* retired — read as a grey nested ring, not flat */
+.cap .recess { display: none; }  /* retired — flat = same build as glossy, no extras */
+
+/* GLOSSY (current) — hide the flat-only layers, run the app's exact 3-shadow
+   chain (CapsuleIcon depth:raised) — fixed px at every size, like the app */
+[data-mat="glossy"] .cap .edge,
+[data-mat="glossy"] .cap .recess { display: none; }
+[data-mat="glossy"] .cap {
+  filter: drop-shadow(0 1px 0 #2f54c8)
+          drop-shadow(0 2px 3.5px rgba(50,90,220,0.42))
+          drop-shadow(0 0.5px 0.5px rgba(20,12,40,0.22)); }
+
+/* FLAT — one neutral contact shadow, nothing else (tile: 0 1.5px 3px @.16) */
+[data-mat="flat"] .cap {
+  filter: drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.16)); }
+
+/* SOFT — two nested paths, like the tile's frame + label boxes:
+   frame = gradient-filled outer silhouette, ink = white inset with its own
+   radii, contours concentric at 2.1u. Same flat shadow recipe. */
+.cap .soft-frame { fill: url(#icg); stroke: none; }
+.cap .soft-ink   { fill: #ffffff; stroke: none; }
+.cap.softv { display: none; }
+[data-mat="soft"] .cap.softv { display: block;
+  filter: drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.16)); }
+[data-mat="soft"] .cap.sharpv { display: none; }
+.sheet.three { grid-template-columns: repeat(3, 1fr); }
+
+/* ---- OPTIONS RAIL (icons) — frosted bar inherited from .compare; cells are
+   tappable active·idle pairs at real rail size */
+.sheet.icons { display: flex; gap: 16px; overflow-x: auto; overflow-y: visible;
+  padding: 10px 18px 8px 12px;
+  scrollbar-width: none; -ms-overflow-style: none; }
+.sheet.icons::-webkit-scrollbar { display: none; height: 0; width: 0; }
+.sheet.icons .cell { flex: 0 0 auto; gap: 0; cursor: default; }
+
+/* render sizes — glossy shadows scale with size so the material keeps its
+   depth when zoomed (the app renders at 36px; s76/s92 are zoom + hero) */
+.s36 .cap { width: 36px; height: 36px; }
+.s76 .cap { width: 76px; height: 76px; }
+.s92 .cap { width: 92px; height: 92px; }
+[data-mat="glossy"] .s76 .cap {
+  filter: drop-shadow(0 1px 0 #2f54c8)
+          drop-shadow(0 2px 7px rgba(80,120,255,0.42)); }
+[data-mat="glossy"] .s92 .cap {
+  filter: drop-shadow(0 1px 0 #2f54c8)
+          drop-shadow(0 2.5px 8.5px rgba(80,120,255,0.42)); }
+
+/* ---- LAB (Projects beaker) — teal palette from the app NAV; same builds ---- */
+[data-ico="lab"] .cap .rim { stroke: url(#icg-lab); }
+[data-ico="lab"][data-mat="glossy"] .cap {
+  filter: drop-shadow(0 1px 0 #159c7e)
+          drop-shadow(0 2px 3.5px rgba(30,190,160,0.42))
+          drop-shadow(0 0.5px 0.5px rgba(20,12,40,0.22)); }
+[data-ico="lab"][data-mat="glossy"] .s76 .cap {
+  filter: drop-shadow(0 1px 0 #159c7e)
+          drop-shadow(0 2px 7px rgba(60,220,190,0.42)); }
+[data-ico="lab"][data-mat="glossy"] .s92 .cap {
+  filter: drop-shadow(0 1px 0 #159c7e)
+          drop-shadow(0 2.5px 8.5px rgba(60,220,190,0.42)); }
+/* Soft is Home-only for now — its segment disables when Lab is selected */
+.seg button:disabled { opacity: 0.38; pointer-events: none; }
+
+/* ---- TOPICS (open book) — purple palette from the app NAV; same builds ---- */
+[data-ico="book"] .cap .rim { stroke: url(#icg-book); }
+[data-ico="book"][data-mat="glossy"] .cap {
+  filter: drop-shadow(0 1px 0 #6a36b5)
+          drop-shadow(0 2px 3.5px rgba(120,60,200,0.42))
+          drop-shadow(0 0.5px 0.5px rgba(20,12,40,0.22)); }
+[data-ico="book"][data-mat="glossy"] .s76 .cap {
+  filter: drop-shadow(0 1px 0 #6a36b5)
+          drop-shadow(0 2px 7px rgba(140,90,230,0.42)); }
+[data-ico="book"][data-mat="glossy"] .s92 .cap {
+  filter: drop-shadow(0 1px 0 #6a36b5)
+          drop-shadow(0 2.5px 8.5px rgba(140,90,230,0.42)); }
+
+/* ---- NOTES (notebook sheet) — orange palette from the app NAV; same builds ---- */
+[data-ico="note"] .cap .rim { stroke: url(#icg-note); }
+[data-ico="note"][data-mat="glossy"] .cap {
+  filter: drop-shadow(0 1px 0 #e0701f)
+          drop-shadow(0 2px 3.5px rgba(240,130,30,0.42))
+          drop-shadow(0 0.5px 0.5px rgba(20,12,40,0.22)); }
+[data-ico="note"][data-mat="glossy"] .s76 .cap {
+  filter: drop-shadow(0 1px 0 #e0701f)
+          drop-shadow(0 2px 7px rgba(250,160,60,0.42)); }
+[data-ico="note"][data-mat="glossy"] .s92 .cap {
+  filter: drop-shadow(0 1px 0 #e0701f)
+          drop-shadow(0 2.5px 8.5px rgba(250,160,60,0.42)); }
+
+/* ---- NOTES lined build — dog-eared sheet, gradient rim + fold, two solid
+   ruled bars (gradients die on zero-height bboxes, so the bars are solid).
+   Same flat recipe: one neutral contact shadow, no glow, no extrude. */
+.cap.linedv { display: none; }
+[data-mat="lined"] .cap.linedv { display: block;
+  filter: drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.16)); }
+[data-mat="lined"] .cap.sharpv { display: none; }
+/* Notes: Flat now renders the Lined (dog-eared ruled sheet) build — Lined is
+   merged into Flat, so the plain-sheet flat glyph is replaced here. */
+[data-ico="note"][data-mat="flat"] .cap.linedv { display: block;
+  filter: drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.16)); }
+[data-ico="note"][data-mat="flat"] .cap.sharpv { display: none; }
+.linedv .ld-rim  { fill: none; stroke: url(#icg-note); stroke-width: 4.2; }
+.linedv .ld-ink  { fill: #ffffff; stroke: none; }
+.linedv .ld-fold { fill: none; stroke: url(#icg-note-seam); stroke-width: 2.2;
+  stroke-linecap: round; stroke-linejoin: round; }
+
+/* ---- ABOUT (user) — pink palette from the app NAV; same builds ---- */
+[data-ico="user"] .cap .rim { stroke: url(#icg-user); }
+[data-ico="user"][data-mat="glossy"] .cap {
+  filter: drop-shadow(0 1px 0 #c2326b)
+          drop-shadow(0 2px 3.5px rgba(220,70,130,0.42))
+          drop-shadow(0 0.5px 0.5px rgba(20,12,40,0.22)); }
+[data-ico="user"][data-mat="glossy"] .s76 .cap {
+  filter: drop-shadow(0 1px 0 #c2326b)
+          drop-shadow(0 2px 7px rgba(240,110,160,0.42)); }
+[data-ico="user"][data-mat="glossy"] .s92 .cap {
+  filter: drop-shadow(0 1px 0 #c2326b)
+          drop-shadow(0 2.5px 8.5px rgba(240,110,160,0.42)); }
+
+/* ---- SEARCH (magnifier) — near-black palette from the app dock; same builds ---- */
+[data-ico="search"] .cap .rim { stroke: url(#icg-search); }
+[data-ico="search"][data-mat="glossy"] .cap {
+  filter: drop-shadow(0 1px 0 #0c0c10)
+          drop-shadow(0 2px 3.5px rgba(20,20,30,0.40))
+          drop-shadow(0 0.5px 0.5px rgba(20,12,40,0.22)); }
+[data-ico="search"][data-mat="glossy"] .s76 .cap {
+  filter: drop-shadow(0 1px 0 #0c0c10)
+          drop-shadow(0 2px 7px rgba(40,44,60,0.42)); }
+[data-ico="search"][data-mat="glossy"] .s92 .cap {
+  filter: drop-shadow(0 1px 0 #0c0c10)
+          drop-shadow(0 2.5px 8.5px rgba(40,44,60,0.42)); }
+
+/* ---- CHIP — the app's active-state white squircle (data-capsule="plain") */
+.chip { display: grid; place-items: center; background: #ffffff;
+  box-shadow: 0 5px 14px rgba(40,50,80,0.13), 0 1px 3px rgba(40,50,80,0.09),
+    inset 0 1px 1px rgba(255,255,255,0.95); }
+.chip.real { width: 62px; height: 62px; border-radius: 20px; }   /* exact app size */
+.chip.zoom { width: 132px; height: 132px; border-radius: 42px; }
+.chip.hero { width: 158px; height: 158px; border-radius: 50px; }
+
+/* ---- RAIL CONTEXT — a frosted mini-panel like the app rail, holding the
+   icon in both real states: active (on chip) and idle (bare) */
+.railctx { display: flex; align-items: center; justify-content: center; gap: 18px;
+  padding: 14px 18px; border-radius: 22px;
+  background: var(--glass-bg-nav, rgba(244,246,251,0.72));
+  border: 1px solid var(--glass-border, rgba(255,255,255,0.65));
+  box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 8px 20px rgba(40,50,80,0.07);
+  -webkit-backdrop-filter: blur(20px) saturate(160%); backdrop-filter: blur(20px) saturate(160%); }
+.railctx .slot { width: 62px; height: 62px; display: grid; place-items: center; }
+.rc-cap { font-family: var(--font-mono); font-size: 0.68rem; color: var(--wii-ink-2);
+  text-align: center; margin-top: 8px; }
+
+/* hero stage column bits */
+.heroStage { display: grid; place-items: center; padding: 10px 0; row-gap: 30px; }
+.heroStage .rc-cap { margin-top: -16px; }
+.compare .cell { align-items: center; text-align: center; }
+.compare .cell .clabel { align-items: center; }
+.compare .zoomrow { display: grid; place-items: center; padding: 6px 0 2px; }

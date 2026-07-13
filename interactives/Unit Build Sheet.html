@@ -1,0 +1,666 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Unit Build Sheet — Zmath</title>
+<link rel="stylesheet" href="../_ds/zmath-design-system-83609af3-61ea-4dba-8e86-2691f934e213/colors_and_type.css" />
+<link rel="stylesheet" href="../_ds/zmath-design-system-83609af3-61ea-4dba-8e86-2691f934e213/ui_kits/website/kit.css" />
+<style>
+  /* override kit's fixed-height app shell so a long sheet scrolls normally */
+  html, body { height: auto; overflow: visible; }
+  body {
+    background:
+      radial-gradient(34% 30% at 16% 12%, rgba(200,170,255,0.30), transparent 70%),
+      radial-gradient(32% 28% at 86% 10%, rgba(255,205,180,0.28), transparent 70%),
+      radial-gradient(38% 32% at 10% 88%, rgba(170,235,205,0.28), transparent 70%),
+      radial-gradient(34% 28% at 90% 92%, rgba(255,200,210,0.24), transparent 70%),
+      var(--paper);
+    background-attachment: fixed;
+    min-height: 100vh;
+  }
+  body::after {            /* faint dot grid */
+    content: ""; position: fixed; inset: 0; z-index: 0; pointer-events: none;
+    background-image: radial-gradient(rgba(0,0,0,0.05) 1px, transparent 1.4px);
+    background-size: 22px 22px;
+  }
+
+  /* ---- shell ---- */
+  .wrap { position: relative; z-index: 1; max-width: 1280px; margin: 0 auto; padding: 86px 28px 90px; }
+  .topnav { position: fixed; top: 14px; left: 50%; transform: translateX(-50%);
+    width: calc(100% - 28px); max-width: 1320px; height: 56px; display: flex; align-items: center; gap: 14px;
+    padding: 0 18px; border-radius: var(--r-tile); background: var(--glass-bg-nav);
+    -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+    border: 1px solid var(--glass-border); box-shadow: var(--shadow-nav); z-index: 100; }
+  .topnav .brand { display: flex; align-items: center; gap: 9px; }
+  .topnav .zmark { width: 26px; height: 26px; border-radius: 7px; background: var(--brand-spectrum);
+    display: grid; place-items: center; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 0.9rem;
+    box-shadow: inset 0 1px 1px rgba(255,255,255,0.5), 0 2px 5px rgba(0,0,0,0.18); }
+  .topnav .brand b { font-size: 1.12rem; font-weight: 700; letter-spacing: -0.02em; }
+  .topnav .brand sup { font-size: 0.6rem; color: var(--fg3); font-weight: 600; }
+  .topnav .crumb { font-size: 0.86rem; color: var(--fg2); font-weight: 600; white-space: nowrap; }
+  .topnav .crumb b { color: var(--fg1); }
+  .topnav .spacer { flex: 1; }
+  .topnav .saved { font-size: 0.74rem; color: var(--fg3); display: inline-flex; align-items: center; gap: 6px; }
+  .topnav .saved .pip { width: 7px; height: 7px; border-radius: 50%; background: var(--green); box-shadow: 0 0 0 3px rgba(16,185,129,0.18); }
+
+  /* ---- header ---- */
+  .head { margin-bottom: 22px; }
+  .head .eyebrow { font-weight: 700; font-size: 0.76rem; letter-spacing: 0.16em; text-transform: uppercase; color: var(--fg2); }
+  .head h1 { font-family: var(--font-display); font-weight: 600; font-size: clamp(2rem, 4.4vw, 2.9rem); letter-spacing: -0.01em;
+    margin: 8px 0 10px; color: var(--fg1); }
+  .head p { font-size: 1.02rem; line-height: 1.55; color: var(--fg2); max-width: 70ch; margin: 0; }
+  .head p b { color: var(--fg1); font-weight: 650; }
+
+  /* ---- glass panel ---- */
+  .panel { background: var(--glass-bg); -webkit-backdrop-filter: var(--glass-blur); backdrop-filter: var(--glass-blur);
+    border: 1px solid var(--glass-border); border-radius: var(--r-card); box-shadow: var(--shadow-card), var(--glass-spec); }
+  .panel + .panel { margin-top: 18px; }
+  .panel-h { display: flex; align-items: center; gap: 12px; padding: 16px 20px 14px; border-bottom: 1px solid var(--hairline); }
+  .panel-h h2 { font-family: var(--font-ui); font-weight: 700; font-size: 1.06rem; letter-spacing: -0.01em; margin: 0; color: var(--fg1); }
+  .panel-h .sub { font-size: 0.8rem; color: var(--fg3); }
+  .panel-h .spacer { flex: 1; }
+
+  /* ---- the source stack (decoder) ---- */
+  .stack { display: grid; grid-template-columns: repeat(4, 1fr); gap: 0; }
+  @media (max-width: 900px) { .stack { grid-template-columns: repeat(2, 1fr); } }
+  @media (max-width: 520px) { .stack { grid-template-columns: 1fr; } }
+  .layer { padding: 16px 18px; border-right: 1px solid var(--hairline); position: relative; }
+  .layer:last-child { border-right: none; }
+  @media (max-width: 900px) { .layer:nth-child(2) { border-right: none; } .layer:nth-child(-n+2) { border-bottom: 1px solid var(--hairline); } }
+  .layer .lnum { font-family: var(--font-mono); font-size: 0.72rem; color: var(--fg3); font-weight: 600; }
+  .layer .lname { display: inline-flex; align-items: center; gap: 8px; font-family: var(--font-display); font-weight: 600; font-size: 1.06rem; margin: 3px 0 2px; }
+  .layer .lname .swatch { width: 13px; height: 13px; border-radius: 4px; box-shadow: inset 0 1px 1px rgba(255,255,255,0.6); }
+  .layer .lrole { font-size: 0.78rem; color: var(--fg2); line-height: 1.4; margin-bottom: 11px; }
+  .layer .srcs { display: flex; flex-direction: column; gap: 6px; }
+  .src-chip { display: inline-flex; align-items: baseline; gap: 7px; font-size: 0.8rem; color: var(--fg1); }
+  .src-chip .tag { font-family: var(--font-mono); font-size: 0.66rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; color: var(--ci); background: var(--cbg); white-space: nowrap; }
+  .src-chip .nm { color: var(--fg2); font-size: 0.78rem; line-height: 1.3; }
+
+  .throughline { display: flex; align-items: center; gap: 14px; padding: 14px 20px; border-top: 1px solid var(--hairline);
+    background: linear-gradient(90deg, rgba(76,32,158,0.05), rgba(5,163,223,0.04) 55%, rgba(61,210,144,0.05)); }
+  .throughline .tl-badge { flex-shrink: 0; font-family: var(--font-mono); font-weight: 700; font-size: 0.72rem; letter-spacing: 0.04em;
+    color: #fff; background: var(--brand-grad); padding: 5px 12px; border-radius: 999px; box-shadow: inset 0 1px 1px rgba(255,255,255,0.4); }
+  .throughline p { margin: 0; font-size: 0.82rem; color: var(--fg2); line-height: 1.45; }
+  .throughline p b { color: var(--fg1); font-weight: 650; }
+  .throughline code { font-family: var(--font-mono); font-size: 0.8rem; color: var(--z-violet); background: rgba(76,32,158,0.07); padding: 1px 6px; border-radius: 6px; }
+
+  /* ---- unit switcher ---- */
+  .unitbar { display: flex; align-items: center; gap: 14px; flex-wrap: wrap; margin: 22px 0 8px; }
+  .usel { position: relative; }
+  .usel select { -webkit-appearance: none; appearance: none; font-family: var(--font-display); font-weight: 600; font-size: 1.15rem;
+    color: var(--fg1); background: var(--glass-bg-strong); border: 1px solid var(--glass-border); border-radius: var(--r-button);
+    padding: 11px 42px 11px 18px; cursor: pointer; box-shadow: var(--shadow-xs), var(--glass-spec); }
+  .usel::after { content: "▾"; position: absolute; right: 16px; top: 50%; transform: translateY(-50%); color: var(--fg3); pointer-events: none; }
+  .lessonchips { display: flex; gap: 7px; flex-wrap: wrap; flex: 1; min-width: 0; }
+  .lchip { font-size: 0.74rem; font-weight: 600; color: var(--fg2); background: rgba(255,255,255,0.55); border: 1px solid var(--hairline);
+    padding: 5px 11px; border-radius: 999px; }
+
+  /* ---- rollup dashboard ---- */
+  .rollup { display: grid; grid-template-columns: auto auto 1fr; gap: 0; align-items: stretch; }
+  @media (max-width: 760px) { .rollup { grid-template-columns: 1fr 1fr; } }
+  .ru-stat { padding: 16px 22px; border-right: 1px solid var(--hairline); }
+  .ru-stat .k { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg3); white-space: nowrap; }
+  .ru-stat .v { font-family: var(--font-display); font-weight: 600; font-size: 1.9rem; color: var(--fg1); line-height: 1.1; margin-top: 2px; }
+  .ru-stat .v small { font-size: 0.9rem; color: var(--fg3); font-weight: 600; }
+  .ru-bars { padding: 16px 22px; display: flex; flex-direction: column; justify-content: center; gap: 8px; }
+  @media (max-width: 760px) { .ru-bars { grid-column: 1 / -1; border-top: 1px solid var(--hairline); } .ru-stat:nth-child(2){border-right:none;} }
+  .ru-track { height: 12px; border-radius: 999px; background: var(--scrim); overflow: hidden; display: flex; box-shadow: inset 0 1px 2px rgba(0,0,0,0.07); }
+  .ru-track i { height: 100%; display: block; }
+  .ru-legend { display: flex; flex-wrap: wrap; gap: 10px 16px; }
+  .ru-legend span { font-size: 0.72rem; color: var(--fg2); display: inline-flex; align-items: center; gap: 6px; }
+  .ru-legend span i { width: 9px; height: 9px; border-radius: 3px; }
+
+  /* ---- the spreadsheet ---- */
+  .sheet-tools { display: flex; align-items: center; gap: 10px; padding: 12px 18px; flex-wrap: wrap; }
+  .btn-primary, .btn-ghost { font-size: 0.84rem; padding: 9px 16px; }
+  .btn-ghost.sm, .btn-primary.sm { padding: 8px 14px; font-size: 0.8rem; }
+  .tbl-scroll { overflow-x: auto; }
+  table.sheet { width: 100%; border-collapse: collapse; min-width: 940px; }
+  table.sheet thead th { position: sticky; top: 0; background: rgba(247,243,236,0.92); -webkit-backdrop-filter: blur(8px); backdrop-filter: blur(8px);
+    font-size: 0.66rem; font-weight: 700; letter-spacing: 0.06em; text-transform: uppercase; color: var(--fg3); text-align: left;
+    padding: 11px 12px; border-bottom: 1px solid var(--hairline-strong); white-space: nowrap; z-index: 2; }
+  table.sheet tbody tr.arow { border-bottom: 1px solid var(--hairline); transition: background var(--dur-fast) ease; }
+  table.sheet tbody tr.arow:hover { background: rgba(255,255,255,0.5); }
+  table.sheet td { padding: 11px 12px; vertical-align: top; font-size: 0.86rem; color: var(--fg1); }
+  .c-exp { width: 30px; text-align: center; }
+  .exp-btn { width: 22px; height: 22px; border-radius: 7px; border: 1px solid var(--hairline); background: rgba(255,255,255,0.6);
+    color: var(--fg2); cursor: pointer; display: inline-flex; align-items: center; justify-content: center; transition: transform var(--dur-base) var(--ease-bounce); }
+  .arow.open .exp-btn { transform: rotate(90deg); }
+  .exp-btn svg { width: 13px; height: 13px; }
+  .c-num { width: 26px; font-family: var(--font-mono); color: var(--fg3); font-size: 0.78rem; }
+  .a-title { font-weight: 650; font-size: 0.92rem; color: var(--fg1); outline: none; border-radius: 6px; }
+  .a-lesson { font-size: 0.74rem; color: var(--fg3); margin-top: 3px; outline: none; }
+  .editable { outline: none; border-radius: 6px; transition: box-shadow var(--dur-fast) ease, background var(--dur-fast) ease; }
+  .editable:focus { background: #fff; box-shadow: var(--ring-focus); padding-left: 4px; padding-right: 4px; margin: 0 -4px; }
+  .c-mech { min-width: 180px; max-width: 230px; }
+  .c-mech .editable { font-size: 0.82rem; color: var(--fg2); line-height: 1.4; }
+  .c-vec { min-width: 150px; max-width: 200px; }
+  .c-vec .editable { font-family: var(--font-mono); font-size: 0.8rem; color: var(--z-violet); line-height: 1.4; }
+  .c-status { width: 118px; }
+  .c-eff { width: 70px; }
+  .c-act { width: 36px; }
+
+  /* status select styled as pill */
+  .st-sel { -webkit-appearance: none; appearance: none; border: none; cursor: pointer; font-family: inherit;
+    font-weight: 700; font-size: 0.72rem; padding: 6px 12px; border-radius: 999px; text-align: center; }
+  .eff-in { width: 54px; border: 1px solid var(--hairline); background: var(--scrim); border-radius: 9px; padding: 6px 8px;
+    font-family: var(--font-mono); font-size: 0.84rem; color: var(--fg1); text-align: center; }
+  .eff-in:focus { outline: none; background: #fff; box-shadow: var(--ring-focus); }
+  .del-btn { width: 26px; height: 26px; border-radius: 8px; border: none; background: transparent; color: var(--fg3); cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; transition: all var(--dur-fast) ease; }
+  .del-btn:hover { background: rgba(220,38,38,0.1); color: var(--red); }
+  .del-btn svg { width: 15px; height: 15px; }
+
+  /* ---- expanded stitch panel ---- */
+  tr.detail td { padding: 0; }
+  .detail-inner { padding: 4px 16px 20px 50px; display: none; }
+  tr.detail.open .detail-inner { display: block; animation: dIn 0.28s var(--ease-smooth) both; }
+  @keyframes dIn { from { opacity: 0; transform: translateY(-5px); } to { opacity: 1; transform: none; } }
+  .stitch-lbl { font-size: 0.66rem; font-weight: 700; letter-spacing: 0.09em; text-transform: uppercase; color: var(--fg3); margin: 10px 0 8px; }
+  table.stitch { width: 100%; border-collapse: collapse; background: rgba(255,255,255,0.45); border-radius: 12px; overflow: hidden; }
+  table.stitch th { font-size: 0.62rem; font-weight: 700; letter-spacing: 0.05em; text-transform: uppercase; color: var(--fg3);
+    text-align: left; padding: 8px 11px; border-bottom: 1px solid var(--hairline); }
+  table.stitch td { padding: 9px 11px; border-bottom: 1px solid var(--hairline); vertical-align: top; font-size: 0.82rem; }
+  table.stitch tr:last-child td { border-bottom: none; }
+  .s-src-cell { width: 150px; white-space: nowrap; }
+  .s-src-cell .tag { font-family: var(--font-mono); font-size: 0.64rem; font-weight: 700; padding: 2px 7px; border-radius: 999px; }
+  .s-src-cell .ly { display: block; font-size: 0.64rem; color: var(--fg3); margin-top: 3px; }
+  .s-pull { color: var(--fg1); }
+  .s-ref { width: 200px; }
+  .s-ref .editable { font-family: var(--font-mono); font-size: 0.74rem; color: var(--fg2); }
+  .s-done { width: 46px; text-align: center; }
+  .chk { width: 22px; height: 22px; border-radius: 7px; border: 1.5px solid var(--hairline-strong); background: rgba(255,255,255,0.7);
+    cursor: pointer; display: inline-flex; align-items: center; justify-content: center; color: transparent; transition: all var(--dur-fast) var(--ease-bounce); }
+  .chk.on { background: var(--green); border-color: var(--green); color: #fff; }
+  .chk svg { width: 13px; height: 13px; }
+  .synth { margin-top: 14px; }
+  .synth .editable { display: block; min-height: 52px; padding: 12px 14px; border-radius: 12px; background: rgba(255,255,255,0.55);
+    border: 1px solid var(--hairline); font-size: 0.86rem; line-height: 1.5; color: var(--fg1); }
+  .synth .editable:empty::before { content: attr(data-ph); color: var(--fg3); }
+  .synth .editable:focus { background: #fff; box-shadow: var(--ring-focus); border-color: transparent; }
+  .meta-row { display: flex; gap: 18px; align-items: center; margin-top: 12px; flex-wrap: wrap; }
+  .meta-row label { font-size: 0.72rem; font-weight: 700; color: var(--fg2); display: inline-flex; align-items: center; gap: 8px; }
+  .pri-sel { -webkit-appearance: none; appearance: none; border: 1px solid var(--hairline-strong); background: rgba(255,255,255,0.7);
+    border-radius: 999px; padding: 5px 12px; font-family: inherit; font-weight: 700; font-size: 0.72rem; cursor: pointer; color: var(--fg1); }
+
+  .addrow { padding: 14px 18px; }
+  .add-btn { width: 100%; border: 1.5px dashed var(--hairline-strong); background: rgba(255,255,255,0.4); color: var(--fg2);
+    border-radius: var(--r-button); padding: 12px; font-family: inherit; font-weight: 650; font-size: 0.86rem; cursor: pointer;
+    display: inline-flex; align-items: center; justify-content: center; gap: 8px; transition: all var(--dur-fast) ease; }
+  .add-btn:hover { background: rgba(255,255,255,0.7); color: var(--fg1); border-color: var(--fg3); }
+  .add-btn:active { transform: scale(0.99); }
+  .add-btn svg { width: 16px; height: 16px; }
+
+  .footnote { margin-top: 22px; font-size: 0.78rem; color: var(--fg3); display: flex; align-items: center; gap: 8px; flex-wrap: wrap; }
+  .footnote a { color: var(--fg2); cursor: pointer; text-decoration: underline; text-underline-offset: 2px; }
+
+  .empty-state { padding: 40px 20px; text-align: center; color: var(--fg3); }
+  .empty-state b { display: block; color: var(--fg2); font-size: 1rem; margin-bottom: 4px; font-family: var(--font-display); font-weight: 600; }
+
+  @media (prefers-reduced-motion: reduce) { * { animation-duration: 0.001s !important; transition-duration: 0.001s !important; } }
+</style>
+</head>
+<body>
+  <nav class="topnav">
+    <div class="brand"><span class="zmark">Z</span><b>Zmath</b><sup>™</sup></div>
+    <span class="crumb">/ <b>Unit Build Sheet</b></span>
+    <span class="spacer"></span>
+    <span class="saved"><span class="pip"></span>Saved locally</span>
+  </nav>
+
+  <div class="wrap">
+    <header class="head">
+      <div class="eyebrow">Article Production Plan</div>
+      <h1>Unit Build Sheet</h1>
+      <p>One IM Grade 8 unit, broken into the articles you'll write. For each article, pull apart the <b>tentacles</b> — what to take from each source — and stitch them into one notebook-style derivation. Sources stack in four layers; the <b>vector-component throughline</b> runs across all of them, toward uniting the elementary functions.</p>
+    </header>
+
+    <!-- SOURCE STACK (decoder) -->
+    <section class="panel">
+      <div class="panel-h">
+        <h2>The Source Stack</h2>
+        <span class="sub">how the seven sources layer into one article</span>
+      </div>
+      <div class="stack" id="stack"></div>
+      <div class="throughline">
+        <span class="tl-badge">THROUGHLINE</span>
+        <p><b>Express everything in vector components.</b> Every figure resolves to <code>a i + b j</code> — translations as vector sums, rotations as the <code>i,j</code> rotation map — so polynomial, trig, exponential, complex &amp; polar all speak one language en route to <b>Clifford algebra</b>.</p>
+      </div>
+    </section>
+
+    <!-- UNIT SWITCHER -->
+    <div class="unitbar">
+      <div class="usel"><select id="unit-select"></select></div>
+      <div class="lessonchips" id="lesson-chips"></div>
+    </div>
+
+    <!-- ROLLUP -->
+    <section class="panel">
+      <div class="rollup">
+        <div class="ru-stat"><div class="k">Articles</div><div class="v" id="ru-count">0</div></div>
+        <div class="ru-stat"><div class="k">Est. sessions</div><div class="v" id="ru-eff">0</div></div>
+        <div class="ru-bars">
+          <div class="ru-track" id="ru-track"></div>
+          <div class="ru-legend" id="ru-legend"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- THE SHEET -->
+    <section class="panel">
+      <div class="panel-h">
+        <h2 id="unit-title">Unit 1</h2>
+        <span class="spacer"></span>
+        <button class="btn-ghost sm" id="export-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><path d="M7 10l5 5 5-5"/><path d="M12 15V3"/></svg>
+          Export CSV
+        </button>
+      </div>
+      <div class="tbl-scroll">
+        <table class="sheet">
+          <thead>
+            <tr>
+              <th class="c-exp"></th>
+              <th class="c-num">#</th>
+              <th>Article</th>
+              <th>Core mechanism</th>
+              <th>Vector form</th>
+              <th>Status</th>
+              <th>Sess.</th>
+              <th class="c-act"></th>
+            </tr>
+          </thead>
+          <tbody id="rows"></tbody>
+        </table>
+      </div>
+      <div class="addrow">
+        <button class="add-btn" id="add-btn">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.2" stroke-linecap="round" stroke-linejoin="round"><path d="M12 5v14M5 12h14"/></svg>
+          Add an article
+        </button>
+      </div>
+    </section>
+
+    <div class="footnote">
+      <span>Everything you type saves to this browser.</span>
+      <a id="reset-unit">Reset this unit to the seeded plan</a>
+      <span>·</span>
+      <a id="wipe-all">Clear all saved data</a>
+    </div>
+  </div>
+
+<script>
+(function () {
+  // ============================================================
+  //  SOURCES + LAYERS  (the decoder)
+  // ============================================================
+  const LAYERS = {
+    skeleton:  { n: '01', name: 'Skeleton',  role: 'The frame & sequence — what an article is and the order ideas unlock.', pastel: 'sky',   fill: 'var(--sky)',   ink: 'var(--sky-ink)' },
+    intuition: { n: '02', name: 'Intuition', role: 'The "why", felt before it is named — mnemonic hooks and seeing-it-geometrically.', pastel: 'peach', fill: 'var(--peach)', ink: 'var(--peach-ink)' },
+    bridge:    { n: '03', name: 'Bridge',    role: 'Sound construction — plane geometry + college algebra that builds the idea up honestly.', pastel: 'mint',  fill: 'var(--mint)',  ink: 'var(--mint-ink)' },
+    rigor:     { n: '04', name: 'Rigor',     role: 'The rigid ceiling — formal treatment in vector/analytic form, A-level and beyond.', pastel: 'lilac', fill: 'var(--lilac)', ink: 'var(--lilac-ink)' },
+  };
+  const SOURCES = {
+    im:     { tag: 'IM G8',     name: 'Illustrative Mathematics, Grade 8', layer: 'skeleton' },
+    be:     { tag: 'BetterExp', name: 'Better Explained — intuition & mnemonics', layer: 'intuition' },
+    gi:     { tag: 'GeoInsght', name: 'Geometry Insights — proof-by-picture', layer: 'intuition' },
+    africk: { tag: 'Africk',    name: 'Africk · Elementary College Geometry', layer: 'bridge' },
+    rees:   { tag: 'Rees',      name: 'Rees · Algebra·Trig·Analytic Geo / Calculus', layer: 'rigor' },
+    bitt:   { tag: 'Bitt',      name: 'Bittinger · Calculus: A Modeling Approach', layer: 'rigor' },
+    sadler: { tag: 'Sadler',    name: 'Sadler · Understanding Pure Mathematics', layer: 'rigor' },
+  };
+  const SRC_ORDER = ['im', 'be', 'gi', 'africk', 'rees', 'bitt', 'sadler'];
+
+  const STATUS = {
+    backlog:   { label: 'Backlog',   fill: 'var(--scrim)',        ink: 'var(--fg2)',        bar: '#cdc6bb' },
+    pulling:   { label: 'Pulling',   fill: 'var(--butter)',       ink: 'var(--butter-ink)', bar: '#f4d97a' },
+    stitching: { label: 'Stitching', fill: 'var(--peach)',        ink: 'var(--peach-ink)',  bar: '#f1b483' },
+    drafting:  { label: 'Drafting',  fill: 'var(--sky)',          ink: 'var(--sky-ink)',    bar: '#8fa9e0' },
+    published: { label: 'Published', fill: 'var(--mint)',         ink: 'var(--mint-ink)',   bar: '#5cc79a' },
+  };
+  const STATUS_ORDER = ['backlog', 'pulling', 'stitching', 'drafting', 'published'];
+
+  // ============================================================
+  //  helper: a blank stitch (one entry per source)
+  // ============================================================
+  function blankStitch() {
+    const s = {};
+    SRC_ORDER.forEach(k => s[k] = { pull: '', ref: '', done: false });
+    return s;
+  }
+  function article(o) {
+    return Object.assign({
+      title: 'New article', lesson: '', mechanism: '', vector: '',
+      status: 'backlog', effort: 1, priority: 'med', synthesis: '',
+      stitch: blankStitch(),
+    }, o, { stitch: Object.assign(blankStitch(), o && o.stitch) });
+  }
+  function st(o) { return Object.assign({ pull: '', ref: '', done: false }, o); }
+
+  // ============================================================
+  //  SEED — IM Grade 8 units. Unit 1 fully worked; rest are frames.
+  // ============================================================
+  function seed() {
+    return {
+      u1: {
+        title: 'Rigid Transformations & Congruence',
+        lessons: ['Translations, rotations, reflections', 'Sequences of transformations', 'Congruence', 'Vertical angles & transversals', 'Angle sum = 180°'],
+        articles: [
+          article({
+            title: 'Rigid Motion = Distance Kept',
+            lesson: 'IM U1 L1–3 · moving the plane',
+            mechanism: 'A rigid motion is any map of the plane that preserves every distance (hence every angle).',
+            vector: "P′ = P + t,   t = a i + b j",
+            status: 'drafting', effort: 2, priority: 'high',
+            synthesis: 'Open with the felt idea — pick the plane up without bending it (BE). Show a translated triangle (GI). Pin down “distance preserved” precisely with Africk’s segment/angle congruence, then re-cast a translation as adding one fixed vector t to every position vector — Sadler’s component addition exactly.',
+            stitch: {
+              im:     st({ pull: 'The three moves: translation, rotation, reflection — by feel, on a grid.', ref: 'Unit 1, Lessons 1–3' }),
+              be:     st({ pull: '“A rigid motion picks up the whole plane and sets it down without stretching.”', ref: 'transformations intuition' }),
+              gi:     st({ pull: 'Picture: a shape and its slid copy, distances marked equal.', ref: 'translations post' }),
+              africk: st({ pull: 'Exact definitions of congruent segments & angles (=equal measure).', ref: '§1.x congruence', done: true }),
+              sadler: st({ pull: 'Vector addition OP + PQ = OQ in i,j components; translation = + t.', ref: 'Vectors ch · Ex.9–10', done: true }),
+              rees:   st({ pull: 'Coordinate form of a translation (x,y) ↦ (x+a, y+b).', ref: 'analytic geo · transl.' }),
+            },
+          }),
+          article({
+            title: 'Reflections & the Mirror Line',
+            lesson: 'IM U1 L4–6 · reflection',
+            mechanism: 'A reflection sends each point to its mirror image; the mirror is the perpendicular bisector of every point–image pair.',
+            vector: "(x i + y j) ↦ (x i − y j)  across Ox",
+            status: 'stitching', effort: 2, priority: 'high',
+            synthesis: 'Fold-the-paper intuition (BE/GI) → Africk’s perpendicular-bisector characterization makes “mirror” exact → component rule for reflection across an axis, then across a line at angle θ (sets up the rotation article).',
+            stitch: {
+              im:     st({ pull: 'Reflect a figure over a line on the grid; note orientation flips.', ref: 'Unit 1, Lessons 4–6' }),
+              be:     st({ pull: 'Mirror = the fold that lands the shape exactly on its image.', ref: 'reflection intuition' }),
+              gi:     st({ pull: 'Perpendicular-bisector picture: every point and its image equidistant from the line.', ref: 'reflection post' }),
+              africk: st({ pull: 'Perpendicular bisector as locus; congruent triangles either side.', ref: '§ perp. bisector', done: true }),
+              sadler: st({ pull: 'Component reflection; sign change on one axis.', ref: 'coordinate geometry' }),
+            },
+          }),
+          article({
+            title: 'Rotations → the Rotation Map',
+            lesson: 'IM U1 L7–8 · rotation',
+            mechanism: 'IM rotates by feel; we build the angle-θ rotation honestly from geometry into the i,j map (the matrix IM hides).',
+            vector: "P′ = (x cosθ − y sinθ) i + (x sinθ + y cosθ) j",
+            status: 'pulling', effort: 3, priority: 'high',
+            synthesis: 'This is the crux: IM’s “turn the plane” is secretly a linear map. Build it from where i and j land (cosθ,sinθ) and (−sinθ,cosθ), prove length is preserved (ties to the one-triangle trig notes), and flag the bridge to complex multiplication e^{iθ} — the first step of the Clifford-algebra arc.',
+            stitch: {
+              im:     st({ pull: 'Rotate a figure about a centre by 90°/180° on the grid.', ref: 'Unit 1, Lessons 7–8' }),
+              be:     st({ pull: 'A rotation is the same number knob (angle) applied to every point.', ref: 'rotation intuition' }),
+              gi:     st({ pull: 'Where do the unit arrows i and j go? Read cosθ, sinθ off the circle.', ref: 'rotation / unit-circle post' }),
+              africk: st({ pull: 'Angle measure, central angles, congruent triangles for the derivation.', ref: '§ angles', done: false }),
+              sadler: st({ pull: 'Vectors in component form; resolve P into i,j before turning.', ref: 'Vectors — components' }),
+              rees:   st({ pull: 'Rotation of axes / the 2×2 rotation matrix in analytic geometry.', ref: 'rotation of axes' }),
+            },
+          }),
+          article({
+            title: 'Congruence = A Sequence of Motions',
+            lesson: 'IM U1 L9–12 · congruence',
+            mechanism: 'Two figures are congruent exactly when some sequence of rigid motions carries one onto the other.',
+            vector: "compose: P′ = R(θ)·P + t",
+            status: 'backlog', effort: 2, priority: 'med',
+            synthesis: 'Define congruence IM-style (a sequence of motions), then show it agrees with Africk’s static SAS/ASA criteria — two doors to the same room. Composition becomes “rotate then translate”, written in one vector line.',
+            stitch: {
+              im:     st({ pull: 'Congruent = mapped by a sequence of rigid motions.', ref: 'Unit 1, Lessons 9–12' }),
+              be:     st({ pull: 'Same shape = reachable by moves that never stretch.', ref: 'congruence intuition' }),
+              africk: st({ pull: 'SAS, ASA, SSS congruence theorems (the classical criteria).', ref: 'Ch. Congruent Triangles' }),
+              sadler: st({ pull: 'Composition of transformations; order matters.', ref: 'transformations' }),
+            },
+          }),
+          article({
+            title: 'Angles, Parallels & the 180° Triangle',
+            lesson: 'IM U1 L13–16 · angle facts',
+            mechanism: 'Vertical, corresponding & alternate angles, and why a triangle’s angles sum to 180° — proved by sliding a line.',
+            vector: "parallel ⇔ equal direction vectors",
+            status: 'backlog', effort: 2, priority: 'low',
+            synthesis: 'IM gets the 180° fact by tearing/rotating corners; Africk proves it from parallel-line axioms; the vector view says “parallel = same direction vector”, bridging to slope and the analytic-geometry unit.',
+            stitch: {
+              im:     st({ pull: 'Tear-the-corners demo; transversal angle relationships.', ref: 'Unit 1, Lessons 13–16' }),
+              gi:     st({ pull: 'Rotate-a-line proof that the three angles fill a straight angle.', ref: 'angle-sum post' }),
+              africk: st({ pull: 'Parallel postulate; vertical & alternate-angle theorems; angle-sum proof.', ref: 'Ch. Parallel Lines' }),
+              rees:   st({ pull: 'Direction vectors / slope; parallel ⇔ equal slope.', ref: 'lines in the plane' }),
+            },
+          }),
+          article({
+            title: 'Dividing a Segment: Position Vectors',
+            lesson: 'Bridge to vectors · extension',
+            mechanism: 'Locate the point dividing AB in a ratio — internally and externally — straight from position vectors.',
+            vector: "r = (n·a + m·b)/(m+n)",
+            status: 'backlog', effort: 2, priority: 'med',
+            synthesis: 'A pure “stuff it bigger” article: take Sadler’s internal/external division (the image example) and ground it in the rigid-motion language — the midpoint is a fixed point of a half-turn. Plants position vectors for everything downstream.',
+            stitch: {
+              africk: st({ pull: 'Midpoint, betweenness, ratio along a segment (classical).', ref: '§ segments' }),
+              sadler: st({ pull: 'Position vectors; AB in ratio m:n, sign for external division.', ref: 'Vectors · Ex.10', done: true }),
+              rees:   st({ pull: 'Section formula in coordinates; midpoint formula.', ref: 'analytic geometry' }),
+            },
+          }),
+        ],
+      },
+      u2: { title: 'Dilations, Similarity & Slope', lessons: ['Dilations & scale factor', 'Similar figures', 'Similar triangles', 'Slope'], articles: [] },
+      u3: { title: 'Linear Relationships', lessons: ['Proportional relationships', 'Slope of a line', 'y = mx + b', 'Horizontal & vertical lines'], articles: [] },
+      u4: { title: 'Linear Equations & Systems', lessons: ['Solving equations', 'Both sides', 'Systems', 'Substitution & elimination'], articles: [] },
+      u5: { title: 'Functions & Volume', lessons: ['Inputs & outputs', 'Function rules & graphs', 'Linear functions', 'Cylinders, cones, spheres'], articles: [] },
+      u6: { title: 'Associations in Data', lessons: ['Scatter plots', 'Line of best fit', 'Two-way tables'], articles: [] },
+      u7: { title: 'Exponents & Scientific Notation', lessons: ['Exponent rules', 'Powers of 10', 'Scientific notation'], articles: [] },
+      u8: { title: 'Pythagoras & Irrational Numbers', lessons: ['Square & cube roots', 'Rational vs irrational', 'Pythagorean theorem', 'Distance in the plane'], articles: [] },
+      u9: { title: 'Putting It All Together', lessons: ['Tessellations', 'Cross-unit problems', 'Modelling with functions'], articles: [] },
+    };
+  }
+  const UNIT_ORDER = ['u1','u2','u3','u4','u5','u6','u7','u8','u9'];
+
+  // ============================================================
+  //  STATE + persistence
+  // ============================================================
+  const KEY = 'zmath_unit_build_v1';
+  let DATA, current = 'u1';
+  function load() {
+    try { const raw = localStorage.getItem(KEY); if (raw) { DATA = JSON.parse(raw); return; } } catch (e) {}
+    DATA = seed();
+  }
+  function save() { try { localStorage.setItem(KEY, JSON.stringify(DATA)); flashSaved(); } catch (e) {} }
+  let savedTimer;
+  function flashSaved() {
+    const el = document.querySelector('.saved'); if (!el) return;
+    el.style.opacity = '1';
+    clearTimeout(savedTimer); savedTimer = setTimeout(() => { el.style.opacity = '0.55'; }, 900);
+  }
+
+  // ============================================================
+  //  RENDER — decoder stack
+  // ============================================================
+  function renderStack() {
+    const wrap = document.getElementById('stack');
+    wrap.innerHTML = Object.entries(LAYERS).map(([key, L]) => {
+      const srcs = SRC_ORDER.filter(s => SOURCES[s].layer === key).map(s => {
+        const S = SOURCES[s];
+        return `<div class="src-chip" style="--ci:${L.ink};--cbg:${L.fill}"><span class="tag">${S.tag}</span><span class="nm">${S.name.replace(/^[^·]*· /, '')}</span></div>`;
+      }).join('');
+      return `<div class="layer">
+        <div class="lnum">LAYER ${L.n}</div>
+        <div class="lname"><span class="swatch" style="background:${L.fill}"></span>${L.name}</div>
+        <div class="lrole">${L.role}</div>
+        <div class="srcs">${srcs}</div>
+      </div>`;
+    }).join('');
+  }
+
+  // ============================================================
+  //  RENDER — unit switcher + lessons
+  // ============================================================
+  function renderUnitBar() {
+    const sel = document.getElementById('unit-select');
+    sel.innerHTML = UNIT_ORDER.map((u, i) => `<option value="${u}">Unit ${i + 1} — ${DATA[u].title}</option>`).join('');
+    sel.value = current;
+    const chips = DATA[current].lessons || [];
+    document.getElementById('lesson-chips').innerHTML = chips.map(l => `<span class="lchip">${l}</span>`).join('');
+    document.getElementById('unit-title').textContent = 'Unit ' + (UNIT_ORDER.indexOf(current) + 1) + ' — ' + DATA[current].title;
+  }
+
+  // ============================================================
+  //  RENDER — rollup
+  // ============================================================
+  function renderRollup() {
+    const arts = DATA[current].articles;
+    document.getElementById('ru-count').textContent = arts.length;
+    const eff = arts.reduce((s, a) => s + (Number(a.effort) || 0), 0);
+    document.getElementById('ru-eff').innerHTML = eff;
+    const counts = {}; STATUS_ORDER.forEach(s => counts[s] = 0);
+    arts.forEach(a => { counts[a.status] = (counts[a.status] || 0) + 1; });
+    const total = arts.length || 1;
+    document.getElementById('ru-track').innerHTML = STATUS_ORDER.map(s =>
+      counts[s] ? `<i style="width:${counts[s] / total * 100}%;background:${STATUS[s].bar}"></i>` : '').join('');
+    document.getElementById('ru-legend').innerHTML = STATUS_ORDER.map(s =>
+      `<span><i style="background:${STATUS[s].bar}"></i>${STATUS[s].label} ${counts[s]}</span>`).join('');
+  }
+
+  // ============================================================
+  //  RENDER — the sheet
+  // ============================================================
+  function statusSelect(a, idx) {
+    const opts = STATUS_ORDER.map(s => `<option value="${s}" ${a.status === s ? 'selected' : ''}>${STATUS[s].label}</option>`).join('');
+    return `<select class="st-sel" data-idx="${idx}" data-f="status" style="background:${STATUS[a.status].fill};color:${STATUS[a.status].ink}">${opts}</select>`;
+  }
+
+  function renderRows() {
+    const tbody = document.getElementById('rows');
+    const arts = DATA[current].articles;
+    if (!arts.length) {
+      tbody.innerHTML = `<tr><td colspan="8"><div class="empty-state"><b>This unit is an empty frame.</b>Add an article to start pulling tentacles from your sources.</div></td></tr>`;
+      return;
+    }
+    tbody.innerHTML = arts.map((a, i) => {
+      const open = a._open ? ' open' : '';
+      const stitchRows = SRC_ORDER.map(sk => {
+        const S = SOURCES[sk], L = LAYERS[S.layer], cell = a.stitch[sk] || { pull: '', ref: '', done: false };
+        return `<tr>
+          <td class="s-src-cell"><span class="tag" style="background:${L.fill};color:${L.ink}">${S.tag}</span><span class="ly">${L.name}</span></td>
+          <td class="s-pull"><div class="editable" contenteditable data-idx="${i}" data-src="${sk}" data-sf="pull" data-ph="—">${esc(cell.pull)}</div></td>
+          <td class="s-ref"><div class="editable" contenteditable data-idx="${i}" data-src="${sk}" data-sf="ref" data-ph="page / link">${esc(cell.ref)}</div></td>
+          <td class="s-done"><button class="chk ${cell.done ? 'on' : ''}" data-idx="${i}" data-src="${sk}" data-chk="1"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M20 6L9 17l-5-5"/></svg></button></td>
+        </tr>`;
+      }).join('');
+      return `
+      <tr class="arow${open}" data-idx="${i}">
+        <td class="c-exp"><button class="exp-btn" data-exp="${i}"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.6" stroke-linecap="round" stroke-linejoin="round"><path d="M9 6l6 6-6 6"/></svg></button></td>
+        <td class="c-num">${i + 1}</td>
+        <td>
+          <div class="a-title editable" contenteditable data-idx="${i}" data-f="title">${esc(a.title)}</div>
+          <div class="a-lesson editable" contenteditable data-idx="${i}" data-f="lesson" data-ph="maps to…">${esc(a.lesson)}</div>
+        </td>
+        <td class="c-mech"><div class="editable" contenteditable data-idx="${i}" data-f="mechanism" data-ph="what's really going on">${esc(a.mechanism)}</div></td>
+        <td class="c-vec"><div class="editable" contenteditable data-idx="${i}" data-f="vector" data-ph="a i + b j">${esc(a.vector)}</div></td>
+        <td class="c-status">${statusSelect(a, i)}</td>
+        <td class="c-eff"><input class="eff-in" type="number" min="0" step="1" value="${Number(a.effort) || 0}" data-idx="${i}" data-f="effort" /></td>
+        <td class="c-act"><button class="del-btn" data-del="${i}" title="Delete article"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M3 6h18M8 6V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2M19 6l-1 14a2 2 0 0 1-2 2H8a2 2 0 0 1-2-2L5 6"/></svg></button></td>
+      </tr>
+      <tr class="detail${open}">
+        <td colspan="8"><div class="detail-inner">
+          <div class="stitch-lbl">Source stitch — what to pull from each, and whether you've pulled it</div>
+          <table class="stitch"><thead><tr><th>Source</th><th>What to pull (the tentacle)</th><th>Page / link</th><th>Got it</th></tr></thead><tbody>${stitchRows}</tbody></table>
+          <div class="synth">
+            <div class="stitch-lbl" style="margin-top:14px">Synthesis — how these stitch into one derivation</div>
+            <div class="editable" contenteditable data-idx="${i}" data-f="synthesis" data-ph="In one paragraph: the order you'll braid these sources into a single notebook page…">${esc(a.synthesis)}</div>
+          </div>
+          <div class="meta-row">
+            <label>Priority
+              <select class="pri-sel" data-idx="${i}" data-f="priority">
+                <option value="high" ${a.priority==='high'?'selected':''}>High</option>
+                <option value="med" ${a.priority==='med'?'selected':''}>Medium</option>
+                <option value="low" ${a.priority==='low'?'selected':''}>Low</option>
+              </select>
+            </label>
+          </div>
+        </div></td>
+      </tr>`;
+    }).join('');
+  }
+
+  function esc(s) { return String(s == null ? '' : s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;'); }
+
+  function renderAll() { renderUnitBar(); renderRollup(); renderRows(); }
+
+  // ============================================================
+  //  EVENTS
+  // ============================================================
+  const rowsEl = document.getElementById('rows');
+
+  // expand / collapse + delete + checkbox (click delegation)
+  rowsEl.addEventListener('click', e => {
+    const exp = e.target.closest('[data-exp]');
+    if (exp) { const i = +exp.dataset.exp; const a = DATA[current].articles[i]; a._open = !a._open; renderRows(); return; }
+    const del = e.target.closest('[data-del]');
+    if (del) { const i = +del.dataset.del; if (confirm('Delete this article?')) { DATA[current].articles.splice(i, 1); save(); renderRollup(); renderRows(); } return; }
+    const chk = e.target.closest('[data-chk]');
+    if (chk) { const i = +chk.dataset.idx, sk = chk.dataset.src; const c = DATA[current].articles[i].stitch[sk]; c.done = !c.done; chk.classList.toggle('on', c.done); save(); return; }
+  });
+
+  // editable text (contenteditable) — save on blur
+  rowsEl.addEventListener('blur', e => {
+    const el = e.target.closest('.editable[contenteditable]'); if (!el) return;
+    const i = +el.dataset.idx, a = DATA[current].articles[i]; if (!a) return;
+    const val = el.innerText.trim();
+    if (el.dataset.sf) { a.stitch[el.dataset.src][el.dataset.sf] = val; }
+    else { a[el.dataset.f] = val; }
+    save();
+  }, true);
+
+  // selects + number input
+  rowsEl.addEventListener('change', e => {
+    const sel = e.target.closest('[data-f]'); if (!sel) return;
+    const i = +sel.dataset.idx, a = DATA[current].articles[i], f = sel.dataset.f;
+    if (f === 'status') { a.status = sel.value; sel.style.background = STATUS[a.status].fill; sel.style.color = STATUS[a.status].ink; renderRollup(); }
+    else if (f === 'effort') { a.effort = Math.max(0, parseInt(sel.value) || 0); renderRollup(); }
+    else if (f === 'priority') { a.priority = sel.value; }
+    save();
+  });
+
+  // unit switch
+  document.getElementById('unit-select').addEventListener('change', e => { current = e.target.value; renderAll(); });
+
+  // add article
+  document.getElementById('add-btn').addEventListener('click', () => {
+    DATA[current].articles.push(article({ title: 'New article', _open: true }));
+    save(); renderRollup(); renderRows();
+    const last = rowsEl.querySelector('tr.arow:last-of-type .a-title');
+    if (last) { last.focus(); document.execCommand && document.getSelection().selectAllChildren(last); }
+  });
+
+  // reset / wipe
+  document.getElementById('reset-unit').addEventListener('click', () => {
+    if (!confirm('Reset this unit to the original seeded plan? Your edits to this unit will be lost.')) return;
+    const fresh = seed(); DATA[current] = fresh[current] || DATA[current]; save(); renderAll();
+  });
+  document.getElementById('wipe-all').addEventListener('click', () => {
+    if (!confirm('Clear ALL saved data and restore the seeded sheet?')) return;
+    localStorage.removeItem(KEY); DATA = seed(); current = 'u1'; renderAll();
+  });
+
+  // CSV export
+  document.getElementById('export-btn').addEventListener('click', () => {
+    const arts = DATA[current].articles;
+    const q = v => '"' + String(v == null ? '' : v).replace(/"/g, '""') + '"';
+    const head = ['Unit','#','Article','Maps to','Mechanism','Vector form','Status','Sessions','Priority',
+      ...SRC_ORDER.flatMap(s => [SOURCES[s].tag + ' — pull', SOURCES[s].tag + ' — ref', SOURCES[s].tag + ' — done']),
+      'Synthesis'];
+    const uname = 'Unit ' + (UNIT_ORDER.indexOf(current) + 1) + ' ' + DATA[current].title;
+    const lines = [head.map(q).join(',')];
+    arts.forEach((a, i) => {
+      const row = [uname, i + 1, a.title, a.lesson, a.mechanism, a.vector, STATUS[a.status].label, a.effort, a.priority];
+      SRC_ORDER.forEach(s => { const c = a.stitch[s] || {}; row.push(c.pull || '', c.ref || '', c.done ? 'yes' : ''); });
+      row.push(a.synthesis);
+      lines.push(row.map(q).join(','));
+    });
+    const blob = new Blob([lines.join('\r\n')], { type: 'text/csv' });
+    const url = URL.createObjectURL(blob); const a = document.createElement('a');
+    a.href = url; a.download = uname.replace(/[^\w]+/g, '_') + '.csv'; a.click(); URL.revokeObjectURL(url);
+  });
+
+  // ============================================================
+  load();
+  renderStack();
+  renderAll();
+})();
+</script>
+</body>
+</html>

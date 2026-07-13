@@ -1,0 +1,340 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Design icons — flat material study</title>
+<link rel="stylesheet" href="../zmath/tokens.css" />
+<link rel="stylesheet" href="flat-tile.css" />
+<link rel="stylesheet" href="flat-icon.css" />
+<style>
+  /* ===== All-icons gallery — REPLACES the hero inside the stage column when Icon = All.
+     Sits in the hero's ~700px slot so six real-size tiles wrap 3×2 and never shrink.
+     Reuses .compare (frosted panel) + .railctx/.chip/.slot/.cap from the linked CSS. */
+  .railGallery { display: none; width: 100%; margin: 0; overflow: visible; clip-path: none;
+    background: none; border: 0; box-shadow: none;
+    opacity: 0; transform: translateY(8px);
+    transition: opacity .38s ease, transform .45s cubic-bezier(.25,1,.5,1); }
+  .railGallery.shown { display: block; }
+  .railGallery.open { opacity: 1; transform: none; }
+  /* In All-mode the stage must not shrink below the 3-tile grid — forces the card
+     to reflow (Tweaks drop below) rather than clip the edge tiles at tight widths. */
+  .play.all-mode .stageCol { min-width: min-content; }
+  .railGallery .railSheet { display: grid; grid-template-columns: repeat(3, auto); justify-content: center; align-items: start;
+    gap: 16px 18px; padding: 18px; }
+  .railGallery .cell { flex: 0 0 auto; display: flex; align-items: center; }
+  .railGallery .railctx { gap: 12px; padding: 12px 14px;
+    box-shadow: 0 1px 3px rgba(0,0,0,0.04), 0 5px 14px rgba(40,50,80,0.06); }
+  .railGallery .chip.real { box-shadow: 0 4px 11px rgba(40,50,80,0.11), 0 1px 3px rgba(40,50,80,0.08), inset 0 1px 1px rgba(255,255,255,0.95); }
+  a { color: #2f54c8; } a:hover { color: #6a8cff; }
+</style>
+</head>
+<body>
+
+<!-- ===== shared SVG: the Home glyph (from zmath/icons.jsx) + the blue gradient ===== -->
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+  <path id="home-glyph" d="M12 3.2 20 11 20 20.5 15 20.5 15 14.5 9 14.5 9 20.5 4 20.5 4 11 Z"/>
+  <!-- SOFT build — two nested paths, like the tile's frame + label boxes.
+       Same anatomy as FLAT (frame = glyph dilated 2.1u, white = the glyph itself),
+       but every 90° corner is filleted — no sharp vertices anywhere. -->
+  <path id="home-frame-soft" d="M10.515 1.715 Q12 0.23 13.485 1.715 L21.485 9.515 Q22.1 10.33 22.1 11 L22.1 20.5 Q22.1 22.6 20 22.6 L15 22.6 Q12.9 22.6 12.9 20.5 L12.9 16.9 Q12.9 16.6 12.6 16.6 L11.4 16.6 Q11.1 16.6 11.1 16.9 L11.1 20.5 Q11.1 22.6 9 22.6 L4 22.6 Q1.9 22.6 1.9 20.5 L1.9 11 Q1.9 10.33 2.515 9.515 Z"/>
+  <path id="home-ink-soft" d="M11.22 3.98 Q12 3.2 12.78 3.98 L19.77 10.77 Q20 11 20 11.33 L20 19.8 Q20 20.5 19.3 20.5 L15.7 20.5 Q15 20.5 15 19.8 L15 15.0 Q15 14.5 14.5 14.5 L9.5 14.5 Q9 14.5 9 15.0 L9 19.8 Q9 20.5 8.3 20.5 L4.7 20.5 Q4 20.5 4 19.8 L4 11.33 Q4 11 4.23 10.77 Z"/>
+  <linearGradient id="icg" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#6a8cff"/><stop offset="1" stop-color="#2f54c8"/>
+  </linearGradient>
+  <!-- LAB (Projects beaker) — glyph + teal palette straight from zmath NAV -->
+  <g id="lab-glyph"><path d="M9 3h6"/><path d="M10 3.5v5L5 19a1.3 1.3 0 0 0 1.2 1.9h11.6A1.3 1.3 0 0 0 19 19L14 8.5v-5Z"/><path d="M7.2 14.5h9.6"/></g>
+  <linearGradient id="icg-lab" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#4fe0bf"/><stop offset="1" stop-color="#159c7e"/>
+  </linearGradient>
+  <!-- TOPICS (open book) — glyph + purple palette straight from zmath NAV -->
+  <g id="book-glyph"><path d="M12 6.5C9.3 5 5.2 5 3 6V18.4c2.2-1 6.3-1 9 .5Z"/><path d="M12 6.5C14.7 5 18.8 5 21 6V18.4c-2.2-1-6.3-1-9 .5Z"/></g>
+  <linearGradient id="icg-book" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#b48cf0"/><stop offset="1" stop-color="#6a36b5"/>
+  </linearGradient>
+  <!-- NOTES (notebook sheet) — glyph + orange palette straight from zmath NAV -->
+  <g id="note-glyph"><path d="M6 3h12a1 1 0 0 1 1 1v16a1 1 0 0 1-1 1H6a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1Z"/></g>
+  <linearGradient id="icg-note" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ffc24d"/><stop offset="1" stop-color="#e0701f"/>
+  </linearGradient>
+  <!-- NOTES lined build — dog-eared sheet + two ruled bars (flat recipe) -->
+  <path id="note-doc" d="M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8Z"/>
+  <path id="note-fold" d="M14 2.2v4.3a1.5 1.5 0 0 0 1.5 1.5h4.3"/>
+  <!-- seam gradient anchored to the doc's own y-range so its color matches the rim at both junctions -->
+  <linearGradient id="icg-note-seam" gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="21">
+    <stop offset="0" stop-color="#ffc24d"/><stop offset="1" stop-color="#e0701f"/>
+  </linearGradient>
+  <!-- ABOUT (user) — glyph + pink palette straight from zmath NAV -->
+  <g id="user-glyph"><circle cx="12" cy="6.6" r="3.2"/><path d="M5.5 19.8C5.5 16.2 8.4 14.6 12 14.6s6.5 1.6 6.5 5.2Z"/></g>
+  <linearGradient id="icg-user" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#ff86ac"/><stop offset="1" stop-color="#c2326b"/>
+  </linearGradient>
+  <!-- SEARCH (magnifier) — ring + handle, near-black palette from the app dock -->
+  <g id="search-glyph"><circle cx="10.7" cy="10.7" r="6"/><path d="M18.6 18.6 20.9 20.9"/></g>
+  <linearGradient id="icg-search" x1="0" y1="0" x2="0" y2="1">
+    <stop offset="0" stop-color="#4a4a52"/><stop offset="1" stop-color="#0c0c10"/>
+  </linearGradient>
+</defs></svg>
+
+<div class="page">
+  <!-- ===== live playground ===== -->
+  <section class="play">
+    <div class="stageCol">
+      <div class="heroStage" id="heroStage" data-mat="flat" data-ico="home">
+        <div class="chip hero">
+          <span class="icoWrap s92">
+            <svg class="cap sharpv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="edge" href="#home-glyph"></use>
+              <use class="rim" href="#home-glyph"></use>
+              <use class="ink" href="#home-glyph"></use>
+              <use class="recess" href="#home-glyph"></use>
+            </svg>
+            <svg class="cap softv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="soft-frame" href="#home-frame-soft"></use>
+              <use class="soft-ink" href="#home-ink-soft"></use>
+            </svg>
+            <svg class="cap linedv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="ld-rim" href="#note-doc"></use>
+              <use class="ld-ink" href="#note-doc"></use>
+              <use class="ld-fold" href="#note-fold"></use>
+            </svg>
+          </span>
+        </div>
+        <div class="railctx">
+          <div class="chip real"><span class="icoWrap s36">
+            <svg class="cap sharpv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="edge" href="#home-glyph"></use>
+              <use class="rim" href="#home-glyph"></use>
+              <use class="ink" href="#home-glyph"></use>
+              <use class="recess" href="#home-glyph"></use>
+            </svg>
+            <svg class="cap softv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="soft-frame" href="#home-frame-soft"></use>
+              <use class="soft-ink" href="#home-ink-soft"></use>
+            </svg>
+            <svg class="cap linedv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="ld-rim" href="#note-doc"></use>
+              <use class="ld-ink" href="#note-doc"></use>
+              <use class="ld-fold" href="#note-fold"></use>
+            </svg>
+          </span></div>
+          <div class="slot"><span class="icoWrap s36">
+            <svg class="cap sharpv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="edge" href="#home-glyph"></use>
+              <use class="rim" href="#home-glyph"></use>
+              <use class="ink" href="#home-glyph"></use>
+              <use class="recess" href="#home-glyph"></use>
+            </svg>
+            <svg class="cap softv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="soft-frame" href="#home-frame-soft"></use>
+              <use class="soft-ink" href="#home-ink-soft"></use>
+            </svg>
+            <svg class="cap linedv" viewBox="0 0 24 24" aria-hidden="true">
+              <use class="ld-rim" href="#note-doc"></use>
+              <use class="ld-ink" href="#note-doc"></use>
+              <use class="ld-fold" href="#note-fold"></use>
+            </svg>
+          </span></div>
+        </div>
+        <div class="rc-cap">active · idle</div>
+      </div>
+      <!-- All-icons gallery: replaces the hero inside the stage when Icon = All -->
+      <section class="compare railGallery" id="railGallery" aria-hidden="true">
+        <div class="railSheet" id="railSheet"></div>
+      </section>
+      <div class="statecap" id="statecap"></div>
+    </div>
+
+    <div class="tweaks">
+      <div class="tw-head">Tweaks</div>
+      <div class="tw-row">
+        <div class="tw-label">Icon</div>
+        <div class="drop" id="icodrop">
+          <button class="drop-btn" type="button"><span id="icodropLabel"></span></button>
+          <div class="drop-menu" role="listbox"></div>
+        </div>
+      </div>
+      <div class="tw-row">
+        <div class="tw-label">Icon material</div>
+        <div class="seg" data-for="mat" style="--i:1;--n:3">
+          <span class="seg-ind"></span>
+        </div>
+      </div>
+      <p class="tw-note"><b>Glossy</b> is today's rail icon — gradient rim, 1px deep extrude, colored glow. <b>Flat</b> is the same build with the gloss stripped: no glow, no extrude, one neutral contact shadow. <b>Soft</b> keeps the flat recipe but rebuilds the geometry as two nested paths — frame + molded white inset with concentric corners, like the tile's frame and label. The active · idle pair under the hero is at real rail size.</p>
+    </div>
+  </section>
+
+</div>
+
+<template id="__bundler_thumbnail">
+  <svg viewBox="0 0 100 100" xmlns="http://www.w3.org/2000/svg">
+    <rect width="100" height="100" fill="#fdfbf7"/>
+    <rect x="28" y="28" width="44" height="44" rx="12" fill="#fff" stroke="#dfe4ef"/>
+    <path d="M50 38 60 48 60 60 54 60 54 53 46 53 46 60 40 60 40 48 Z" fill="#fff" stroke="url(#g)" stroke-width="4" stroke-linejoin="round"/>
+    <defs><linearGradient id="g" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a8cff"/><stop offset="1" stop-color="#2f54c8"/></linearGradient></defs>
+  </svg>
+</template>
+
+<script>
+(function () {
+  var hero = document.getElementById('heroStage');
+  var cap = document.getElementById('statecap');
+  var MAT = { glossy: 'Glossy (current)', flat: 'Flat', soft: 'Soft — nested paths', lined: 'Flat — ruled sheet' };
+  var ICO = { search: { label: 'Search', glyph: '#search-glyph' },
+              home: { label: 'Home', glyph: '#home-glyph' },
+              book: { label: 'Topics', glyph: '#book-glyph' },
+              lab:  { label: 'Lab',  glyph: '#lab-glyph' },
+              note: { label: 'Notes', glyph: '#note-glyph' },
+              user: { label: 'About', glyph: '#user-glyph' } };
+  var MATLABEL = { glossy: 'Glossy', flat: 'Flat', soft: 'Soft', lined: 'Lined' };
+  // Which material chips appear for each icon, in display order.
+  // { off: true } = visible but disabled placeholder (that build isn't done yet).
+  var MATLIST = {
+    all: [{ v: 'glossy' }, { v: 'flat' }],
+    home: [{ v: 'glossy' }, { v: 'flat' }, { v: 'soft' }],
+    search: [{ v: 'glossy' }, { v: 'flat' }, { v: 'soft', off: true }],
+    note: [{ v: 'glossy' }, { v: 'flat' }, { v: 'soft', off: true }],
+    book: [{ v: 'glossy' }, { v: 'flat' }, { v: 'soft', off: true }],
+    lab:  [{ v: 'glossy' }, { v: 'flat' }, { v: 'soft', off: true }],
+    user: [{ v: 'glossy' }, { v: 'flat' }, { v: 'soft', off: true }]
+  };
+  var state = { mat: 'flat', ico: 'home' };
+
+  // ---- all-icons gallery rail ----
+  var gallery = document.getElementById('railGallery');
+  var play = document.querySelector('.play');
+  var railSheet = document.getElementById('railSheet');
+  var RAILORDER = ['search', 'home', 'book', 'lab', 'note', 'user'];
+  // one icoWrap's worth of layers (sharp + soft + lined), sharp pointed at `glyph`.
+  // Gallery only ever renders glossy/flat, so softv stays hidden and linedv only
+  // surfaces for the Notes cell (its flat build = the ruled dog-eared sheet).
+  function icoWrapHTML(glyph) {
+    return '<svg class="cap sharpv" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<use class="edge" href="' + glyph + '"></use>' +
+        '<use class="rim" href="' + glyph + '"></use>' +
+        '<use class="ink" href="' + glyph + '"></use>' +
+        '<use class="recess" href="' + glyph + '"></use>' +
+      '</svg>' +
+      '<svg class="cap softv" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<use class="soft-frame" href="#home-frame-soft"></use>' +
+        '<use class="soft-ink" href="#home-ink-soft"></use>' +
+      '</svg>' +
+      '<svg class="cap linedv" viewBox="0 0 24 24" aria-hidden="true">' +
+        '<use class="ld-rim" href="#note-doc"></use>' +
+        '<use class="ld-ink" href="#note-doc"></use>' +
+        '<use class="ld-fold" href="#note-fold"></use>' +
+      '</svg>';
+  }
+  // Six cells, each a real-rail-size active·idle pair. data-ico + data-mat both
+  // sit on the cell so the compound icon-material selectors (e.g. note+flat) match.
+  function buildRail() {
+    railSheet.innerHTML = '';
+    RAILORDER.forEach(function (k) {
+      var w = icoWrapHTML(ICO[k].glyph);
+      var cell = document.createElement('div');
+      cell.className = 'cell';
+      cell.setAttribute('data-ico', k);
+      cell.setAttribute('data-mat', state.mat);
+      cell.innerHTML =
+        '<div class="railctx">' +
+          '<div class="chip real"><span class="icoWrap s36">' + w + '</span></div>' +
+          '<div class="slot"><span class="icoWrap s36">' + w + '</span></div>' +
+        '</div>';
+      railSheet.appendChild(cell);
+    });
+  }
+
+  // ---- icon dropdown (popover menu, checkmark on the selected icon) ----
+  var drop = document.getElementById('icodrop');
+  drop.querySelector('.drop-btn').addEventListener('click', function (e) {
+    e.stopPropagation(); drop.classList.toggle('open');
+  });
+  document.addEventListener('click', function () { drop.classList.remove('open'); });
+  function buildIcoMenu() {
+    var menu = drop.querySelector('.drop-menu');
+    menu.innerHTML = '';
+    // the six real icons, plus the new "All" contact-sheet option
+    Object.keys(ICO).concat(['all']).forEach(function (k) {
+      var label = (k === 'all') ? 'All' : ICO[k].label;
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.className = 'drop-item' + (k === state.ico ? ' on' : '');
+      b.innerHTML = '<span class="ck">\u2713</span><span></span>';
+      b.lastChild.textContent = label;
+      b.addEventListener('click', function () {
+        drop.classList.remove('open');
+        state.ico = k;
+        // if the current material isn't an enabled option for this selection, fall back to Flat
+        var ok = (MATLIST[k] || []).some(function (m) { return m.v === state.mat && !m.off; });
+        if (!ok) state.mat = 'flat';
+        apply();
+      });
+      menu.appendChild(b);
+    });
+    document.getElementById('icodropLabel').textContent = (state.ico === 'all') ? 'All' : ICO[state.ico].label;
+  }
+
+  function buildMatSeg() {
+    var seg = document.querySelector('.seg[data-for="mat"]');
+    var list = MATLIST[state.ico] || MATLIST.book;
+    seg.innerHTML = '<span class="seg-ind"></span>';
+    list.forEach(function (m) {
+      var b = document.createElement('button');
+      b.type = 'button';
+      b.setAttribute('data-val', m.v);
+      b.textContent = MATLABEL[m.v];
+      if (m.off) b.disabled = true;
+      if (m.v === state.mat) b.classList.add('on');
+      seg.appendChild(b);
+    });
+    seg.style.setProperty('--n', list.length);
+    var idx = list.map(function (m) { return m.v; }).indexOf(state.mat);
+    seg.style.setProperty('--i', idx < 0 ? 0 : idx);
+  }
+
+  function apply() {
+    var isAll = state.ico === 'all';
+    // "All" only ships glossy + flat (soft geometry exists for Home only)
+    if (isAll && state.mat !== 'glossy' && state.mat !== 'flat') state.mat = 'flat';
+    if (isAll) {
+      hero.style.display = 'none';           // hero hides — the rail takes its place
+      play.classList.add('all-mode');
+      gallery.classList.add('shown');
+      gallery.setAttribute('aria-hidden', 'false');
+      buildRail();
+      requestAnimationFrame(function () { gallery.classList.add('open'); });
+      cap.innerHTML = '<b>All icons · ' + MATLABEL[state.mat] + '</b>';
+    } else {
+      hero.style.display = '';
+      play.classList.remove('all-mode');
+      gallery.classList.remove('open');
+      gallery.classList.remove('shown');
+      gallery.setAttribute('aria-hidden', 'true');
+      hero.setAttribute('data-mat', state.mat);
+      hero.setAttribute('data-ico', state.ico);
+      // point the sharp build's layers at the selected glyph
+      hero.querySelectorAll('.cap.sharpv use').forEach(function (u) {
+        u.setAttribute('href', ICO[state.ico].glyph);
+      });
+      cap.innerHTML = '<b>' + ICO[state.ico].label + ' · ' + MAT[state.mat] + '</b>';
+    }
+    buildMatSeg();
+    buildIcoMenu();
+  }
+
+  document.querySelectorAll('.seg').forEach(function (seg) {
+    var btns = Array.prototype.slice.call(seg.querySelectorAll('button'));
+    seg.style.setProperty('--n', btns.length);
+    seg.addEventListener('click', function (e) {
+      var b = e.target.closest('button');
+      if (!b) return;
+      state.mat = b.getAttribute('data-val');
+      apply();
+    });
+  });
+
+  apply();
+})();
+</script>
+</body>
+</html>

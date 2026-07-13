@@ -1,0 +1,138 @@
+/* ============================================================
+   TWEAK OVERRIDES — three expressive "feel" levers, driven by
+   data-attributes on <html> set by the Tweaks panel:
+     data-ambience = day | dusk | night     (the ground it floats on)
+     data-material = liquid | frosted | flat (how glassy the chrome is)
+     data-energy   = calm | lively | springy (motion personality)
+   Defaults (day / liquid / lively) == the original design, so an
+   un-tweaked load looks exactly as before.
+   ============================================================ */
+
+/* ------------------------------------------------------------
+   AMBIENCE — repaints the whole atmosphere the glass sits on.
+   The frosted-white chrome stays put; only the ground, dot grid
+   and ambient glow change, so legibility is preserved.
+   ------------------------------------------------------------ */
+
+/* DUSK — warm golden-hour paper. Cozy, low, amber. */
+html[data-ambience="dusk"] {
+  --wii-bg-1: #fff6ea;
+  --wii-bg-2: #ffead6;
+  --wii-bg-3: #f8dcc0;
+  --wii-dot: rgba(150, 90, 30, 0.07);
+}
+html[data-ambience="dusk"] .os::before {
+  background:
+    radial-gradient(30% 28% at 12% 16%, rgba(255, 170, 90, 0.20), transparent 70%),
+    radial-gradient(28% 24% at 88% 12%, rgba(255, 120, 110, 0.16), transparent 70%),
+    radial-gradient(30% 28% at 14% 90%, rgba(255, 200, 120, 0.16), transparent 70%),
+    radial-gradient(26% 24% at 90% 86%, rgba(240, 150, 90, 0.14), transparent 70%);
+}
+
+/* MIDNIGHT — deep twilight ground; frosted-white panels glow on top,
+   the pastel ambient blobs bloom, dots go faint-light. */
+html[data-ambience="night"] {
+  --wii-bg-1: #1b2233;
+  --wii-bg-2: #141a29;
+  --wii-bg-3: #0c1019;
+  --wii-dot: rgba(255, 255, 255, 0.05);
+}
+html[data-ambience="night"] .os::before {
+  background:
+    radial-gradient(28% 26% at 13% 17%, rgba(170, 120, 240, 0.26), transparent 70%),
+    radial-gradient(26% 24% at 87% 13%, rgba(255, 150, 120, 0.18), transparent 70%),
+    radial-gradient(30% 28% at 12% 88%, rgba(70, 220, 190, 0.20), transparent 70%),
+    radial-gradient(28% 24% at 90% 85%, rgba(120, 150, 255, 0.20), transparent 70%);
+  filter: blur(48px);
+}
+/* the only text that sits bare on the ground (Notes / About headers) */
+html[data-ambience="night"] .topbar .title { color: #f2f0ea; }
+html[data-ambience="night"] .topbar .sub   { color: #b8c1d4; }
+html[data-ambience="night"] .stage::-webkit-scrollbar-thumb { background: rgba(255,255,255,0.18); }
+
+/* ------------------------------------------------------------
+   MATERIAL — how the chrome is made. Liquid (default) is glossy
+   liquid-glass; Frosted is soft milk-glass; Flat is opaque paper.
+   ------------------------------------------------------------ */
+
+/* FROSTED — milkier, less specular, softer shadows. Still blurred. */
+html[data-material="frosted"] {
+  --glass-bg:        rgba(255, 255, 255, 0.80);
+  --glass-bg-nav:    rgba(255, 255, 255, 0.84);
+  --glass-bg-strong: rgba(255, 255, 255, 0.92);
+  --glass-spec:  inset 0 1px 2px rgba(255, 255, 255, 0.4);
+  --spec-strong: inset 0 1px 2px rgba(255, 255, 255, 0.45);
+  --shadow-nav:  0 2px 12px rgba(0, 0, 0, 0.05);
+}
+html[data-material="frosted"] .tile-sheen { opacity: 0.45; }
+html[data-material="frosted"] .topics-hero { background: rgba(255, 255, 255, 0.84); }
+
+/* FLAT — opaque paper cards, no blur, no gloss, flat single-layer shadow. */
+html[data-material="flat"] {
+  --glass-bg:        rgba(252, 251, 248, 0.97);
+  --glass-bg-nav:    rgba(252, 251, 248, 0.97);
+  --glass-bg-strong: rgba(255, 255, 255, 0.99);
+  --glass-spec:  inset 0 0 0 1px rgba(0, 0, 0, 0);
+  --spec-strong: inset 0 0 0 1px rgba(0, 0, 0, 0);
+  --shadow-nav:  0 1px 2px rgba(0, 0, 0, 0.10);
+  --shadow-wii:  0 1px 2px rgba(0, 0, 0, 0.08);
+}
+html[data-material="flat"] .rail-panel,
+html[data-material="flat"] .merge-bg,
+html[data-material="flat"] .topics-hero,
+html[data-material="flat"] .status-pill,
+html[data-material="flat"] .dock,
+html[data-material="flat"] .tile-art,
+html[data-material="flat"] .seg,
+html[data-material="flat"] .rail-tag,
+html[data-material="flat"] .note-row,
+html[data-material="flat"] .badge,
+html[data-material="flat"] .card {
+  -webkit-backdrop-filter: none !important;
+  backdrop-filter: none !important;
+}
+html[data-material="flat"] .topics-hero { background: #fcfbf8; }
+html[data-material="flat"] .tile-sheen { opacity: 0; }
+html[data-material="flat"] .tile {
+  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10) !important;
+}
+html[data-material="flat"] .tile:hover {
+  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14) !important;
+}
+
+/* ------------------------------------------------------------
+   ENERGY — the springiness of every hover/press. Reshapes how
+   alive (toy-like) vs. composed the whole UI feels.
+   ------------------------------------------------------------ */
+
+/* CALM — composed. No overshoot, gentler lifts. */
+html[data-energy="calm"] {
+  --ease-bounce: cubic-bezier(0.25, 1, 0.5, 1);
+  --ease-smooth: cubic-bezier(0.33, 1, 0.68, 1);
+  --dur-base: 0.3s;
+}
+html[data-energy="calm"] .tile:hover {
+  transform: translateY(-3px) scale(1.008) !important;
+}
+html[data-energy="calm"] .dock .di:hover {
+  transform: translateY(-3px) scale(1.06) !important;
+}
+
+/* SPRINGY — console-toy overshoot, exaggerated lifts. */
+html[data-energy="springy"] {
+  --ease-bounce: cubic-bezier(0.34, 1.8, 0.5, 1.25);
+  --dur-base: 0.32s;
+}
+html[data-energy="springy"] .tile:hover {
+  transform: translateY(-13px) scale(1.05) !important;
+}
+html[data-energy="springy"] .dock .di:hover {
+  transform: translateY(-13px) scale(1.32) !important;
+}
+html[data-energy="springy"] .nav-item:active,
+html[data-energy="springy"] .dock .di:active {
+  transform: scale(0.88) !important;
+}
+
+/* reduced-motion: keep the overshoot curves but let the engine's own
+   reduce-motion handling damp the ambient drift (already wired). */

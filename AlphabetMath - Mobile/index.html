@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath</title>
+<!-- ONE stylesheet entry — the brain owns the full list (zmath/styles.css).
+     The real title is set by the brain (zmath/main.jsx) on boot. -->
+<link rel="stylesheet" href="zmath/styles.css" />
+
+<!-- warm the ESM CDN connection so React resolves faster on first paint -->
+<link rel="preconnect" href="https://esm.sh" crossorigin />
+
+<!-- React/ReactDOM as ES modules, resolved by the import map below. The same
+     bare "react" / "react-dom/client" specifiers the Vite app uses, so the
+     SOURCE FILES are identical across both readers. -->
+<script type="importmap">
+{
+  "imports": {
+    "react": "https://esm.sh/react@18.3.1",
+    "react-dom": "https://esm.sh/react-dom@18.3.1?external=react",
+    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?external=react"
+  }
+}
+</script>
+</head>
+<body>
+<div id="root">
+  <!-- Loading state shown while the no-build loader fetches + compiles modules
+       (replaced by React on mount). Keeps #root non-empty during the network
+       fetch so the page never flashes blank. -->
+  <div id="zmath-boot" style="position:fixed;inset:0;display:flex;align-items:center;justify-content:center;background:#f4f5fb">
+    <div style="font:600 15px/1.4 ui-sans-serif,system-ui,sans-serif;color:#8b93a7;letter-spacing:.02em">Loading AlphabetMath…</div>
+  </div>
+</div>
+
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+
+<!-- ── zmath-loader: no-build ESM+JSX import-graph loader ──────────────────────
+     Babel-standalone only compiles the script tag it owns, NOT files reached via
+     `import`. So we walk the graph ourselves: fetch each relative module,
+     Babel-transform its JSX, rewrite relative specifiers to blob URLs, and pin
+     import.meta.url to each file's real URL (blob: URLs are not a resolvable
+     base). Bare specifiers (react) fall through to the import map untouched.
+     The Vite build reads the SAME source files natively — this loader exists
+     only so the portable page can run them with no build step. -->
+<script>
+async function loadGraph(entryUrl) {
+  const cache = new Map();                                   // absUrl -> blobUrl
+  const RELATIVE = /(\bfrom\s*|\bimport\s*)(["'])(\.[^"']+)\2/g;
+  async function build(absUrl) {
+    if (cache.has(absUrl)) return cache.get(absUrl);
+    const src = await (await fetch(absUrl)).text();
+    const deps = [];
+    src.replace(RELATIVE, (m, _k, _q, spec) => { deps.push(spec); return m; });
+    const map = {};
+    for (const spec of deps) map[spec] = await build(new URL(spec, absUrl).href);
+    let code = Babel.transform(src, {
+      presets: ["react"],
+      filename: absUrl.split("/").pop(),
+    }).code;
+    code = code.replace(RELATIVE, (m, kw, q, spec) =>
+      map[spec] ? `${kw}${q}${map[spec]}${q}` : m);
+    code = code.replace(/import\.meta\.url/g, JSON.stringify(absUrl));
+    const blob = URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
+    cache.set(absUrl, blob);
+    return blob;
+  }
+  return build(new URL(entryUrl, location.href).href);
+}
+
+loadGraph("./zmath/main.jsx")
+  .then((entry) => import(entry))
+  .catch((err) => {
+    console.error("[zmath-loader]", err);
+    document.getElementById("root").innerHTML =
+      '<pre style="padding:24px;color:#bf3535;font:13px/1.5 ui-monospace,monospace;white-space:pre-wrap">'
+      + 'AlphabetMath failed to load:\n' + (err && (err.stack || err.message) || err) + '</pre>';
+  });
+</script>
+</body>
+</html>

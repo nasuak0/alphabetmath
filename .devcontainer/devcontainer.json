@@ -1,0 +1,20 @@
+{
+  "name": "AlphabetMath",
+  "image": "mcr.microsoft.com/devcontainers/javascript-node:20",
+
+  // Install the App's dependencies automatically on first open — no commands needed.
+  "postCreateCommand": "cd 'AlphabetMath - App' && npm install",
+
+  // 5173 = Vite dev server (the App) · 5500 = static server (the Mobile live product)
+  "forwardPorts": [5173, 5500],
+  "portsAttributes": {
+    "5173": { "label": "App (Vite dev)" },
+    "5500": { "label": "Mobile (live product)" }
+  },
+
+  "customizations": {
+    "vscode": {
+      "extensions": ["ritwickdey.LiveServer"]
+    }
+  }
+}

@@ -1,0 +1,14 @@
+# AlphabetMath — root .gitignore
+# Studio-only folders: never ship to GitHub (by decision, 2026-07-09)
+uploads/
+scraps/
+_ds/
+
+# Build artifacts & dependencies (regenerated, never committed)
+node_modules/
+dist/
+
+# OS junk
+.DS_Store
+Thumbs.db
+desktop.ini

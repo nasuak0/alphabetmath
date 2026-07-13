@@ -1,0 +1,188 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Interaction Kit — Directions</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&family=Baloo+2:wght@500;600;700&family=JetBrains+Mono:wght@400;500&display=swap');
+  :root{
+    --navy:#26345f; --blue:#3a5694; --red:#bf3535; --ink:#2c2420; --ink2:#6a615b;
+    --paper:#f7f3ec; --edge:rgba(38,52,95,0.12);
+    --serif:Georgia,'Times New Roman',serif;
+    --ui:'Inter',-apple-system,sans-serif;
+    --mono:'JetBrains Mono',ui-monospace,monospace;
+    --display:'Baloo 2','Inter',sans-serif;
+  }
+  *{box-sizing:border-box;}
+  html,body{height:100%;}
+  body{margin:0;font-family:var(--ui);color:var(--ink);background:#ece8df;
+    display:flex;align-items:center;justify-content:center;padding:32px;}
+  .stage{width:100%;max-width:960px;}
+  .stage-title{font-family:var(--display);font-weight:700;font-size:30px;color:var(--ink);margin:0 0 18px 4px;letter-spacing:-0.01em;}
+  .stage-card{background:#fff;border:1px solid var(--edge);border-radius:18px;
+    box-shadow:0 10px 40px rgba(38,52,95,0.10);overflow:hidden;}
+
+  /* ---- kit frame ---- */
+  .kit{display:flex;flex-direction:column;align-items:stretch;padding:14px 16px 16px;height:100%;}
+  .kit-svg{width:100%;height:auto;touch-action:none;user-select:none;display:block;}
+
+  /* ============ Direction B — Notebook (chosen) ============ */
+  .kitB-coord{font-family:var(--serif);font-style:italic;font-size:14px;fill:var(--red);font-weight:600;}
+  @keyframes pinpop{0%{transform:scale(1.5);}60%{transform:scale(.9);}100%{transform:scale(1);}}
+  .kitB-pinpop{animation:pinpop .22s cubic-bezier(.34,1.56,.64,1);transform-origin:center;transform-box:fill-box;}
+  .kitB-top{display:flex;align-items:stretch;gap:0;}
+  .kitB-top .kit-svg{order:2;flex:1 1 58%;min-width:0;align-self:flex-start;margin-top:2px;padding-left:18px;}
+  .kitB-panel{order:1;flex:0 0 40%;display:flex;flex-direction:column;gap:7px;padding-right:18px;border-right:2px solid #1c2233;}
+  /* layout A — compact: only sliders + Show-the-trap, figure expands */
+  .kitB-top--min .kitB-panel{flex:0 0 26%;justify-content:center;gap:11px;}
+  .kitB-top--min .kit-svg{flex:1 1 74%;}
+  /* hero equation card */
+  .kitB-hero{background:#fbf7ef;border:1.5px solid #e6dcca;border-radius:10px;padding:6px 11px;}
+  .kitB-herolab{font-family:var(--display);font-weight:600;font-size:9px;letter-spacing:.04em;color:#a2967f;margin-bottom:0;}
+  .kitB-heroeq{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--navy);line-height:1.1;}
+  .kitB-heroeq b{font-style:normal;color:var(--red);font-weight:700;}
+  /* stat boxes */
+  .kitB-stats{display:flex;gap:8px;}
+  .kitB-stat{flex:1;background:#fffdf8;border:1.5px solid #e6dcca;border-radius:11px;padding:8px 10px;display:flex;flex-direction:column;gap:3px;min-width:0;}
+  .kitB-stat.muted{opacity:.5;}
+  .kitB-statlab{font-family:var(--display);font-weight:600;font-size:10px;letter-spacing:.07em;text-transform:uppercase;color:#a2967f;}
+  .kitB-statval{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--navy);white-space:nowrap;}
+  .kitB-statval em{font-style:normal;color:var(--red);font-weight:700;}
+  /* article table — n / Step / Side / Area check */
+  .kitB-table{background:#fffdf8;border:1.5px solid #e6dcca;border-radius:10px;padding:1px 11px;
+    border-top:2px solid #1c2233;border-bottom:2px solid #1c2233;}
+  .kitB-trow{display:grid;grid-template-columns:68px 1fr auto;align-items:baseline;gap:8px;
+    padding:5px 0;border-bottom:1px solid #efe7d7;}
+  .kitB-trow:last-child{border-bottom:none;}
+  .kitB-tkey{font-family:var(--display);font-weight:600;font-size:9px;letter-spacing:.05em;text-transform:uppercase;color:#a2967f;}
+  .kitB-tform{font-family:var(--serif);font-style:italic;font-size:12.5px;color:#8a8073;white-space:nowrap;}
+  .kitB-tnum{font-family:var(--serif);font-style:italic;font-size:13.5px;color:var(--navy);white-space:nowrap;text-align:right;}
+  .kitB-tnum b{font-style:normal;font-weight:700;color:var(--red);}
+  .kitB-sup{font-size:.66em;}
+  .kitB-radical{display:inline-flex;align-items:flex-start;}
+  .kitB-radsign{font-style:italic;}
+  .kitB-radband{border-top:1.4px solid currentColor;padding:1px 2px 0 1px;margin-left:1px;line-height:1.05;}
+  /* toggle row */
+  .kitB-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+    background:#fffdf8;border:1.5px solid #e6dcca;border-radius:9px;padding:6px 10px;cursor:pointer;text-align:left;}
+  .kitB-tgl-text{display:flex;flex-direction:column;gap:0;}
+  .kitB-tgl-title{font-family:var(--ui);font-weight:600;font-size:11.5px;color:var(--ink);}
+  .kitB-tgl-sub{font-family:var(--ui);font-size:10px;color:var(--ink2);}
+  .kitB-switch{flex:none;width:36px;height:20px;border-radius:99px;background:#ddd3c2;position:relative;transition:.16s;}
+  .kitB-switch span{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.16s;}
+  .kitB-switch.on{background:var(--red);}
+  .kitB-switch.on span{left:19px;}
+  /* tip card */
+  .kitB-tip{display:flex;gap:8px;background:#fbf7ef;border:1px solid #ece3d3;border-radius:9px;padding:8px 10px;}
+  .kitB-tipbadge{flex:none;width:24px;height:24px;border-radius:6px;background:var(--navy);display:flex;align-items:center;justify-content:center;}
+  .kitB-tiptext{font-family:var(--ui);font-size:11px;line-height:1.4;color:var(--ink2);}
+  .kitB-tiptext b{color:var(--ink);}
+  .kitB-tiptext i{font-family:var(--serif);font-style:italic;color:var(--navy);}
+  .kitB-coord{font-family:var(--serif);font-style:italic;font-size:14px;fill:var(--red);font-weight:600;}
+  .kitB-hint text{font-family:var(--serif);font-style:italic;font-size:13px;fill:var(--red);opacity:.72;transition:opacity .35s ease;}
+  .kitB-hint.gone text{opacity:0;}
+  .kitB-slidercard{background:#fbf7ef;border:1.5px solid #e6dcca;border-radius:10px;padding:7px 11px;}
+  .kitB-controls{display:flex;flex-direction:column;gap:12px;margin-top:16px;padding-top:14px;border-top:1px dashed rgba(38,52,95,0.18);}
+  .kitB-sliders{display:flex;flex-direction:column;gap:6px;}
+  .kitB-sliders label{display:flex;align-items:center;gap:9px;font-family:var(--display);font-weight:600;font-size:13px;color:var(--navy);}
+  .kitB-sliders label b{font-family:var(--display);background:var(--navy);color:#fff;border-radius:6px;padding:1px 7px;font-size:12.5px;min-width:22px;text-align:center;}
+  .kitB-sliders input{flex:1;}
+  .kitB input[type=range]{-webkit-appearance:none;height:6px;background:#e6ddcf;border-radius:99px;}
+  .kitB input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:18px;height:18px;border-radius:50%;background:var(--red);cursor:grab;border:3px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.25);}
+  .kitB-scenes{display:flex;gap:7px;flex-wrap:wrap;}
+  .kitB-paper{flex:1 1 26%;min-width:54px;font-family:var(--display);font-weight:600;font-size:14px;color:var(--ink2);
+    background:#fffdf8;border:1.5px solid #e0d5c3;border-radius:11px;padding:7px 0;cursor:pointer;
+    box-shadow:0 1.5px 0 #e0d5c3;transition:.12s;}
+  .kitB-paper:hover{transform:translateY(-1px);color:var(--navy);}
+  .kitB-paper.perf{border-style:dashed;}
+  .kitB-paper.on{background:var(--navy);color:#fff;border-color:var(--navy);box-shadow:0 1.5px 0 #1a2543;border-style:solid;}
+  /* svg in-figure labels */
+  .kitB-trilab{font-family:var(--serif);font-style:italic;font-size:11px;fill:var(--red);opacity:.85;}
+  .kitB-seg{font-family:var(--serif);font-style:italic;font-size:12px;fill:var(--navy);}
+  .kitB-brace{stroke:#26345f;stroke-width:1.4;opacity:.6;}
+  .kitB-bracelab{font-family:var(--serif);font-style:italic;font-size:12.5px;fill:#26345f;}
+  .kitB-vlab{font-family:var(--serif);font-style:italic;font-size:11.5px;fill:#26345f;paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round;}
+  .kitB-perfect{font-family:var(--display);font-weight:600;font-size:13px;fill:#3f9b73;}
+  .kitB-eq.muted{color:#a59c93;}
+  .kitB-eq.muted b{color:#a59c93;}
+  .kitB-pow{white-space:nowrap;}
+  .kitB-halfexp{font-size:.62em;}
+  /* diagonal (slashed) 1/2 exponent — elegant serif fraction, like a hand-drawn power */
+  .kitB-dfrac{white-space:nowrap;font-style:italic;letter-spacing:-.01em;}
+  .kitB-dfn{font-size:.84em;position:relative;top:-.18em;}
+  .kitB-dfsl{margin:0 -.04em;}
+  .kitB-dfd{font-size:.84em;position:relative;top:.12em;}
+  /* CSS-drawn radical that connects and fits the surrounding font */
+  .kitB-sqrt{display:inline-flex;align-items:stretch;white-space:nowrap;}
+  .kitB-sqrt-sign{width:.5em;align-self:stretch;height:auto;flex:none;margin-right:0;overflow:visible;position:relative;top:.5px;}
+  .kitB-sqrt-body{border-top:1px solid currentColor;padding:.12em .24em 0 .18em;line-height:1.06;}
+
+  /* ---- article-style spreadsheet (tweak: Middle table = "sheet") ---- */
+  .kitB-sheet{margin:16px 4px 2px;text-align:center;}
+  .kitB-sheet-cap{font-family:var(--display);font-weight:600;font-size:10px;letter-spacing:.06em;
+    text-transform:uppercase;color:#a2967f;margin-bottom:7px;padding-left:2px;text-align:left;}
+  .kitB-sh-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:8px;
+    align-items:baseline;margin-top:13px;padding:11px 6px 12px;
+    border-top:2.5px solid #1c2233;border-bottom:2.5px solid #1c2233;}
+  .kitB-sh-rule{grid-column:1/-1;height:0;border-top:1px solid #c9c0b0;margin:1px 0;}
+  .kitB-sh-h{font-family:var(--serif);font-style:italic;font-size:15px;color:var(--ink);text-align:center;}
+  .kitB-sh-f{font-family:var(--serif);font-style:italic;font-size:13px;color:#a59c93;text-align:center;white-space:nowrap;display:block;}
+  .kitB-sh-n{font-family:var(--serif);font-style:italic;font-size:14px;color:var(--ink2);text-align:center;white-space:nowrap;display:block;}
+  .kitB-sh-v{font-family:var(--serif);font-style:italic;font-size:16px;color:var(--navy);text-align:center;white-space:nowrap;display:block;}
+  .kitB-sh-v b{font-style:italic;font-weight:600;color:var(--navy);}
+  /* step readout living with the sliders */
+  .kitB-step{display:flex;align-items:center;gap:6px;margin-top:9px;padding-top:9px;
+    border-top:1px dashed #e6dcca;font-family:var(--display);font-weight:600;font-size:13px;color:var(--navy);}
+  .kitB-step-key{font-family:var(--display);font-weight:600;font-size:9px;letter-spacing:.07em;
+    text-transform:uppercase;color:#a2967f;}
+  .kitB-step i{font-family:var(--serif);font-style:italic;font-weight:400;font-size:14px;color:#8a8073;}
+  .kitB-step b{font-family:var(--serif);font-style:italic;font-size:14px;background:var(--navy);color:#fff;
+    border-radius:6px;padding:1px 9px;}
+</style>
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
+<script type="text/babel" src="kit-directions.jsx"></script>
+<script type="text/babel">
+  const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+    "braceSide": "RQ",
+    "panelLayout": "full",
+    "accent": "#bf3535"
+  }/*EDITMODE-END*/;
+
+  function App() {
+    const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+    React.useEffect(() => {
+      document.documentElement.style.setProperty('--red', t.accent);
+    }, [t.accent]);
+    return (
+      <div className="stage">
+        <h1 className="stage-title">Direction B — Notebook</h1>
+        <div className="stage-card"><KitNotebook braceSide={t.braceSide} panelLayout={t.panelLayout} /></div>
+        <TweaksPanel>
+          <TweakSection label="Panel layout" />
+          <TweakRadio label="Layout" value={t.panelLayout}
+            options={[{value:'min',label:'A'},{value:'full',label:'B'}]}
+            onChange={(v) => setTweak('panelLayout', v)} />
+          <TweakSection label="Rise / run braces" />
+          <TweakRadio label="Brace side" value={t.braceSide}
+            options={[{value:'OP',label:'O→P'},{value:'RQ',label:'R→Q'},{value:'both',label:'Both'}]}
+            onChange={(v) => setTweak('braceSide', v)} />
+          <TweakSection label="Theme" />
+          <TweakColor label="Accent" value={t.accent}
+            options={['#bf3535', '#26345f', '#3f9b73', '#9a5bd0']}
+            onChange={(v) => setTweak('accent', v)} />
+        </TweaksPanel>
+      </div>
+    );
+  }
+  ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>
