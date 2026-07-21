@@ -3,9 +3,10 @@ import React from "react";
 import { createPortal } from "react-dom";
 import { Sidebar, Tile, Modal, NoteBlock } from "./components.jsx";
 import { Icon } from "./icons.jsx";
-import { CoverArt } from "./coverart.jsx";
-import { ZMATH_TOPICS, ZMATH_PROJECTS, ZMATH_TByID, ZMATH_NOTES, NOTE_GLYPH } from "./data.js";
+import { ZMATH_TOPICS, ZMATH_PROJECTS, ZMATH_TByID, ZMATH_PByID, ZMATH_NOTES, NOTE_GLYPH } from "./data.js";
 import { LabSpotlight } from "./lab-screen.jsx";
+import { HomeTray, TopicsTray } from "./picker-screens.jsx";
+import { ZMATH_COMPOSED } from "./tile-covers.js";
 import { useTweaks, TweaksPanel, TweakSection, TweakSelect, TweakRadio } from "./tweaks-panel.jsx";
 const { useState: uS, useEffect: uE } = React;
 
@@ -44,19 +45,21 @@ function useClock() {
   uE(() => { const t = setInterval(() => setNow(new Date()), 20000); return () => clearInterval(t); }, []);
   const time = now.toLocaleTimeString([], { hour: 'numeric', minute: '2-digit' });
   const date = now.toLocaleDateString([], { month: 'short', day: 'numeric' });
-  return { time, date };
+  const h = now.getHours();
+  const tod = h >= 6 && h < 11 ? 'morning' : h >= 11 && h < 17 ? 'midday' : h >= 17 && h < 21 ? 'evening' : 'night';
+  return { time, date, tod };
 }
 
 function TopBar({ title, sub }) {
-  const { time, date } = useClock();
+  const { time, date, tod } = useClock();
   return (
     <div className="topbar">
       <div>
         <div className="title">{title}</div>
         <div className="sub">{sub}</div>
       </div>
-      <div className="status-pill">
-        <Icon name="clock" size={15} sw={2} />
+      <div className="status-pill" data-tod={tod}>
+        <span className="g"><Icon name="clock" size={17} sw={2.4} /></span>
         <span className="clock">{time}</span>
         <span className="sep" />
         <span className="date">{date}</span>
@@ -65,36 +68,20 @@ function TopBar({ title, sub }) {
   );
 }
 
-/* ---- HOME (two sub-bars — topic tiles + project cartridges — merge into one tray) ---- */
+/* ---- HOME (one paper tray, two shelf-less rows: topic tiles + project cartridges) ---- */
 function HomeScreen({ onOpen, go, eyebrows }) {
+  /* Design Lab port: study-exact shelves tray (picker-screens.jsx), scaled to the Lab-tray footprint. */
   return (
-    <div className="fade home">
+    <div className="fade picker-home lab-spot">
       <HeroWidget compact pillEyebrow eyebrow={eyebrows.home} />
-      <div className="homestack">
-        <div className="homebar homebar-top">
-          <div className="rail-tag"><span>Topics</span></div>
-          <div className="hrail hrail-topics">
-            {ZMATH_TOPICS.map((t, i) => (
-              <Tile key={t.id} item={{ kind: 'topic', id: t.id, w: 1, h: 1 }} idx={i} onOpen={onOpen} />
-            ))}
-          </div>
-        </div>
-        <div className="homebar homebar-bottom">
-          <div className="rail-tag"><span>Projects</span></div>
-          <div className="hrail hrail-projects">
-            {ZMATH_PROJECTS.map((p, i) => (
-              <Tile key={p.id} item={{ kind: 'project', id: p.id, w: 2, h: 1 }} idx={i} onOpen={onOpen} />
-            ))}
-          </div>
-        </div>
-      </div>
+      <HomeTray onOpen={onOpen} />
     </div>
   );
 }
 
 /* ---- shared glass hero widget (frosted panel + brand glow + clock pill) ---- */
 function HeroWidget({ eyebrow, title, sub, compact, pillEyebrow, children }) {
-  const { time, date } = useClock();
+  const { time, date, tod } = useClock();
   return (
     <div className={'topics-hero' + (compact ? ' compact' : '')}>
       <div className="th-main">
@@ -105,8 +92,8 @@ function HeroWidget({ eyebrow, title, sub, compact, pillEyebrow, children }) {
         {sub && <div className="sub">{sub}</div>}
         {children}
       </div>
-      <div className="status-pill th-pill">
-        <Icon name="clock" size={15} sw={2} />
+      <div className="status-pill th-pill" data-tod={tod}>
+        <span className="g"><Icon name="clock" size={17} sw={2.4} /></span>
         <span className="clock">{time}</span>
         <span className="sep" />
         <span className="date">{date}</span>
@@ -117,26 +104,11 @@ function HeroWidget({ eyebrow, title, sub, compact, pillEyebrow, children }) {
 
 /* ---- TOPICS ---- */
 function TopicsScreen({ onOpen, eyebrows }) {
-  const [filter, setFilter] = uS('All');
-  const cats = ['All', 'Pure', 'Applied'];
-  const idx = cats.indexOf(filter);
-  const pure = new Set(['algebra','geometry','numberth','logic','analysis']);
-  const list = ZMATH_TOPICS.filter(t => filter === 'All' || (filter === 'Pure' ? pure.has(t.id) : !pure.has(t.id)));
+  /* Design Lab port: study-exact 4×2 grid tray (picker-screens.jsx). */
   return (
-    <div className={'fade' + (filter === 'All' ? ' topics-screen' : '')}>
-      <HeroWidget compact pillEyebrow eyebrow={eyebrows.topics}>
-        <div className="seg" style={{ '--seg': idx }}>
-          <span className="seg-ind" />
-          {cats.map(c => (
-            <button key={c} className={'seg-btn' + (filter === c ? ' on' : '')} onClick={() => setFilter(c)}>{c}</button>
-          ))}
-        </div>
-      </HeroWidget>
-      <div className="tile-tray">
-      <div className="grid-uniform">
-        {list.map((t, i) => <Tile key={t.id} item={{ kind: 'topic', id: t.id, w: 1, h: 1 }} idx={i} onOpen={onOpen} />)}
-      </div>
-      </div>
+    <div className="fade picker-topics lab-spot">
+      <HeroWidget compact pillEyebrow eyebrow={eyebrows.topics} />
+      <TopicsTray onOpen={onOpen} />
     </div>
   );
 }
@@ -229,7 +201,7 @@ function NotesScreen({ onOpen, eyebrows }) {
           {/* merged sticky header: blue cover with back + title */}
           <div className="reader-header">
             <div className="mc-grad" />
-            {shownTopic && <CoverArt topic={shownTopic} className="tile-cover" />}
+            {shownTopic && <svg className="tile-cover" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href={ZMATH_COMPOSED[shownTopic.id].art} /></svg>}
             <div className="tile-sheen" />
             <button className="nts-back" onClick={() => setReading(null)} aria-label="Back to Notebook">
               <Icon name="arrowLeft" size={17} sw={2.4} />
@@ -303,7 +275,7 @@ const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "capsuleShape": "plain",
   "homeMaterial": "color",
   "fit": "fluid",
-  "tileLabel": "halo"
+  "iconMat": "flat"
 }/*EDITMODE-END*/;
 
 /* Optional deep-link overrides (read from the URL once):
@@ -345,10 +317,10 @@ function App() {
     r.setAttribute('data-energy', 'lively');
     r.setAttribute('data-capsule', 'plain');
     r.setAttribute('data-fit', FIT_OVERRIDE || t.fit || 'fluid');
-    r.setAttribute('data-tilelabel', t.tileLabel);
-    r.setAttribute('data-tilemat', 'flat2');
-    r.setAttribute('data-flatbadge', 'solid');
-  }, [t.material, t.tileLabel, t.fit]);
+    /* Phase 5: flat-composed is THE look (shiny retired). Flat Lab-paper tray on Topics + Home + Projects (Lab). */
+    r.setAttribute('data-tilemat', 'flat-composed');
+    r.setAttribute('data-traymat', (page === 'Topics' || page === 'Home' || page === 'Projects') ? 'flat' : 'glass');
+  }, [t.material, t.fit, page]);
 
   const onOpen = (e) => setEntry(e);
   const nav = (p) => { setPage(p); document.querySelector('.stage')?.scrollTo(0, 0); };
@@ -368,7 +340,7 @@ function App() {
     <div className="os">
       <RotateGuard />
       <Sidebar page={page} setPage={(p) => { setPage(p); document.querySelector('.stage')?.scrollTo(0, 0); }}
-               searchInRail={true} onSearch={() => nav('Topics')} capsuleDepth="raised" homeMaterial="color" homeIconFinish="glossy" />
+               searchInRail={true} onSearch={() => nav('Topics')} capsuleDepth="raised" homeMaterial="color" homeIconFinish="glossy" iconFinish={t.iconMat} />
       <main className="stage">
         <div className="stage-inner">
           <Screen key={page} onOpen={onOpen} go={nav} eyebrows={eyebrows} />
@@ -384,10 +356,9 @@ function App() {
         <TweakRadio label="Chrome" value={t.material}
                     options={['liquid', 'frosted']}
                     onChange={(v) => setTweak('material', v)} />
-        <TweakSection label="Label legibility" />
-        <TweakRadio label="Treatment" value={t.tileLabel}
-                    options={['scrim', 'halo', 'fade', 'combo']}
-                    onChange={(v) => setTweak('tileLabel', v)} />
+        <TweakRadio label="Icons" value={t.iconMat}
+                    options={['glossy', 'flat']}
+                    onChange={(v) => setTweak('iconMat', v)} />
       </TweaksPanel>
     </div>
   );

@@ -1,0 +1,327 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>3D Graph — study</title>
+<link rel="stylesheet" href="../zmath/tokens.css" />
+<style>
+  *{box-sizing:border-box;}
+  html,body{height:100%;margin:0;}
+  body{font-family:var(--font-ui,system-ui);color:var(--fg1,#2b2723);background:#e4e6ee;
+    display:flex;align-items:center;justify-content:center;padding:22px;-webkit-font-smoothing:antialiased;}
+  a{color:var(--wii-ink,#3a66c8);}a:hover{color:var(--wii-ink-2,#2b4fa0);}
+  .lp-sheet{position:relative;width:100%;height:100%;max-width:1320px;max-height:830px;
+    display:flex;overflow:hidden;border-radius:26px;background:#fff;
+    box-shadow:0 2px 8px rgba(30,35,50,0.10),0 30px 70px rgba(30,40,70,0.28);isolation:isolate;}
+  .lp-left{position:relative;flex:0 0 40%;max-width:520px;min-width:340px;
+    display:flex;flex-direction:column;background:#fff;z-index:2;}
+  .lp-left::after{content:"";position:absolute;top:0;right:0;bottom:0;width:1px;background:var(--hairline-strong,rgba(40,40,50,0.16));}
+  .lp-head{flex:0 0 auto;display:flex;align-items:center;gap:16px;padding:22px 34px 18px;
+    background:linear-gradient(180deg,#fff,#faf8f4);border-bottom:1px solid rgba(40,40,50,0.06);}
+  .lp-tag{display:flex;flex-direction:column;font-family:var(--font-display,inherit);font-weight:800;
+    font-size:1.2rem;line-height:0.96;letter-spacing:-0.01em;}
+  .lp-tag span:last-child{color:var(--fg3,#9a938a);}
+  .lp-sym{font-family:var(--font-display,inherit);font-weight:800;font-size:2.1rem;line-height:0.9;letter-spacing:-0.02em;}
+  .lp-name{font-family:var(--font-ui,inherit);font-weight:700;font-size:1.02rem;line-height:1.12;text-wrap:balance;margin-left:auto;text-align:right;max-width:9em;}
+  .va{color:#b23a48;font-style:italic;font-weight:800;}
+  .vb{color:#3f7d52;font-style:italic;font-weight:800;}
+  .vc{color:#2c4a8a;font-style:italic;font-weight:800;}
+  .vd{color:#2b3a66;font-style:italic;font-weight:800;}
+  body.zup .vb{color:#2c4a8a;}body.zup .vc{color:#3f7d52;}
+  .lp-body{flex:1 1 auto;min-height:0;display:flex;flex-direction:column;gap:14px;padding:20px 34px 22px;overflow:auto;}
+  .facts{display:flex;flex-direction:column;gap:6px;}
+  .fact{display:flex;align-items:baseline;justify-content:space-between;gap:12px;
+    padding:8px 14px;border-radius:12px;background:#faf8f4;box-shadow:inset 0 0 0 1px rgba(40,40,50,0.08);
+    font-size:0.95rem;font-weight:700;}
+  .fact b{font-weight:800;font-variant-numeric:tabular-nums;}
+  .para{font-size:0.98rem;line-height:1.5;font-weight:600;color:var(--fg1,#2b2723);}
+  .ctl{display:flex;flex-direction:column;gap:10px;}
+  .row{display:flex;align-items:center;gap:12px;}
+  .row label{width:1.4em;font-weight:800;font-style:italic;font-size:1.05rem;text-align:center;}
+  .row input[type=range]{flex:1;accent-color:#2b2723;}
+  .row output{width:1.6em;text-align:center;font-weight:800;font-variant-numeric:tabular-nums;}
+  .planes{display:flex;flex-direction:column;gap:8px;margin-top:2px;}
+  .planes-cap{font-size:0.78rem;font-weight:800;letter-spacing:0.06em;text-transform:uppercase;color:var(--fg3,#9a938a);}
+  .chips{display:flex;gap:8px;}
+  .chip{flex:1;padding:8px 10px;border-radius:11px;border:0;cursor:pointer;font-family:inherit;
+    font-weight:800;font-size:0.86rem;background:#f3efe8;color:var(--fg3,#9a938a);
+    box-shadow:inset 0 0 0 1px rgba(40,40,50,0.08);
+    transition:background 0.15s,color 0.15s,transform 0.18s cubic-bezier(0.34,1.56,0.64,1);}
+  .chip:active{transform:scale(0.95);}
+  .chip.on{background:#2b2723;color:#fff;box-shadow:none;}
+  .chip.on .pl-x{color:#ff9d94;}.chip.on .pl-y{color:#9dbdf0;}.chip.on .pl-z{color:#9fd6ac;}
+  .chip .pl-x{color:#b23a48;}.chip .pl-y{color:#2c4a8a;}.chip .pl-z{color:#3f7d52;}
+  .lp-foot{flex:0 0 auto;display:flex;align-items:center;gap:10px;padding:14px 24px 18px;border-top:1px solid rgba(40,40,50,0.08);font-weight:700;font-size:0.9rem;color:var(--fg3,#9a938a);}
+  .lp-right{position:relative;flex:1 1 auto;min-width:0;background:#fdfcfa;}
+  #gl{position:absolute;inset:0;width:100%;height:100%;display:block;touch-action:none;cursor:grab;}
+  #gl:active{cursor:grabbing;}
+  .cbtn{position:absolute;z-index:3;width:40px;height:40px;border-radius:50%;border:0;cursor:pointer;
+    display:flex;align-items:center;justify-content:center;background:#fff;color:#3a3630;
+    box-shadow:0 1px 3px rgba(30,35,50,0.18),inset 0 0 0 1px rgba(40,40,50,0.10);
+    font-weight:800;font-size:1.05rem;transition:transform 0.18s cubic-bezier(0.34,1.56,0.64,1);}
+  .cbtn:hover{transform:scale(1.08);}
+  .cbtn:active{transform:scale(0.94);}
+  .cbtn.on{background:#2b2723;color:#fff;}
+  #btnClose{top:16px;right:16px;}
+  #btnReset{bottom:16px;left:16px;}
+  #btnLbl{bottom:16px;left:66px;font-size:0.72rem;letter-spacing:0.02em;}
+  #btnHelp{bottom:16px;right:16px;}
+  .helpcard{position:absolute;z-index:4;right:16px;bottom:66px;width:260px;padding:14px 16px;border-radius:14px;
+    background:#fff;box-shadow:0 10px 30px rgba(30,40,70,0.25),inset 0 0 0 1px rgba(40,40,50,0.10);
+    font-size:0.88rem;line-height:1.45;font-weight:600;display:none;}
+  .helpcard.show{display:block;}
+  .helpcard b{display:block;margin-bottom:4px;}
+</style>
+</head>
+<body>
+<template id="__bundler_thumbnail"><svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 100 100"><rect width="100" height="100" fill="#faf7f1"/><path d="M35 65 L65 65 L65 35 L35 35 Z M35 65 L50 75 L80 75 L65 65 M65 35 L80 45 L80 75" fill="none" stroke="#2c4a8a" stroke-width="3"/><line x1="35" y1="65" x2="80" y2="45" stroke="#b23a48" stroke-width="3"/></svg></template>
+<div class="lp-sheet">
+  <div class="lp-left">
+    <div class="lp-head">
+      <div class="lp-tag"><span>3D</span><span>+1</span></div>
+      <div class="lp-sym">√(<span class="va">a</span>²+<span class="vb">b</span>²+<span class="vc">c</span>²)</div>
+      <div class="lp-name">The box diagonal</div>
+    </div>
+    <div class="lp-body">
+      <div class="facts">
+        <div class="fact"><span>Box <span class="va">a</span> × <span class="vb">b</span> × <span class="vc">c</span></span><b id="fBox"></b></div>
+        <div class="fact"><span>Floor diagonal √(<span class="va">a</span>²+<span class="vb">b</span>²)</span><b id="fFloor"></b></div>
+        <div class="fact"><span>Space diagonal <span class="vd">d</span></span><b id="fDiag"></b></div>
+      </div>
+      <p class="para">Pythagoras, twice. On the floor, the dashed diagonal squares to <span class="va">a</span>² + <span class="vb">b</span>². Now stand that right triangle up: the floor diagonal and the height <span class="vc">c</span> make a second right angle, so the <span class="vd">space diagonal</span> squares to <span class="va">a</span>² + <span class="vb">b</span>² + <span class="vc">c</span>². Same lemma, one more dimension — drag the graph to see both triangles at once.</p>
+      <div class="ctl">
+        <div class="row"><label class="va">a</label><input id="ia" type="range" min="1" max="6" step="1" value="3" /><output id="oa">3</output></div>
+        <div class="row"><label class="vb">b</label><input id="ib" type="range" min="1" max="6" step="1" value="4" /><output id="ob">4</output></div>
+        <div class="row"><label class="vc">c</label><input id="ic" type="range" min="1" max="6" step="1" value="2" /><output id="oc">2</output></div>
+      </div>
+      <div class="planes">
+        <span class="planes-cap">Grid</span>
+        <div class="chips"><button type="button" class="chip" id="pfull">full expansion</button></div>
+      </div>
+      <div class="planes">
+        <span class="planes-cap">Up axis</span>
+        <div class="chips">
+          <button type="button" class="chip" id="upy"><span class="pl-y">y</span> up</button>
+          <button type="button" class="chip on" id="upz"><span class="pl-z">z</span> up</button>
+        </div>
+      </div>
+      <div class="planes">
+        <span class="planes-cap">Planes</span>
+        <div class="chips">
+          <button type="button" class="chip on" id="pxz">floor <span class="pl-x">x</span><span class="pl-y">y</span></button>
+          <button type="button" class="chip on" id="pxy">wall <span class="pl-x">x</span><span class="pl-z">z</span></button>
+          <button type="button" class="chip on" id="pyz">wall <span class="pl-y">y</span><span class="pl-z">z</span></button>
+        </div>
+      </div>
+    </div>
+    <div class="lp-foot"><span>Drag to orbit · scroll to zoom</span></div>
+  </div>
+  <div class="lp-right">
+    <canvas id="gl"></canvas>
+    <button type="button" class="cbtn" id="btnClose" aria-label="Close">×</button>
+    <button type="button" class="cbtn" id="btnReset" aria-label="Reset view">⟲</button>
+    <button type="button" class="cbtn on" id="btnLbl" aria-label="Toggle labels">abc</button>
+    <button type="button" class="cbtn" id="btnHelp" aria-label="Help">?</button>
+    <div class="helpcard" id="help">
+      <b>How this page works</b>
+      Drag to spin the box, scroll to zoom. The sliders set the three sides; the red-dashed floor diagonal and the dark space diagonal update live. ⟲ resets the view.
+    </div>
+  </div>
+</div>
+<script type="importmap">{"imports":{"three":"https://unpkg.com/three@0.161.0/build/three.module.js","three/addons/":"https://unpkg.com/three@0.161.0/examples/jsm/"}}</script>
+<script type="module">
+import * as THREE from 'three';
+import { OrbitControls } from 'three/addons/controls/OrbitControls.js';
+const RED=0xb23a48, BLUE=0x2c4a8a, GREEN=0x3f7d52, INK=0x2b3a66, GRID=0xe4e1da, GRID2=0xc6c2b8;
+const canvas=document.getElementById('gl');
+const renderer=new THREE.WebGLRenderer({canvas,antialias:true});
+renderer.setClearColor(0xfdfcfa);
+const scene=new THREE.Scene();
+const camera=new THREE.PerspectiveCamera(40,1,0.1,200);
+const controls=new OrbitControls(camera,canvas);
+controls.enableDamping=true; controls.dampingFactor=0.08; controls.enablePan=false;
+controls.minDistance=5; controls.maxDistance=40;
+let group=null, labels=[], showLbl=true, up='z', full=false;
+const st={a:3,b:4,c:2};
+const showPl={xz:true,xy:true,yz:true};
+let planeGroups={};
+function lineSeg(p1,p2,color,dashed,w){
+  const g=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(...p1),new THREE.Vector3(...p2)]);
+  const m=dashed?new THREE.LineDashedMaterial({color,dashSize:0.22,gapSize:0.14}):new THREE.LineBasicMaterial({color});
+  const l=new THREE.Line(g,m); if(dashed)l.computeLineDistances(); return l;
+}
+function tube(p1,p2,color,r){
+  const a=new THREE.Vector3(...p1), b=new THREE.Vector3(...p2), d=b.clone().sub(a);
+  const geo=new THREE.CylinderGeometry(r,r,d.length(),10);
+  const mesh=new THREE.Mesh(geo,new THREE.MeshBasicMaterial({color}));
+  mesh.position.copy(a.clone().add(b).multiplyScalar(0.5));
+  mesh.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),d.clone().normalize());
+  return mesh;
+}
+function label(text,pos,color,sc){
+  const cv=document.createElement('canvas'); const wide=text.length>3; cv.width=wide?512:256; cv.height=128;
+  const cx=cv.getContext('2d');
+  cx.font='italic 800 72px Georgia,serif'; cx.textAlign='center'; cx.textBaseline='middle';
+  cx.fillStyle=color; cx.fillText(text,cv.width/2,64);
+  const sp=new THREE.Sprite(new THREE.SpriteMaterial({map:new THREE.CanvasTexture(cv),transparent:true,depthTest:false}));
+  sp.position.set(...pos); const s=sc||1; sp.scale.set((wide?3:1.5)*s,0.75*s,1); sp.renderOrder=9;
+  return sp;
+}
+function fmt(n){const r=Math.sqrt(n);return Number.isInteger(r)?String(r):'√'+n+' ≈ '+r.toFixed(2);}
+function build(){
+  if(group){scene.remove(group);group.traverse(o=>{o.geometry&&o.geometry.dispose();o.material&&o.material.map&&o.material.map.dispose();o.material&&o.material.dispose();});}
+  group=new THREE.Group(); labels=[];
+  const {a,b,c}=st, M=Math.max(a,b,6)+1, H=Math.max(c,4)+1;
+  // axis letter/color assignment depends on which axis points up
+  const dL=up==='y'?'z':'y', UPC=up==='y'?BLUE:GREEN, DPC=up==='y'?GREEN:BLUE,
+    upHex=up==='y'?'#2c4a8a':'#3f7d52', dpHex=up==='y'?'#3f7d52':'#2c4a8a';
+  const mkPlane=(pts,color,op)=>{const g=new THREE.BufferGeometry().setFromPoints(pts.map(p=>new THREE.Vector3(...p)));
+    g.setIndex([0,1,2,0,2,3]);g.computeVertexNormals();
+    return new THREE.Mesh(g,new THREE.MeshBasicMaterial({color,transparent:true,opacity:op,side:THREE.DoubleSide,depthWrite:false}));};
+  // three toggleable coordinate planes, each a subgroup: grid + soft tint + border + name tag
+  const xz=new THREE.Group(), xy=new THREE.Group(), yz=new THREE.Group();
+  planeGroups={xz,xy,yz};
+  // floor (xz, y=0) — neutral; full expansion shows all four quadrants
+  const F=full?M:1, XL=full?-M:-1, YB=full?-H:0;
+  for(let i=XL;i<=M;i++){
+    xz.add(lineSeg([i,0,F],[i,0,-M],i===0?GRID2:GRID,false));
+    xz.add(lineSeg([XL,0,-i],[M,0,-i],i===0?GRID2:GRID,false));
+  }
+  xz.add(mkPlane([[XL,0,F],[M,0,F],[M,0,-M],[XL,0,-M]],0x8a8478,0.06));
+  xz.add(label('x'+dL,[M-0.6,0.02,-(M-0.5)],'#8a8478'));
+  // back wall (xy, z=0) — warm red tint
+  // back wall — warm red tint
+  for(let i=(full?-M:0);i<=M;i++){
+    if(full?Math.abs(i)<=H:i<=H) xy.add(lineSeg([XL,i,0],[M,i,0],i===0?GRID2:0xe4c4bc,false));
+    xy.add(lineSeg([i,YB,0],[i,H,0],0xe4c4bc,false));
+  }
+  xy.add(mkPlane([[XL,YB,0],[M,YB,0],[M,H,0],[XL,H,0]],0xb23a48,0.06));
+  xy.add(label('x'+up,[M-0.6,H-0.4,0],'#c07a72'));
+  // side wall (yz, x=0) — cool blue tint
+  // side wall — cool blue tint
+  for(let i=(full?-M:0);i<=M;i++){
+    if(full?Math.abs(i)<=H:i<=H) yz.add(lineSeg([0,i,F],[0,i,-M],i===0?GRID2:0xbccce4,false));
+    yz.add(lineSeg([0,YB,-i],[0,H,-i],0xbccce4,false));
+  }
+  yz.add(mkPlane([[0,YB,F],[0,YB,-M],[0,H,-M],[0,H,F]],0x2c4a8a,0.06));
+  yz.add(label('yz',[0,H-0.4,-(M-0.6)],'#7a90b8'));
+  xz.visible=showPl.xz; xy.visible=showPl.xy; yz.visible=showPl.yz;
+  group.add(xz,xy,yz);
+  // axes: x red, y blue, z green — thicker rods with cone arrow tips
+  const ay=H+0.4;
+  const axis=(p1,p2,col)=>{
+    const a=new THREE.Vector3(...p1), b=new THREE.Vector3(...p2), dir=b.clone().sub(a).normalize();
+    group.add(tube(p1,p2,col,0.035));
+    const cone=new THREE.Mesh(new THREE.ConeGeometry(0.13,0.42,12),new THREE.MeshBasicMaterial({color:col}));
+    cone.position.copy(b); cone.quaternion.setFromUnitVectors(new THREE.Vector3(0,1,0),dir);
+    group.add(cone);
+  };
+  axis([0,0,0],[M+0.4,0,0],0xb23a48);
+  axis([0,0,0],[0,0,-(M+0.4)],DPC);
+  axis([0,0,0],[0,ay,0],UPC);
+  if(full){
+    axis([0,0,0],[-(M+0.4),0,0],0xb23a48);
+    axis([0,0,0],[0,0,M+0.4],DPC);
+    axis([0,0,0],[0,-ay,0],UPC);
+  }
+  for(let k=1;k<=Math.max(c,4);k++) group.add(lineSeg([0,k,0.1],[0,k,-0.1],GRID2,false));
+  // integer tick numbers along each axis
+  for(let i=1;i<=M;i++) labels.push(label(String(i),[i,-0.38,0.42],'#b23a48',0.62));
+  for(let i=1;i<=M;i++) labels.push(label(String(i),[-0.42,-0.38,-i],dpHex,0.62));
+  for(let i=1;i<=H;i++) labels.push(label(String(i),[-0.42,i,0.42],upHex,0.62));
+  labels.push(label('x',[M+1,0,0],'#b23a48'),label(dL,[0,0,-(M+1)],dpHex),label(up,[0,ay+0.6,0],upHex));
+  if(full) labels.push(label('−x',[-(M+1),0,0],'#b23a48',0.8),label('−'+dL,[0,0,M+1],dpHex,0.8),label('−'+up,[0,-(ay+0.6),0],upHex,0.8));
+  // box edges match axis colors: x-direction red, z-direction green, y-direction blue
+  const X=a, Y=c, Z=-b;
+  const cor=[[0,0,0],[X,0,0],[X,0,Z],[0,0,Z],[0,Y,0],[X,Y,0],[X,Y,Z],[0,Y,Z]];
+  const E=[[0,1,RED],[3,2,RED],[4,5,RED],[7,6,RED],[1,2,DPC],[0,3,DPC],[5,6,DPC],[4,7,DPC],[0,4,UPC],[1,5,UPC],[2,6,UPC],[3,7,UPC]];
+  E.forEach(([i,j,col])=>group.add(tube(cor[i],cor[j],col,0.035)));
+  // translucent faces
+  const boxG=new THREE.BoxGeometry(X,Y,-Z);
+  const boxM=new THREE.MeshBasicMaterial({color:0x8f86c2,transparent:true,opacity:0.20,depthWrite:false});
+  const box=new THREE.Mesh(boxG,boxM); box.position.set(X/2,Y/2,Z/2); group.add(box);
+  // floor diagonal (dashed) + floor triangle fill
+  group.add(lineSeg([0,0,0],[X,0,Z],0xb23a48,true));
+  const triG=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(X,0,0),new THREE.Vector3(X,0,Z)]);
+  triG.setIndex([0,1,2]); triG.computeVertexNormals();
+  group.add(new THREE.Mesh(triG,new THREE.MeshBasicMaterial({color:0xc2607a,transparent:true,opacity:0.16,side:THREE.DoubleSide,depthWrite:false})));
+  // standing triangle: origin -> floor corner -> top corner
+  const tri2=new THREE.BufferGeometry().setFromPoints([new THREE.Vector3(0,0,0),new THREE.Vector3(X,0,Z),new THREE.Vector3(X,Y,Z)]);
+  tri2.setIndex([0,1,2]); tri2.computeVertexNormals();
+  group.add(new THREE.Mesh(tri2,new THREE.MeshBasicMaterial({color:INK,transparent:true,opacity:0.08,side:THREE.DoubleSide,depthWrite:false})));
+  // space diagonal
+  group.add(tube([0,0,0],[X,Y,Z],INK,0.05));
+  const dot=new THREE.Mesh(new THREE.SphereGeometry(0.11,16,12),new THREE.MeshBasicMaterial({color:INK}));
+  dot.position.set(X,Y,Z); group.add(dot);
+  const org=new THREE.Mesh(new THREE.SphereGeometry(0.09,16,12),new THREE.MeshBasicMaterial({color:0x3a3630}));
+  group.add(org);
+  // step-path arrows to P: +a along the x axis, +b along the floor, +c straight up
+  axis([0,0,0],[X,0,0],RED);
+  axis([X,0,0],[X,0,Z],DPC);
+  axis([X,0,Z],[X,Y,Z],UPC);
+  labels.push(label('+'+st.a,[X/2,0.5,0.85],'#b23a48',0.7),
+    label('+'+st.b,[X+0.85,0.5,Z/2],dpHex,0.7),
+    label('+'+st.c,[X+0.85,Y/2,Z-0.5],upHex,0.7),
+    label(`P(${st.a},${st.b},${st.c})`,[X,Y+0.65,Z],'#2b3a66',0.85));
+  // labels
+  labels.push(label('a',[X/2,0.4,0.4],'#b23a48'),label('b',[X+0.55,0.4,Z/2],dpHex),
+    label('c',[X+0.5,Y/2,Z-0.35],upHex),label('d',[X/2-0.3,Y/2+0.35,Z/2],'#2b3a66'));
+  labels.forEach(l=>{l.visible=showLbl;group.add(l);});
+  scene.add(group);
+  document.getElementById('fBox').textContent=`${st.a} × ${st.b} × ${st.c}`;
+  document.getElementById('fFloor').textContent=fmt(a*a+b*b);
+  document.getElementById('fDiag').textContent=fmt(a*a+b*b+c*c);
+}
+function frame(){
+  const {a,b,c}=st, m=Math.max(a,b,c);
+  controls.target.set(a/2,c/2,-b/2);
+  const r=Math.max(9,m*2.6);
+  camera.position.set(a/2+r*0.72,c/2+r*0.52,-b/2+r*0.78);
+  controls.update();
+}
+function resize(){
+  const w=canvas.clientWidth,h=canvas.clientHeight;
+  if(!w||!h)return;
+  renderer.setSize(w,h,false);
+  renderer.setPixelRatio(Math.min(devicePixelRatio,2));
+  camera.aspect=w/h; camera.updateProjectionMatrix();
+}
+new ResizeObserver(resize).observe(canvas);
+['a','b','c'].forEach(k=>{
+  const inp=document.getElementById('i'+k), out=document.getElementById('o'+k);
+  inp.addEventListener('input',()=>{st[k]=+inp.value;out.textContent=inp.value;build();});
+});
+document.getElementById('btnReset').addEventListener('click',frame);
+document.getElementById('btnLbl').addEventListener('click',e=>{
+  showLbl=!showLbl; e.currentTarget.classList.toggle('on',showLbl);
+  labels.forEach(l=>l.visible=showLbl);
+});
+document.getElementById('btnHelp').addEventListener('click',()=>document.getElementById('help').classList.toggle('show'));
+function setUp(v){
+  up=v; document.body.classList.toggle('zup',v==='z');
+  document.getElementById('upy').classList.toggle('on',v==='y');
+  document.getElementById('upz').classList.toggle('on',v==='z');
+  const dL=v==='y'?'z':'y';
+  document.getElementById('pxz').innerHTML=`floor <span class="pl-x">x</span><span class="pl-${dL}">${dL}</span>`;
+  document.getElementById('pxy').innerHTML=`wall <span class="pl-x">x</span><span class="pl-${v}">${v}</span>`;
+  document.getElementById('pyz').innerHTML=`wall <span class="pl-y">y</span><span class="pl-z">z</span>`;
+  build();
+}
+document.getElementById('upy').addEventListener('click',()=>setUp('y'));
+document.getElementById('upz').addEventListener('click',()=>setUp('z'));
+document.getElementById('pfull').addEventListener('click',e=>{
+  full=!full; e.currentTarget.classList.toggle('on',full); build();
+});
+[['pxz','xz'],['pxy','xy'],['pyz','yz']].forEach(([id,k])=>{
+  document.getElementById(id).addEventListener('click',e=>{
+    showPl[k]=!showPl[k]; e.currentTarget.classList.toggle('on',showPl[k]);
+    if(planeGroups[k]) planeGroups[k].visible=showPl[k];
+  });
+});
+document.getElementById('btnClose').addEventListener('click',()=>{const h=document.referrer;history.length>1?history.back():null;});
+build(); resize(); frame();
+renderer.setAnimationLoop(()=>{controls.update();renderer.render(scene,camera);});
+</script>
+</body>
+</html>

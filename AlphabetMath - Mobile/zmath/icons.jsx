@@ -101,6 +101,11 @@ function CapsuleIcon({ name, size = 36, colors = ['#8a6bff', '#4a1fb0'], glow = 
   const moat = material === 'moat';
   const paths = ZMATH_ICON_PATHS[name] || '';
   const thin = ZMATH_ICON_THIN[name] || '';
+  /* FLAT study imports (explore/Design Icons.html): Notes' flat build is the
+     dog-eared ruled sheet, not the plain rect — doc rim + white ink + fold seam. */
+  const flatNote = flatLook && (name === 'note' || name === 'note2');
+  const NOTE_DOC = 'M14 3H6a1 1 0 0 0-1 1v16a1 1 0 0 0 1 1h12a1 1 0 0 0 1-1V8Z';
+  const NOTE_FOLD = 'M14 2.2v4.3a1.5 1.5 0 0 0 1.5 1.5h4.3';
   // grey: crisp embossed light-grey stroke (badge-tray border tone).
   // moat: the glyph LINES are cut from the cool-grey moat-ring material itself —
   //   an engraved look (dark cool-grey top edge in shadow, lighter cool-grey below
@@ -109,8 +114,8 @@ function CapsuleIcon({ name, size = 36, colors = ['#8a6bff', '#4a1fb0'], glow = 
   const c1 = moat ? '#e7eaf1' : grey ? '#bcc3d3' : colors[1];
   const deep = grey || moat ? '#aab1c4' : colors[1];
   const filter = (softGeo || flatLook)
-    // flat / soft finish — one neutral contact shadow, nothing else (the study recipe)
-    ? 'drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.16))'
+    // flat / soft finish — neutral contact shadow + the glossy's 1px deep extrude
+    ? `drop-shadow(0 1px 0 ${deep}) drop-shadow(0 1.5px 2.5px rgba(0,0,0,0.16))`
     : moat
     // moat: flat 2D — no bevel, just the clean grey glyph (single solid piece)
     ? 'none'
@@ -142,6 +147,27 @@ function CapsuleIcon({ name, size = 36, colors = ['#8a6bff', '#4a1fb0'], glow = 
       </svg>
     );
   }
+  if (flatNote) {
+    /* seam gradient anchored to the doc's y-range so the fold color matches the rim */
+    return (
+      <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true"
+        strokeLinecap="round" strokeLinejoin="round" style={{ filter, overflow: 'visible' }}>
+        <defs>
+          <linearGradient id={gid} x1="0" y1="0" x2="0" y2="1">
+            <stop offset="0" stopColor={c0} />
+            <stop offset="1" stopColor={c1} />
+          </linearGradient>
+          <linearGradient id={gid + 's'} gradientUnits="userSpaceOnUse" x1="0" y1="3" x2="0" y2="21">
+            <stop offset="0" stopColor={c0} />
+            <stop offset="1" stopColor={c1} />
+          </linearGradient>
+        </defs>
+        <path d={NOTE_DOC} fill="none" stroke={`url(#${gid})`} strokeWidth={rim} />
+        <path d={NOTE_DOC} fill="#ffffff" stroke="none" />
+        <path d={NOTE_FOLD} fill="none" stroke={`url(#${gid}s)`} strokeWidth="2.2" />
+      </svg>
+    );
+  }
   return (
     <svg width={size} height={size} viewBox="0 0 24 24" fill="none" aria-hidden="true"
       strokeLinecap="round" strokeLinejoin="round"
@@ -158,9 +184,10 @@ function CapsuleIcon({ name, size = 36, colors = ['#8a6bff', '#4a1fb0'], glow = 
       {/* white interior — fills to the path edge, covering the inner half of the rim */}
       <g fill="#ffffff" stroke="none"
         dangerouslySetInnerHTML={{ __html: paths }} />
-      {/* thin sub-glyph (e.g. magnifier handle) — slim solid stroke ≈ visible ring border */}
+      {/* thin sub-glyph (e.g. magnifier handle) — the flat study draws the
+          handle at FULL rim width (stubby bold handle) */}
       {thin && (
-        <g fill="none" stroke={`url(#${gid})`} strokeWidth={rim / 2}
+        <g fill="none" stroke={`url(#${gid})`} strokeWidth={flatLook ? rim : rim / 2}
           dangerouslySetInnerHTML={{ __html: thin }} />
       )}
     </svg>

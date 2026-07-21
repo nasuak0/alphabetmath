@@ -27,7 +27,7 @@
 <body>
 <!-- Phone gate: pure CSS. Under 700px wide the app is hidden and only the
      notice shows. Kept IDENTICAL in both shells (Mobile + App). -->
-<style>#phone-gate{display:none;position:fixed;inset:0;z-index:9999;background:#f4f5fb;align-items:center;justify-content:center;padding:32px;text-align:center}@media (max-width:699px){#phone-gate{display:flex}#root{display:none}}</style>
+<style>#phone-gate{display:none;position:fixed;inset:0;z-index:2147483000;background:#f4f5fb;align-items:center;justify-content:center;padding:32px;text-align:center}@media (max-width:699px),(max-height:500px){#phone-gate{display:flex}#root{display:none !important}#rotate-guard{display:none !important}}</style>
 <div id="phone-gate"><div style="max-width:340px;font:15px/1.6 ui-sans-serif,system-ui,sans-serif;color:#8b93a7"><div style="font-size:34px;margin-bottom:14px">λ</div><div style="font-weight:700;font-size:17px;color:#4a5165;margin-bottom:8px">AlphabetMath needs a bigger screen</div>This app is designed for tablets and computers. Please open it on an iPad or a laptop.</div></div>
 <div id="root">
   <!-- Loading state shown while the no-build loader fetches + compiles modules

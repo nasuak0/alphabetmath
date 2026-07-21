@@ -1,0 +1,179 @@
+/* ============================================================
+   FLAT-COMPOSED TILE MATERIAL  (tweak: html[data-tilemat="flat-composed"])
+   Phase 2 — ported from explore/flat-tile.css (the Design Tile study).
+   The study's flat molded-cartridge shell, generalized from the geometry
+   pilot to EVERY tile (topics + project cartridges, all screens), for use
+   with the composed cover art (tile-covers.js) where the words are baked
+   into the drawing. DORMANT until something sets data-tilemat="flat-composed"
+   on <html> — nothing does yet; Phase 3 flips it per screen.
+   ============================================================ */
+
+/* Per-topic deep-frame recipes (hard rims / recess lines). --c1/--c2/--ink
+   arrive inline from the app (grad()); only --frame-deep is new. Keys are
+   the APP's topic ids (study said "numtheory"; the app says "numberth"). */
+[data-tilemat="flat-composed"] .tile[data-topic="algebra"]  { --frame-deep: 110,20,55; }
+[data-tilemat="flat-composed"] .tile[data-topic="geometry"] { --frame-deep: 150,60,12; }
+[data-tilemat="flat-composed"] .tile[data-topic="calculus"] { --frame-deep: 140,90,10; }
+[data-tilemat="flat-composed"] .tile[data-topic="linalg"]   { --frame-deep: 25,38,120; }
+[data-tilemat="flat-composed"] .tile[data-topic="numberth"] { --frame-deep: 8,95,75; }
+[data-tilemat="flat-composed"] .tile[data-topic="prob"]     { --frame-deep: 74,30,120; }
+[data-tilemat="flat-composed"] .tile[data-topic="analysis"] { --frame-deep: 150,45,20; }
+[data-tilemat="flat-composed"] .tile[data-topic="logic"]    { --frame-deep: 130,20,25; }
+
+/* SHELL — hard gradient frame: one neutral contact shadow + a crisp darker
+   inner rim so the colored stroke reads as a solid wall (no glow, no sheen). */
+[data-tilemat="flat-composed"] .tile {
+  border-radius: 19px; padding: 5px;
+  container-type: inline-size;
+  background: linear-gradient(180deg, var(--c1), var(--c2));
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(var(--frame-deep),0.18);
+}
+[data-tilemat="flat-composed"] .tile:hover {
+  transform: translateY(-5px) scale(1.02);
+  box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(var(--frame-deep),0.18);
+}
+
+/* WHITE CARD — solid white, no frost; composed division hairline only
+   (the words live inside the drawing, so no recessed-label top shadow). */
+[data-tilemat="flat-composed"] .tile .tile-art {
+  border-radius: 14px; background: #fff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(var(--frame-deep),0.10);
+}
+[data-tilemat="flat-composed"] .tile .tile-sheen { display: none; }
+[data-tilemat="flat-composed"] .tile .tile-scrim { display: none; }
+
+/* ============================================================
+   PHASE 4a — FLAT TRAY (Lab paper ground), DORMANT until a screen
+   sets data-traymat="flat" on <html> (no code does yet).
+   Recipe lifted verbatim from lab.css .scr: paper radial ground,
+   one crisp shadow + hairline inset ring — no blur, no glass.
+   Scope: the main tray surfaces ONLY (.tile-tray + home .merge-bg);
+   dock, sidebar, header, clock stay frosted by user decision. */
+[data-traymat="flat"] .tile-tray,
+[data-traymat="flat"] .home .homestack {
+  background: radial-gradient(120% 90% at 50% -10%, var(--wii-bg-1), var(--wii-bg-2) 55%, var(--wii-bg-3) 100%);
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  border: 0; border-radius: var(--r-tile);
+  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 26px 60px rgba(40,50,80,0.12), inset 0 0 0 1px rgba(0,0,0,0.045), inset 0 2px 6px rgba(255,255,255,0.9);
+}
+
+/* (paper-hero override removed — hero uses the base .topics-hero glass recipe
+   from app.css on every page, same as Notebook/Contact.) */
+
+/* COMPOSED COVER — the SVG must fill the white card exactly (not size to its
+   own square viewBox), so slice-cropping stays symmetric and the baked-in
+   label at the drawing's bottom edge remains visible. */
+[data-tilemat="flat-composed"] .tile svg.tile-cover { position: absolute; inset: 0; width: 100%; height: 100%; }
+
+/* COMPOSED WORDS — the SVG carries "TOPIC 0X / Name"; hide the HTML label
+   so text never doubles. (Kept as visibility so layout/anims are untouched.) */
+[data-tilemat="flat-composed"] .tile .tile-tx { visibility: hidden; }
+/* Home rails: the hidden label must not RESERVE height either — its min-content
+   size was stretching tiles past their declared aspect (rendered 1.25 instead of
+   1.30). display:none lets aspect-ratio be authoritative. (Safe: words are baked
+   into the composed cover art.) */
+[data-tilemat="flat-composed"] .home .hrail .tile .tile-tx { display: none; }
+
+/* PROPORTIONAL FRAME — Topics + Home (Step 2 touch-up): pad/radius/badge scale
+   with the tile so the rim reads Lab-thin at every size on both screens. */
+.topics-screen .tile[data-kind], .home .tile[data-kind] { border-radius: clamp(12px, 1.33vw, 19px); padding: clamp(2.5px, 0.3vw, 4.5px); }
+.topics-screen .tile[data-kind] .tile-art, .home .tile[data-kind] .tile-art { border-radius: clamp(9px, 1.02vw, 14.5px); }
+
+/* BADGE — single flat white chip molded into the corner (study geometry:
+   42×32 @ 6,6), hairline outline, no grey moat / floating pill / blur. */
+[data-tilemat="flat-composed"] .tile .badge {
+  top: 6px; left: 6px; min-width: 42px; height: 32px;
+  border-radius: 15px 7px 14px 7px; font-size: 0.86rem;
+  background: #ffffff;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  box-shadow: inset 0 0 0 1px rgba(var(--frame-deep),0.16);
+}
+[data-tilemat="flat-composed"] .tile .badge::before { display: none; }
+
+/* Proportional badge — Topics + Home (cqw resolves against the tile container) */
+.topics-screen .tile[data-kind] .badge, .home .tile[data-kind] .badge {
+  top: clamp(4px, 3cqw, 8px); left: clamp(4px, 3cqw, 8px);
+  min-width: clamp(34px, 21cqw, 58px); height: clamp(26px, 16cqw, 44px);
+  border-radius: clamp(11px, 7.5cqw, 21px) clamp(5px, 3.5cqw, 10px) clamp(10px, 7cqw, 19px) clamp(5px, 3.5cqw, 10px);
+  font-size: clamp(0.72rem, 6.9cqw, 1.18rem);
+}
+
+
+/* ============================================================
+   PHASE 6a — SEATED TILES (Topics). The Lab's carts don't respond
+   to hover — no lift, no grow, no glow; they sit flush on the paper
+   with the resting contact shadow until *selected* (6b's ring).
+   Scope: Topics screen only; Home follows in 6d. */
+.topics-screen .tile:hover {
+  transform: none;
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(var(--frame-deep),0.18);
+  z-index: auto;
+}
+.topics-screen .tile:active { transform: none; }
+/* 6 — SEATED SCALE (user-approved fluid tray): tiles cap at the approved size
+   and compress equally on narrow screens; tray unchanged. */
+html .topics-screen .grid-uniform {
+  grid-template-columns: repeat(4, minmax(0, clamp(210px, 19.5vw, 280px)));
+  grid-auto-rows: auto;
+  gap: clamp(16px, 1.6vw, 22px);
+  justify-content: center; align-content: start;
+  padding-top: 26px;
+  min-height: 100%; padding-bottom: 64px;
+}
+html .topics-screen .grid-uniform .tile { height: auto; aspect-ratio: 1.44 / 1; }
+/* 6b — the pick ring, VERBATIM Lab cart-flat recipe (lab.css .pring +
+   [data-layout="cart-flat"] override): transparent pad, quiet deep outline
+   at -8px / radius 27, growing out with the same bounce. */
+.topics-screen .tile::after { content: ""; position: absolute; inset: -2px; border-radius: clamp(13px, 1.45vw, 20.5px); opacity: 0; pointer-events: none;
+  box-shadow: 0 0 0 1.5px rgba(var(--frame-deep), 0.28);
+  transition: inset 0.32s var(--ease-bounce), border-radius 0.32s var(--ease-bounce), opacity 0.2s var(--ease-smooth); }
+.topics-screen .tile.sel::after { inset: -3.5px; border-radius: clamp(14px, 1.55vw, 22px); opacity: 1; }
+/* 6c — promotion: the picked tile rises a notch above its siblings (the Lab's
+   mini→selected jump, scaled to grid proportions) */
+.topics-screen .tile { transition: transform 0.32s var(--ease-bounce); }
+.topics-screen .tile.sel { transform: scale(1.045); z-index: 3; }
+.topics-screen .tile.sel:hover { transform: scale(1.045); }
+/* 6c — the ghost: square drawing anchored right, bleeding off top/bottom/right;
+   sticky 0-height clipped window so it can never extend the tray's scroll area. */
+.topics-screen .tile-tray { position: relative; }
+.topics-screen .topics-ghost { position: sticky; top: 0; height: 0; z-index: 0; pointer-events: none; overflow: visible; }
+.topics-screen .topics-ghost .ghost-clip { position: absolute; left: 0; top: 0; width: 100%; height: calc(100vh - 100px); max-height: 80vh; overflow: hidden; }
+.topics-screen .topics-ghost svg { position: absolute; right: -6%; top: -18%; height: 136%; aspect-ratio: 1 / 1; width: auto;
+  opacity: 0.15; filter: saturate(1.2);
+  animation: topicsGhostIn 0.5s var(--ease-smooth); }
+@keyframes topicsGhostIn { from { opacity: 0; } }
+.topics-screen .grid-uniform { position: relative; z-index: 1; }
+
+/* 6d — HOME: same seating + ring as Topics on both shelves. */
+.home .tile:hover { transform: none;
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(var(--frame-deep),0.18);
+  z-index: auto; }
+.home .tile:active { transform: none; }
+.home .tile { transition: transform 0.32s var(--ease-bounce); }
+.home .tile::after { content: ""; position: absolute; inset: -2px; border-radius: clamp(13px, 1.45vw, 20.5px); opacity: 0; pointer-events: none;
+  box-shadow: 0 0 0 1.5px rgba(var(--frame-deep), 0.28);
+  transition: inset 0.32s var(--ease-bounce), border-radius 0.32s var(--ease-bounce), opacity 0.2s var(--ease-smooth); }
+.home .tile.sel::after { inset: -3.5px; border-radius: clamp(14px, 1.55vw, 22px); opacity: 1; }
+.home .tile.sel { transform: scale(1.045); z-index: 3; }
+.home .tile.sel:hover { transform: scale(1.045); }
+
+/* CARTRIDGE (project tiles) — same materials, the study's cartridge badge
+   proportions (44×36 @ 0.92rem). */
+[data-tilemat="flat-composed"] .tile[data-kind="project"] .badge {
+  min-width: 44px; height: 36px; font-size: 0.92rem;
+  border-radius: 16px 7px 15px 7px;
+}
+
+/* Proportional CARTRIDGE badge — Topics + Home. Must come AFTER the fixed
+   44×36 study rule above (same specificity) or cartridges keep a frozen badge
+   that ignores tile scale and drifts out of the corner. cqw values are the
+   topic-badge recipe rescaled by the cartridge's greater width (÷1.36) and the
+   study's slightly larger cart-badge footprint (44×36 vs 42×32), so both badge
+   kinds render at matching visual size and hug the corner at every crop. */
+.topics-screen .tile[data-kind="project"] .badge, .home .tile[data-kind="project"] .badge {
+  top: clamp(4px, 2.2cqw, 8px); left: clamp(4px, 2.2cqw, 8px);
+  min-width: clamp(34px, 15.44cqw, 58px); height: clamp(26px, 11.76cqw, 44px);
+  border-radius: clamp(11px, 5.5cqw, 21px) clamp(5px, 2.57cqw, 10px) clamp(10px, 5.15cqw, 19px) clamp(5px, 2.57cqw, 10px);
+  font-size: clamp(0.72rem, 5.07cqw, 1.18rem);
+}

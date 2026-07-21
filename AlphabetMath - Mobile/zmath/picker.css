@@ -1,0 +1,63 @@
+/* ============================================================
+   Picker trays — Home (shelves) + Topics (grid)
+   React port of the Design Lab study's home/topics screens.
+   Base material (screen shell, .ptile.fc molded cartridge, badge,
+   ghost, .spill capsule) comes from lab.css under .lab-spot; this
+   file adds ONLY the home/topics layout + their cascade-resolved
+   overrides (see scraps/port-plan-home-topics.md).
+   ============================================================ */
+
+/* ---- HOME: two shelves on the paper ground ---- */
+/* Menu shelf capsules only: slightly thicker capsule + slightly bigger Field/Demo label (pill text unchanged, default gap restored) */
+.lab-spot .scr[data-layout="home"] .hhead .spill { padding: 7px 10px 7px 19px; font-size: 14.5px; }
+.lab-spot .scr[data-layout="home"] .hhead .spill b { padding: 5px 13px; font-size: 13px; }
+.lab-spot .scr[data-layout="home"] .hwrap { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 24px; overflow: hidden; }
+.lab-spot .scr[data-layout="home"] .hwrap > .ghost { z-index: 0; }
+.lab-spot .scr[data-layout="home"] .hshelf { position: relative; z-index: 1; display: flex; flex-direction: column; gap: 12px; }
+.lab-spot .scr[data-layout="home"] .hhead { padding: 0 24px; }
+.lab-spot .scr[data-layout="home"] .hrail { height: 184px; display: flex; align-items: center; padding: 0; overflow: visible; scroll-padding: 0; }
+.lab-spot .scr[data-layout="home"] .hrow { display: flex; align-items: center; gap: 16px; width: max-content; transition: transform 0.45s var(--ease-bounce); will-change: transform; }
+.lab-spot .scr[data-layout="home"] .hrow .ptile { flex: none; }
+/* selection = gentle lift + quiet NEUTRAL hugging ring (never the frosted halo) */
+.lab-spot .scr[data-layout="home"] .pring { display: none; }
+.lab-spot .scr[data-layout="home"] .ptile.sel .pring { display: block; opacity: 1; background: transparent;
+  -webkit-backdrop-filter: none; backdrop-filter: none; border: 0;
+  inset: -4px; border-radius: 21px; box-shadow: 0 0 0 2px rgba(var(--deep),0.30); }
+/* option C final: resting cards fill their slots (reference spacing); the
+   ringed one grows + lifts with a deeper shadow, Lab-flavored but restrained */
+.lab-spot .scr[data-layout="home"] .ptile { cursor: pointer; transition: transform 0.32s var(--ease-bounce); }
+.lab-spot .scr[data-layout="home"] .ptile.sel { transform: translateY(-3px) scale(1.04); z-index: 3; }
+.lab-spot .scr[data-layout="home"] .ptile.fc.sel::before { box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), 0 12px 24px rgba(40,50,80,0.20), inset 0 0 0 1px rgba(var(--deep),0.18); }
+/* molded rim — a notch thicker at rest (reference image), Lab-thick when selected */
+.lab-spot .scr[data-layout="home"] .ptile.fc { padding: 4px; }
+.lab-spot .scr[data-layout="home"] .ptile.fc.sel { padding: 5px; }
+.lab-spot .scr[data-layout="home"] .ptile.fc .pcard { border-radius: 10.5px; clip-path: inset(0 round 10.5px); }
+.lab-spot .scr[data-layout="home"] .ptile.fc.sel .pcard { border-radius: 14px; clip-path: inset(0 round 14px); }
+/* nested corner badge: FLAT (reference) — white seat, colored letters, thin colored rim, no drop shadow */
+.lab-spot .scr[data-layout="home"] .ptile.fc .psym { top: 6px; left: 6px; min-width: 34px; height: 28px; padding: 0 7px; font-size: 0.78rem; border-radius: 11px 6px 12px 6px;
+  box-shadow: inset 0 0 0 1px rgba(var(--deep),0.16); }
+.lab-spot .scr[data-layout="home"] .ptile.fc.sel .psym { top: 6px; left: 6px; min-width: 44px; height: 36px; padding: 0 9px; font-size: 0.92rem; border-radius: 16px 7px 15px 7px; }
+/* ghost: selected pick's topic art, big, anchored top-right, bleeding off the paper */
+.lab-spot .scr[data-layout="home"] .ghost { left: auto; right: -5%; top: -12%; bottom: auto; width: 64%; height: auto; aspect-ratio: auto; transform: none; }
+.lab-spot .scr[data-layout="home"][data-ghost="bold"] .ghost { opacity: 0.2; }
+
+/* ---- TOPICS: 4×2 grid of topic tiles, Lab DNA ---- */
+.lab-spot .scr[data-layout="topics"] .tgrid { position: absolute; inset: 0; z-index: 5; display: grid; grid-template-columns: repeat(4, minmax(0, 218px)); justify-content: center; grid-auto-rows: min-content; gap: 22px 20px; align-content: start; padding: 44px 40px 32px; overflow-y: auto; scrollbar-width: none; }
+.lab-spot .scr[data-layout="topics"] .tgrid::-webkit-scrollbar { display: none; }
+.lab-spot .scr[data-layout="topics"] .tgrid .ptile { width: 100%; aspect-ratio: 218 / 158; height: auto; min-height: 0; }
+.lab-spot .scr[data-layout="topics"] .tgrid .ptile .pcard { position: absolute; inset: 4px; width: auto; height: auto; }
+.lab-spot .scr[data-layout="topics"] .tgrid .ptile.fc.sel .pcard { inset: 5px; }
+.lab-spot .scr[data-layout="topics"] .ptile { cursor: pointer; transition: transform 0.32s var(--ease-bounce); }
+.lab-spot .scr[data-layout="topics"] .ptile.sel { transform: translateY(-3px) scale(1.04); z-index: 3; }
+.lab-spot .scr[data-layout="topics"] .ptile.fc.sel::before { box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), 0 12px 24px rgba(40,50,80,0.20), inset 0 0 0 1px rgba(var(--deep),0.18); }
+/* selection ring = quiet deep-color outline (no frost) */
+.lab-spot .scr[data-layout="topics"] .pring { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border: 0; inset: -4px; border-radius: 21px; box-shadow: 0 0 0 2px rgba(var(--deep), 0.15); }
+.lab-spot .scr[data-layout="topics"] .ptile.fc { padding: 4px; }
+.lab-spot .scr[data-layout="topics"] .ptile.fc.sel { padding: 5px; }
+.lab-spot .scr[data-layout="topics"] .ptile.fc .pcard { border-radius: 11.5px; clip-path: inset(0 round 11.5px); }
+.lab-spot .scr[data-layout="topics"] .ptile.fc.sel .pcard { border-radius: 14px; clip-path: inset(0 round 14px); }
+.lab-spot .scr[data-layout="topics"] .ptile.fc .psym { top: 6px; left: 6px; min-width: 34px; height: 28px; padding: 0 7px; font-size: 0.78rem; border-radius: 11px 6px 12px 6px; box-shadow: inset 0 0 0 1px rgba(var(--deep),0.16); }
+.lab-spot .scr[data-layout="topics"] .ptile.fc.sel .psym { top: 6px; left: 6px; min-width: 44px; height: 36px; padding: 0 9px; font-size: 0.92rem; border-radius: 16px 7px 15px 7px; }
+/* ghost: selected topic's art, big + center-right, behind the grid */
+.lab-spot .scr[data-layout="topics"] .ghost { left: 30%; right: -8%; top: -4%; bottom: -6%; width: auto; height: auto; aspect-ratio: auto; }
+.lab-spot .scr[data-layout="topics"][data-ghost="bold"] .ghost { opacity: 0.2; }

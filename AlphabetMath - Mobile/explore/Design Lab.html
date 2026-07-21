@@ -26,6 +26,51 @@
   .tw-x:hover { background: rgba(40,50,80,0.08); color: var(--wii-ink); }
   a { color: var(--wii-ink); }
   a:hover { color: var(--wii-ink-2); }
+  .ph-note { position: absolute; inset: 0; display: grid; place-items: center;
+    font: 600 15px var(--font-ui); color: var(--wii-ink-2); opacity: 0.55; }
+  /* ---- Home screen: two shelves on the paper ground ---- */
+  .scr .home { position: absolute; inset: 0; display: flex; flex-direction: column; justify-content: center; gap: 24px; overflow: hidden; }
+  .scr .home > .ghost { z-index: 0; }
+  .scr .home .hshelf { position: relative; z-index: 1; }
+  .home .hshelf { display: flex; flex-direction: column; gap: 12px; }
+  .home .hhead { padding: 0 40px; transition: opacity 0.3s var(--ease-smooth); }
+  .home .hshelf:not(.on) .hhead { opacity: 0.38; }
+  .home .hrail { height: 184px; display: flex; align-items: center; }
+  .home .hshelf.carts .hrail { height: 184px; }
+  .home .hrow { display: flex; align-items: center; gap: 16px; width: max-content;
+    transition: transform 0.45s var(--ease-bounce); will-change: transform; }
+  .home .hrow .ptile { flex: none; }
+  /* Home wears the Lab screen's flat DNA: quiet deep-color ring, no frosted card, gentle lift */
+  .scr[data-layout="home"] .pring { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border: 0; inset: -6px; border-radius: 27px; box-shadow: 0 0 0 2px rgba(var(--deep), 0.15); }
+  .home .ptile { transition: transform 0.32s var(--ease-bounce); }
+  .home .ptile.sel { transform: scale(1.03); z-index: 3; }
+  /* Home: molded rim, slightly thinner than the Lab cartridges, wrapping evenly (inner radius = outer − rim) */
+  .scr[data-layout="home"] .ptile.flat { padding: 3.5px; }
+  .scr[data-layout="home"] .ptile.flat.sel { padding: 5px; }
+  .scr[data-layout="home"] .ptile.flat .pcard { border-radius: 11.5px; clip-path: inset(0 round 11.5px); }
+  .scr[data-layout="home"] .ptile.flat.sel .pcard { border-radius: 14px; clip-path: inset(0 round 14px); }
+  /* Home ghost: larger, anchored top-right so it bleeds up into the upper-right gutter and spans down the right edge */
+  .scr[data-layout="home"] .ghost { right: -5%; width: 64%; height: auto; aspect-ratio: auto; transform: none; }
+  .scr[data-layout="home"] .ghost.gtop { top: -12%; bottom: auto; }
+  .scr[data-layout="home"] .ghost.gbot { bottom: -14%; top: auto; }
+  .scr[data-layout="home"] .ptile.flat.sel .pcard { border-radius: 14px; clip-path: inset(0 round 14px); }
+  /* Home badge = Design Tile study's flat badge: ONE consistent corner chip, only a slight grow on select.
+     Target .fc (always present) + .home ancestor to outrank flat-lab.css's shrink-on-select rule. */
+  .scr[data-layout="home"] .home .ptile.flat .psym { top: 5px; left: 5px; min-width: 44px; height: 36px; padding: 0 9px; font-size: 0.92rem; border-radius: 13px 7px 15px 7px; }
+  .scr[data-layout="home"] .home .ptile.flat.sel .psym { top: 6px; left: 6px; min-width: 44px; height: 36px; padding: 0 9px; font-size: 0.92rem; border-radius: 16px 7px 15px 7px; }
+  /* ---- Topics screen: 4×2 grid of topic tiles, Lab DNA ---- */
+  .scr .tgrid { position: absolute; inset: 0; z-index: 5; display: grid; grid-template-columns: repeat(4, 218px); grid-template-rows: repeat(2, 158px); gap: 22px 20px; justify-content: center; align-content: start; padding-top: 44px; }
+  .scr[data-layout="topics"] .ptile { width: 218px; height: 158px; cursor: pointer; transition: transform 0.32s var(--ease-bounce); }
+  .scr[data-layout="topics"] .ptile.sel { transform: scale(1.03); z-index: 3; }
+  .scr[data-layout="topics"] .pring { background: transparent; -webkit-backdrop-filter: none; backdrop-filter: none; border: 0; inset: -6px; border-radius: 25px; box-shadow: 0 0 0 2px rgba(var(--deep), 0.15); }
+  .scr[data-layout="topics"] .ptile.flat { padding: 3.5px; }
+  .scr[data-layout="topics"] .ptile.flat.sel { padding: 5px; }
+  .scr[data-layout="topics"] .ptile.flat .pcard { border-radius: 11.5px; clip-path: inset(0 round 11.5px); }
+  .scr[data-layout="topics"] .ptile.flat.sel .pcard { border-radius: 14px; clip-path: inset(0 round 14px); }
+  .scr[data-layout="topics"] .ptile.flat .psym { top: 5px; left: 5px; min-width: 44px; height: 36px; padding: 0 9px; font-size: 0.92rem; border-radius: 13px 7px 15px 7px; }
+  .scr[data-layout="topics"] .ptile.flat.sel .psym { top: 6px; left: 6px; min-width: 44px; height: 36px; padding: 0 9px; font-size: 0.92rem; border-radius: 16px 7px 15px 7px; }
+  /* Topics ghost: selected topic's art, big + center-right, behind the grid */
+  .scr[data-layout="topics"] .ghost { left: 30%; right: -8%; top: -4%; bottom: -6%; width: auto; height: auto; }
 </style>
 </head>
 <body>
@@ -44,6 +89,8 @@
   <g id="nt-cart-composed"><use href="#nt-cover"/><text x="8" y="130.1" style="font:800 6.55px var(--font-ui);letter-spacing:0.65px" fill="#fff" stroke="#fff" stroke-width="2.6" stroke-linejoin="round">INTERACTIVE DEMO</text><text x="8" y="143.7" style="font:700 11.7px var(--font-display);letter-spacing:-0.12px" fill="#fff" stroke="#fff" stroke-width="2.6" stroke-linejoin="round">Prime Spiral</text><text x="8" y="130.1" style="font:800 6.55px var(--font-ui);letter-spacing:0.65px" fill="rgba(14,130,104,0.62)">INTERACTIVE DEMO</text><text x="8" y="143.7" style="font:700 11.7px var(--font-display);letter-spacing:-0.12px" fill="#0e8268">Prime Spiral</text></g>
   <g id="prob-cover"><path d="M26.5 6 L26.5 194" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M47.5 6 L47.5 194" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M68.5 6 L68.5 194" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M89.5 6 L89.5 194" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 6 L110.5 194" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M131.5 6 L131.5 194" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M152.5 6 L152.5 194" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M173.5 6 L173.5 194" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 16.0 L194 16.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 37.0 L194 37.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 58.0 L194 58.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 79.0 L194 79.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 100.0 L194 100.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 121.0 L194 121.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 142.0 L194 142.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 163.0 L194 163.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M6 184.0 L194 184.0" fill="none" stroke="rgba(106,54,181,0.1188)" stroke-width="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L110.5 37.0 L152.5 37.0 L152.5 16.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L89.5 79.0 L89.5 100.0 L26.5 100.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L152.5 79.0 L152.5 163.0 L173.5 163.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L110.5 37.0 L68.5 37.0 L68.5 79.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L110.5 121.0 L131.5 121.0 L131.5 163.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L131.5 79.0 L131.5 100.0 L173.5 100.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L89.5 79.0 L89.5 121.0 L47.5 121.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L89.5 79.0 L89.5 58.0 L47.5 58.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L110.5 100.0 L89.5 100.0" fill="none" stroke="#ffffff" stroke-width="11" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L110.5 37.0 L152.5 37.0 L152.5 16.0" fill="none" stroke="#9a5cee" stroke-width="6.5" opacity="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L89.5 79.0 L89.5 100.0 L26.5 100.0" fill="none" stroke="#c9a4f2" stroke-width="6.5" opacity="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L152.5 79.0 L152.5 163.0 L173.5 163.0" fill="none" stroke="#7c45d0" stroke-width="6.5" opacity="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L110.5 37.0 L68.5 37.0 L68.5 79.0" fill="none" stroke="#a070ee" stroke-width="6.5" opacity="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L110.5 121.0 L131.5 121.0 L131.5 163.0" fill="none" stroke="#8e54e0" stroke-width="6.5" opacity="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L131.5 79.0 L131.5 100.0 L173.5 100.0" fill="none" stroke="#9560e8" stroke-width="6.5" opacity="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L89.5 79.0 L89.5 121.0 L47.5 121.0" fill="none" stroke="#7e48d2" stroke-width="6.5" opacity="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L89.5 79.0 L89.5 58.0 L47.5 58.0" fill="none" stroke="#a877ea" stroke-width="6.5" opacity="1" stroke-linecap="round" stroke-linejoin="round"/><path d="M110.5 79.0 L110.5 100.0 L89.5 100.0" fill="none" stroke="#b89ae8" stroke-width="6.5" opacity="0.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="152.5" cy="16" r="7.5" fill="#ffffff"/><circle cx="152.5" cy="16" r="5.5" fill="#9a5cee" opacity="1"/><circle cx="26.5" cy="100" r="7.5" fill="#ffffff"/><circle cx="26.5" cy="100" r="5.5" fill="#c9a4f2" opacity="1"/><circle cx="173.5" cy="163" r="7.5" fill="#ffffff"/><circle cx="173.5" cy="163" r="5.5" fill="#7c45d0" opacity="1"/><circle cx="68.5" cy="79" r="7.5" fill="#ffffff"/><circle cx="68.5" cy="79" r="5.5" fill="#a070ee" opacity="1"/><circle cx="131.5" cy="163" r="7.5" fill="#ffffff"/><circle cx="131.5" cy="163" r="5.5" fill="#8e54e0" opacity="1"/><circle cx="173.5" cy="100" r="7.5" fill="#ffffff"/><circle cx="173.5" cy="100" r="5.5" fill="#9560e8" opacity="1"/><circle cx="47.5" cy="121" r="7.5" fill="#ffffff"/><circle cx="47.5" cy="121" r="5.5" fill="#7e48d2" opacity="1"/><circle cx="47.5" cy="58" r="7.5" fill="#ffffff"/><circle cx="47.5" cy="58" r="5.5" fill="#a877ea" opacity="1"/><circle cx="89.5" cy="100" r="7.5" fill="#ffffff"/><circle cx="89.5" cy="100" r="5.5" fill="#b89ae8" opacity="0.45"/><circle cx="110.5" cy="79" r="9.5" fill="#ffffff"/><circle cx="110.5" cy="79" r="7" fill="#2a1640"/></g>
   <g id="prob-cart-composed"><use href="#prob-cover"/><text x="8" y="130.1" style="font:800 6.55px var(--font-ui);letter-spacing:0.65px" fill="#fff" stroke="#fff" stroke-width="2.6" stroke-linejoin="round">INTERACTIVE DEMO</text><text x="8" y="143.7" style="font:700 11.7px var(--font-display);letter-spacing:-0.12px" fill="#fff" stroke="#fff" stroke-width="2.6" stroke-linejoin="round">Random Walks</text><text x="8" y="130.1" style="font:800 6.55px var(--font-ui);letter-spacing:0.65px" fill="rgba(94,43,166,0.62)">INTERACTIVE DEMO</text><text x="8" y="143.7" style="font:700 11.7px var(--font-display);letter-spacing:-0.12px" fill="#5e2ba6">Random Walks</text></g>
+  <g id="an-cover"><path d="M8 10 L8 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M30 10 L30 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M52 10 L52 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M74 10 L74 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M96 10 L96 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M118 10 L118 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M140 10 L140 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M162 10 L162 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M184 10 L184 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M8 182 L200 182" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M8 160 L200 160" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M8 138 L200 138" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M8 116 L200 116" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M8 94 L200 94" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M8 72 L200 72" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M8 50 L200 50" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M8 28 L200 28" stroke="rgba(216,81,47,0.09)" stroke-width="1"/><path d="M36 12 L36 182" fill="none" stroke="rgba(216,81,47,0.36)" stroke-width="1.6" stroke-linecap="round"/><path d="M32 182 L200 182" fill="none" stroke="rgba(216,81,47,0.36)" stroke-width="1.6" stroke-linecap="round"/><path d="M92 182 L92 137.3" fill="none" stroke="rgba(216,81,47,0.46)" stroke-width="1.9" stroke-dasharray="4 4"/><path d="M144 182 L144 62.7" fill="none" stroke="rgba(216,81,47,0.46)" stroke-width="1.9" stroke-dasharray="4 4"/><path d="M36 137.3 L92 137.3" fill="none" stroke="rgba(216,81,47,0.46)" stroke-width="1.9" stroke-dasharray="4 4"/><path d="M36 62.7 L144 62.7" fill="none" stroke="rgba(216,81,47,0.46)" stroke-width="1.9" stroke-dasharray="4 4"/><path d="M92 178 L92 186" stroke="rgba(216,81,47,0.55)" stroke-width="1.5" stroke-linecap="round"/><path d="M144 178 L144 186" stroke="rgba(216,81,47,0.55)" stroke-width="1.5" stroke-linecap="round"/><path d="M118 178 L118 186" stroke="rgba(216,81,47,0.55)" stroke-width="1.5" stroke-linecap="round"/><path d="M32 137.3 L40 137.3" stroke="rgba(216,81,47,0.55)" stroke-width="1.5" stroke-linecap="round"/><path d="M32 62.7 L40 62.7" stroke="rgba(216,81,47,0.55)" stroke-width="1.5" stroke-linecap="round"/><path d="M32 100.0 L40 100.0" stroke="rgba(216,81,47,0.55)" stroke-width="1.5" stroke-linecap="round"/><path d="M24.0 157.5 L28.0 157.4 L32.0 157.3 L36.0 157.1 L40.0 156.8 L44.0 156.5 L48.0 156.1 L52.0 155.7 L56.0 155.1 L60.0 154.3 L64.0 153.4 L68.0 152.2 L72.0 150.7 L76.0 149.0 L80.0 146.8 L84.0 144.2 L88.0 141.0 L92.0 137.3 L96.0 133.0 L100.0 128.1 L104.0 122.6 L108.0 116.6 L112.0 110.1 L116.0 103.4 L120.0 96.6 L124.0 89.9 L128.0 83.4 L132.0 77.4 L136.0 71.9 L140.0 67.0 L144.0 62.7 L148.0 59.0 L152.0 55.8 L156.0 53.2 L160.0 51.0 L164.0 49.3 L168.0 47.8 L172.0 46.6 L176.0 45.7 L180.0 44.9 L184.0 44.3 L188.0 43.9 L192.0 43.5 L196.0 43.2 L200.0 42.9 L204.0 42.7 L208.0 42.6" fill="none" stroke="rgba(216,81,47,0.9)" stroke-width="2.5" stroke-linecap="round" stroke-linejoin="round"/><circle cx="92" cy="137.3" r="3.1" fill="#fff" stroke="rgba(216,81,47,0.7)" stroke-width="1.5"/><circle cx="144" cy="62.7" r="3.1" fill="#fff" stroke="rgba(216,81,47,0.7)" stroke-width="1.5"/><circle cx="112" cy="110.1" r="6.5" fill="none" stroke="rgba(216,81,47,0.6)" stroke-width="1.7"/><circle cx="112" cy="110.1" r="4.2" fill="rgba(216,81,47,0.95)"/></g>
+  <g id="lg-cover"><g fill="none" stroke="rgba(194,48,53,0.2)" stroke-width="3" stroke-linecap="round" stroke-linejoin="round"><path d="M-40 34 L92 34 L92 -40"/><path d="M-40 148 L44 148 L44 62 L240 62"/><path d="M60 240 L60 118 L240 118"/><path d="M132 -40 L132 44 L240 44"/><path d="M-40 92 L26 92 L26 178 L118 178 L118 240"/><path d="M156 240 L156 166 L240 166"/><path d="M170 -40 L170 24 L240 24"/><path d="M-40 190 L84 190 L84 240"/><path d="M14 -40 L14 62"/><path d="M188 76 L188 140 L240 140"/><path d="M-40 12 L48 12 L48 -40"/><path d="M-40 80 L14 80 L14 132 L60 132"/><path d="M92 34 L92 98 L132 98"/><path d="M148 62 L148 118"/><path d="M76 148 L76 190"/></g><g id="lg-circ" transform="translate(100 100) scale(1.25) translate(-100 -100)"><g fill="none" stroke="rgba(194,48,53,0.7)" stroke-width="3.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 64 L62 64"/><path d="M6 84 L62 84"/><path d="M30 64 L30 118 L60 118"/><path d="M40 84 L40 138 L60 138"/><path d="M106 74 L118 74 L118 88 L130 88"/><path d="M98 128 L118 128 L118 114 L130 114"/><path d="M174 101 L198 101"/></g><g fill="rgba(194,48,53,0.9)"><circle cx="30" cy="64" r="3.4"/><circle cx="40" cy="84" r="3.4"/></g><g fill="rgba(194,48,53,0.10)" stroke="rgba(194,48,53,0.9)" stroke-width="3.4" stroke-linejoin="round"><path d="M60 54 Q84 56 106 74 Q84 92 60 94 Q68 74 60 54 Z"/><path d="M60 110 L80 110 A18 18 0 0 1 80 146 L60 146 Z"/><path d="M128 76 Q152 78 174 101 Q152 124 128 126 Q136 101 128 76 Z"/></g><path d="M53 54 Q61 74 53 94" fill="none" stroke="rgba(194,48,53,0.9)" stroke-width="3.4" stroke-linecap="round"/></g></g>
 </defs></svg>
 
 <div class="page wide">
@@ -63,7 +110,7 @@
         <button class="tw-x" id="twClose" type="button" aria-label="Close tweaks">✕</button>
       </div>
       <div class="tw-row">
-        <div class="tw-label">Layout</div>
+        <div class="tw-label">Screen</div>
         <div class="drop" id="laydrop">
           <button class="drop-btn" type="button"><span id="laydropLabel"></span></button>
           <div class="drop-menu" role="listbox"></div>
@@ -93,13 +140,16 @@
 
   /* ---- data (mirrors zmath/data.js) ---------------------------------- */
   var TOPICS = {
-    geometry: { sym: 'Ge', name: 'Geometry',       c1: '#ffac5e', c2: '#e0702a', ink: '#bd5410', deep: '150,60,12' },
-    algebra:  { sym: 'Al', name: 'Algebra',        c1: '#ff7a9c', c2: '#c2326b', ink: '#b51f57', deep: '110,20,55' },
-    linalg:   { sym: 'La', name: 'Linear Algebra', c1: '#5b8def', c2: '#3147bc', ink: '#2a3db0', deep: '25,38,120' },
-    numberth: { sym: 'Nt', name: 'Number Theory',  c1: '#2fd3b0', c2: '#159c7e', ink: '#0e7d64', deep: '8,95,75' },
-    calculus: { sym: 'Ca', name: 'Calculus',       c1: '#ffce4d', c2: '#e0962a', ink: '#b0730f', deep: '140,90,10' },
-    prob:     { sym: 'Pr', name: 'Probability',    c1: '#a06ee0', c2: '#6a36b5', ink: '#5e2ba6', deep: '74,30,120' }
+    geometry: { sym: 'Ge', n: '02', name: 'Geometry',       c1: '#ffac5e', c2: '#e0702a', ink: '#bd5410', deep: '150,60,12',  blurb: 'Curvature, tilings, and constructions.' },
+    algebra:  { sym: 'Al', n: '01', name: 'Algebra',        c1: '#ff7a9c', c2: '#c2326b', ink: '#b51f57', deep: '110,20,55',  blurb: 'Groups, rings, and the shapes of symmetry.' },
+    linalg:   { sym: 'La', n: '04', name: 'Linear Algebra', c1: '#5b8def', c2: '#3147bc', ink: '#2a3db0', deep: '25,38,120',  blurb: 'Vectors, matrices, transformations.' },
+    numberth: { sym: 'Nt', n: '05', name: 'Number Theory',  c1: '#2fd3b0', c2: '#159c7e', ink: '#0e7d64', deep: '8,95,75',    blurb: 'Primes, lattices, and Diophantine games.' },
+    calculus: { sym: 'Ca', n: '03', name: 'Calculus',       c1: '#ffce4d', c2: '#e0962a', ink: '#b0730f', deep: '140,90,10',  blurb: 'Limits, flows, and the infinitely small.' },
+    prob:     { sym: 'Pr', n: '06', name: 'Probability',    c1: '#a06ee0', c2: '#6a36b5', ink: '#5e2ba6', deep: '74,30,120',  blurb: 'Randomness, chains, and expectation.' },
+    analysis: { sym: 'An', n: '07', name: 'Analysis',       c1: '#ff8e72', c2: '#d8512f', ink: '#c2431f', deep: '160,55,28',  blurb: 'Rigor behind the calculus, made visual.' },
+    logic:    { sym: 'Lo', n: '08', name: 'Logic',          c1: '#f0686b', c2: '#c23035', ink: '#ad2429', deep: '140,30,36',  blurb: 'Proof, computability, and paradox.' }
   };
+  var TOPIC_ORDER = ['algebra', 'geometry', 'calculus', 'linalg', 'numberth', 'prob', 'analysis', 'logic'];
   var PROJECTS = [
     { id: 'p1', topic: 'geometry', scene: 'tiling',  title: 'Knot Atlas',        kind: 'Interactive', year: '2026', desc: 'Drag the strands of every prime knot up to nine crossings and watch its invariants update live.' },
     { id: 'p2', topic: 'linalg',   scene: 'vectors', title: 'Matrix Playground', kind: 'Interactive', year: '2026', desc: 'Compose transformations on the plane and see eigenvectors snap into place in real time.' },
@@ -109,12 +159,22 @@
     { id: 'p6', topic: 'prob',     scene: 'lattice', title: 'Random Walks',      kind: 'Demo',        year: '2024', desc: 'Race a thousand walkers and watch the bell curve assemble itself from pure chance.' }
   ];
   var PByID = {}; PROJECTS.forEach(function (p) { PByID[p.id] = p; });
+  /* Home-only extra cartridge (Lab rail keeps its original six — big-cart art for p8 isn't baked in) */
+  var P7 = { id: 'p8', topic: 'analysis', scene: 'epsilon', title: 'Riemann Sum', kind: 'Interactive', year: '2026', desc: 'Slice the area under a curve into rectangles and watch the sum sharpen into the integral.' };
+  PByID.p8 = P7;
+  var HOME_PROJECTS = PROJECTS.concat([P7]);
 
   var LAYOUTS = [
     { id: 'cart-flat', short: 'C', name: 'Spotlight — flat cartridges' }
   ];
+  var SCREENS = [
+    { id: 'lab', name: 'Lab — cartridge rail' },
+    { id: 'home', name: 'Home — shelves' },
+    { id: 'topics', name: 'Topics — grid' }
+  ];
 
-  var st = { layout: 'cart-flat', selId: 'p1', ghost: 'bold', chrome: 'live', details: false };
+  var st = { screen: 'lab', layout: 'cart-flat', selId: 'p1', ghost: 'bold', chrome: 'live', details: false,
+    homeShelf: 0, homeTopic: 'algebra', homeProj: 'p1', homeSel: null, topicSel: null };
 
   function hex2rgb(h) { var n = parseInt(h.slice(1), 16); return ((n >> 16) & 255) + ',' + ((n >> 8) & 255) + ',' + (n & 255); }
 
@@ -124,7 +184,7 @@
   }
   /* Composed material (Tile study's "Flat + Composed"): every cartridge
      wears its topic's composed ink art, words living inside the drawing. */
-  var COVER = { geometry: 'geo', algebra: 'alg', linalg: 'la', numberth: 'nt', calculus: 'cal', prob: 'prob' };
+  var COVER = { geometry: 'geo', algebra: 'alg', linalg: 'la', numberth: 'nt', calculus: 'cal', prob: 'prob', analysis: 'an', logic: 'lg' };
   function composedCoverSvg(p, mini) {
     if (mini) {
       var ink = hex2rgb(TOPICS[p.topic].ink);
@@ -134,6 +194,34 @@
     }
     return '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#' + COVER[p.topic] + '-cart-composed"></use></svg>';
   }
+  /* Home art = the REAL app's composed cover defs (tile-covers.js, injected by the
+     module below): full-bleed drawing with "TOPIC 0X / Name" or "INTERACTIVE DEMO /
+     Name" baked in. Same art the live Home + Lab use — Home as a true Lab sibling.
+     Returns null until the defs module has loaded; callers fall back to study art. */
+  function homeArt(topic, kind) {
+    var zc = window.ZMATH_COMPOSED && window.ZMATH_COMPOSED[topic];
+    if (!zc) return null;
+    var href = kind === 'cart' ? zc.cart : zc.tile;
+    var extra = topic === 'geometry' ? '--gs:rgba(224,112,42,0.9);--gst:rgba(232,130,62,0.82);--gw:2.6;' : '';
+    return '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"' +
+      ' style="' + extra + 'color:rgb(' + hex2rgb(TOPICS[topic].ink) + ')"><use href="' + href + '"></use></svg>';
+  }
+  function homeGhostCls() {
+    if (!st.homeSel) return '';
+    return ' gtop';
+  }
+  function homeSelTopic() {
+    if (!st.homeSel) return null;
+    return st.homeSel.shelf === 0 ? st.homeSel.key : PByID[st.homeSel.key].topic;
+  }
+  function homeGhostSvg(topic) {
+    if (!topic) return '';
+    var zc = window.ZMATH_COMPOSED && window.ZMATH_COMPOSED[topic];
+    var href = zc ? zc.art : '#' + COVER[topic] + '-cover';
+    var extra = topic === 'geometry' ? '--gs:rgba(224,112,42,0.9);--gst:rgba(232,130,62,0.82);--gw:2.6;' : '';
+    return '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"' +
+      ' style="' + extra + 'color:rgb(' + hex2rgb(TOPICS[topic].ink) + ')"><use href="' + href + '"></use></svg>';
+  }
   function ghostSvg(p) {
     /* geometry keeps its quiet line-art ghost */
     if (p.topic !== 'geometry') {
@@ -141,10 +229,10 @@
     }
     return coverSvg(p);
   }
-  function tileHTML(p, w, h, sel, extra) {
+  function tileHTML(p, w, h, sel, extra, coverOverride) {
     var t = TOPICS[p.topic];
     var flat = st.layout === 'cart-flat';
-    var cover = composedCoverSvg(p, !sel);
+    var cover = coverOverride || composedCoverSvg(p, !sel);
     return '<div class="ptile ' + (extra || '') + ' fc' + (flat ? ' flat' : '') + (sel ? ' sel' : '') + '" data-id="' + p.id + '"' +
       ' style="--c1:' + t.c1 + ';--c2:' + t.c2 + ';--deep:' + (t.deep || hex2rgb(t.ink)) + ';width:' + w + 'px;height:' + h + 'px">' +
       '<span class="pring"></span>' +
@@ -152,6 +240,21 @@
       '<span class="psym"><span>' + t.sym + '</span></span></div>';
   }
   function statPill(label, val) { return '<span class="spill">' + label + ' <b>' + val + '</b></span>'; }
+  /* Lab-DNA square topic tile — same molded frame / white card / badge recipe as the cartridges */
+  function topicTileHTML(id, w, h, sel) {
+    var t = TOPICS[id];
+    var art = homeArt(id, 'tile');
+    if (!art) {
+      var extra = id === 'geometry' ? '--gs:rgba(224,112,42,0.9);--gst:rgba(232,130,62,0.82);--gw:2.6;' : '';
+      art = '<svg viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"' +
+        ' style="' + extra + 'color:rgb(' + hex2rgb(t.ink) + ')"><use href="#' + COVER[id] + '-cover"></use></svg>';
+    }
+    return '<div class="ptile fc flat ttile' + (sel ? ' sel' : '') + '" data-topic="' + id + '"' +
+      ' style="--c1:' + t.c1 + ';--c2:' + t.c2 + ';--deep:' + t.deep + ';width:' + w + 'px;height:' + h + 'px">' +
+      '<span class="pring"></span>' +
+      '<div class="pcard"><div class="coverwrap">' + art + '</div></div>' +
+      '<span class="psym"><span>' + t.sym + '</span></span></div>';
+  }
   function metaHTML(p, layout) {
     var t = TOPICS[p.topic];
     var h = '<div class="m-title">' + p.title + '</div>';
@@ -207,8 +310,55 @@
     return h + '</div></div>';
   }
 
+  function clampN(v, min, max) { return Math.max(min, Math.min(max, v)); }
+  /* ---- Home: two shelves, rail glide keeps the pick centered ------------ */
+  var HG = { pad: 40, gap: 16, tW: 210, tH: 162, cW: 284, cH: 162 };
+  function homeGeom(kind) {
+    var g = HG, x = 0, c = 0;
+    var isT = kind === 'topics', list = isT ? TOPIC_ORDER : HOME_PROJECTS, sel = isT ? st.homeTopic : st.homeProj, w = isT ? g.tW : g.cW;
+    list.forEach(function (it) { var id = it.id || it; if (id === sel) c = x + w / 2; x += w + g.gap; });
+    return clampN(490 - c, 980 - g.pad - (x - g.gap), g.pad);
+  }
+  function homeRow(kind) {
+    var g = HG, h = '';
+    if (kind === 'topics') {
+      TOPIC_ORDER.forEach(function (id) { h += topicTileHTML(id, g.tW, g.tH, !!st.homeSel && st.homeSel.shelf === 0 && id === st.homeSel.key); });
+    } else {
+      HOME_PROJECTS.forEach(function (p) { h += tileHTML(p, g.cW, g.cH, !!st.homeSel && st.homeSel.shelf === 1 && p.id === st.homeSel.key, 'cart', homeArt(p.topic, 'cart')); });
+    }
+    return '<div class="hrail"><div class="hrow" style="transform:translateX(' + homeGeom(kind).toFixed(1) + 'px)">' + h + '</div></div>';
+  }
+  function homeHTML() {
+    var t = TOPICS[st.homeTopic], p = PByID[st.homeProj];
+    return '<div class="home">' +
+      '<div class="ghost' + homeGhostCls() + '">' + homeGhostSvg(homeSelTopic()) + '</div>' +
+      '<div class="hshelf topics on">' +
+        '<div class="hhead">' + statPill('Field:', t.name) + '</div>' + homeRow('topics') + '</div>' +
+      '<div class="hshelf carts on">' +
+        '<div class="hhead">' + statPill('Interactive:', p.title) + '</div>' + homeRow('carts') + '</div>' +
+      '</div>';
+  }
+
+  function topicsHTML() {
+    var h = '<div class="topics-scr">';
+    h += '<div class="ghost">' + (st.topicSel ? homeGhostSvg(st.topicSel) : '') + '</div>';
+    h += '<div class="tgrid">';
+    TOPIC_ORDER.forEach(function (id) { h += topicTileHTML(id, 218, 158, st.topicSel === id); });
+    h += '</div></div>';
+    return h;
+  }
   /* ---- screen renderer -------------------------------------------------- */
   function screenHTML(layout) {
+    if (st.screen === 'home') {
+      return '<div class="scr" data-layout="home" data-ghost="' + st.ghost + '" data-chrome="' + st.chrome + '">' + homeHTML() + '</div>';
+    }
+    if (st.screen === 'topics') {
+      return '<div class="scr" data-layout="topics" data-ghost="' + st.ghost + '" data-chrome="' + st.chrome + '">' + topicsHTML() + '</div>';
+    }
+    if (st.screen !== 'lab') {
+      return '<div class="scr" data-layout="' + st.screen + '" data-ghost="' + st.ghost + '" data-chrome="' + st.chrome + '">' +
+        '<div class="ph-note">' + (st.screen === 'home' ? 'Home — shelves land in Step 4' : 'Topics — grid lands in Step 5') + '</div></div>';
+    }
     var p = PByID[st.selId];
     var h = '<div class="scr" data-layout="' + layout + '" data-ghost="' + st.ghost +
       '" data-chrome="' + st.chrome + '">';
@@ -222,7 +372,7 @@
   var hero = document.getElementById('hero');
   var heroKey = '';
   function structKey() {
-    return [st.layout, st.ghost, st.chrome].join('|');
+    return [st.screen, st.layout, st.ghost, st.chrome].join('|');
   }
   function buildHero() { hero.innerHTML = screenHTML(st.layout); wireHero(); }
   function syncHero() {
@@ -252,6 +402,26 @@
       scr.insertAdjacentHTML('beforeend', ch); wireChrome(scr);
     }
   }
+  function syncHome() {
+    var scr = hero.querySelector('.scr[data-layout="home"]');
+    if (!scr) return buildHero();
+    scr.querySelectorAll('.hshelf').forEach(function (sh) { sh.classList.add('on'); });
+    var tsh = scr.querySelector('.hshelf.topics');
+    tsh.querySelectorAll('.ptile').forEach(function (el) { el.classList.toggle('sel', !!st.homeSel && st.homeSel.shelf === 0 && el.getAttribute('data-topic') === st.homeSel.key); });
+    tsh.querySelector('.hrow').style.transform = 'translateX(' + homeGeom('topics').toFixed(1) + 'px)';
+    var tb = tsh.querySelector('.spill b'); if (tb) tb.textContent = TOPICS[st.homeTopic].name;
+    var csh = scr.querySelector('.hshelf.carts');
+    csh.querySelectorAll('.ptile').forEach(function (el) { el.classList.toggle('sel', !!st.homeSel && st.homeSel.shelf === 1 && el.getAttribute('data-id') === st.homeSel.key); });
+    csh.querySelector('.hrow').style.transform = 'translateX(' + homeGeom('carts').toFixed(1) + 'px)';
+    var cb = csh.querySelector('.spill b'); if (cb) cb.textContent = PByID[st.homeProj].title;
+    var gh = scr.querySelector('.ghost'); if (gh) { var gt = homeSelTopic(); gh.innerHTML = homeGhostSvg(gt); gh.classList.remove('gtop', 'gbot'); if (st.homeSel) gh.classList.add('gtop'); }
+  }
+  function syncTopics() {
+    var scr = hero.querySelector('.scr[data-layout="topics"]');
+    if (!scr) return buildHero();
+    scr.querySelectorAll('.ptile').forEach(function (el) { el.classList.toggle('sel', el.getAttribute('data-topic') === st.topicSel); });
+    var gh = scr.querySelector('.ghost'); if (gh) gh.innerHTML = st.topicSel ? homeGhostSvg(st.topicSel) : '';
+  }
   function pulseSel() {
     var el = hero.querySelector('.ptile.sel');
     if (!el) return;
@@ -271,6 +441,22 @@
     var scr = hero.querySelector('.scr');
     scr.addEventListener('click', function (e) {
       if (e.target.closest('.cbtn')) return;
+      if (st.screen === 'home') {
+        var ht = e.target.closest('.ptile');
+        if (!ht) return;
+        if (ht.hasAttribute('data-topic')) { st.homeShelf = 0; st.homeTopic = ht.getAttribute('data-topic'); st.homeSel = { shelf: 0, key: st.homeTopic }; }
+        else { st.homeShelf = 1; st.homeProj = ht.getAttribute('data-id'); st.homeSel = { shelf: 1, key: st.homeProj }; }
+        apply();
+        return;
+      }
+      if (st.screen === 'topics') {
+        var tt = e.target.closest('.ptile');
+        if (!tt) return;
+        st.topicSel = tt.getAttribute('data-topic');
+        apply();
+        return;
+      }
+      if (st.screen !== 'lab') return; /* topics gets its own wiring */
       var it = e.target.closest('.ptile');
       if (!it) return;
       var id = it.getAttribute('data-id');
@@ -293,23 +479,40 @@
   function buildLayMenu() {
     var menu = drop.querySelector('.drop-menu');
     menu.innerHTML = '';
-    LAYOUTS.forEach(function (L) {
+    SCREENS.forEach(function (S) {
       var b = document.createElement('button');
       b.type = 'button';
-      b.className = 'drop-item' + (L.id === st.layout ? ' on' : '');
+      b.className = 'drop-item' + (S.id === st.screen ? ' on' : '');
       b.innerHTML = '<span class="ck">\u2713</span><span></span>';
-      b.lastChild.textContent = L.name;
-      b.addEventListener('click', function () { closeDrops(); st.layout = L.id; onLayoutChange(); apply(); });
+      b.lastChild.textContent = S.name;
+      b.addEventListener('click', function () { closeDrops(); st.screen = S.id; onLayoutChange(); apply(); });
       menu.appendChild(b);
     });
     document.getElementById('laydropLabel').textContent =
-      LAYOUTS.find(function (L) { return L.id === st.layout; }).name;
+      SCREENS.find(function (S) { return S.id === st.screen; }).name;
   }
 
   /* ---- keyboard ----------------------------------------------------------- */
   document.addEventListener('keydown', function (e) {
     if (['ArrowUp', 'ArrowDown', 'ArrowLeft', 'ArrowRight'].indexOf(e.key) < 0) return;
     e.preventDefault();
+    if (st.screen === 'home') {
+      if (e.key === 'ArrowUp' || e.key === 'ArrowDown') { st.homeShelf = e.key === 'ArrowUp' ? 0 : 1; st.homeSel = st.homeShelf === 0 ? { shelf: 0, key: st.homeTopic } : { shelf: 1, key: st.homeProj }; apply(); return; }
+      var hb = e.key === 'ArrowLeft';
+      if (st.homeShelf === 0) { var tl = TOPIC_ORDER, tj = tl.indexOf(st.homeTopic); st.homeTopic = tl[(tj + (hb ? -1 : 1) + tl.length) % tl.length]; st.homeSel = { shelf: 0, key: st.homeTopic }; }
+      else { var cl = HOME_PROJECTS, cj = cl.map(function (p) { return p.id; }).indexOf(st.homeProj); st.homeProj = cl[(cj + (hb ? -1 : 1) + cl.length) % cl.length].id; st.homeSel = { shelf: 1, key: st.homeProj }; }
+      apply();
+      return;
+    }
+    if (st.screen === 'topics') {
+      var N = TOPIC_ORDER.length;
+      var stp = e.key === 'ArrowLeft' ? -1 : e.key === 'ArrowRight' ? 1 : e.key === 'ArrowUp' ? -4 : 4;
+      var tj2 = TOPIC_ORDER.indexOf(st.topicSel);
+      st.topicSel = TOPIC_ORDER[tj2 < 0 ? 0 : (tj2 + stp + N) % N];
+      apply();
+      return;
+    }
+    if (st.screen !== 'lab') return;
     var back = e.key === 'ArrowUp' || e.key === 'ArrowLeft';
     var list = listFor(), j = selIdx();
     st.selId = list[(j + (back ? -1 : 1) + list.length) % list.length].id;
@@ -370,15 +573,24 @@
   function apply() {
     clampSel();
     var key = structKey();
-    if (key !== heroKey) { heroKey = key; buildHero(); } else { syncHero(); }
+    if (key !== heroKey) { heroKey = key; buildHero(); } else if (st.screen === 'home') { syncHome(); } else if (st.screen === 'topics') { syncTopics(); } else { syncHero(); }
     buildLayMenu();
     fit();
     var L = LAYOUTS.find(function (x) { return x.id === st.layout; });
-    cap.innerHTML = '<b>' + L.name + ' — ' + PByID[st.selId].title + '</b>';
+    var S = SCREENS.find(function (x) { return x.id === st.screen; });
+    cap.innerHTML = '<b>' + (st.screen === 'lab' ? L.name + ' — ' + PByID[st.selId].title : S.name) + '</b>';
   }
 
+  window.__refreshHero = function () { heroKey = ''; apply(); };
   apply();
 })();
+</script>
+<script type="module">
+  /* One brain: pull the live app's composed cover defs (auto-injected on import)
+     so Home renders the identical art + baked labels the real Home/Lab use. */
+  import { ZMATH_COMPOSED } from '../zmath/tile-covers.js';
+  window.ZMATH_COMPOSED = ZMATH_COMPOSED;
+  if (window.__refreshHero) window.__refreshHero();
 </script>
 </body>
 </html>

@@ -1,9 +1,6 @@
 /* ============================================================
-   Design tile — flat-material study
-   One tile component, driven by two data-attributes on .tileWrap:
-     data-mat  = glossy | flat        (material)
-     data-dots = none | halftone | tenji   (the "dot edit" layer)
-   Glossy reproduces the CURRENT app tile faithfully (the "before").
+   Design tile — flat material (the keeper)
+   One tile component, data-mat="flat" on .tileWrap.
    Flat = molded-cartridge material: hard gradient frame, white label
    embedded on one recessed line, flat badge (no moat), one contact shadow.
    Topic = Geometry  → grad #ffac5e → #e0702a, ink #bd5410.
@@ -27,27 +24,15 @@
   --frame-deep: 74,30,120; }          /* deep violet, for hard rims / recess lines */
 .tileWrap[data-topic="analysis"] { --c1:#ff8e72; --c2:#d8512f; --ink:#c4441f;
   --frame-deep: 150,45,20; }          /* deep blush, for hard rims / recess lines */
+.tileWrap[data-topic="logic"] { --c1:#f0686b; --c2:#c23035; --ink:#ae2226;
+  --frame-deep: 130,20,25; }          /* deep coral, for hard rims / recess lines */
 
 /* ---- TILE SHELL ------------------------------------------------------- */
 .tile { position: relative; cursor: pointer; isolation: isolate;
   aspect-ratio: 1.4 / 1;
   transition: transform .25s cubic-bezier(.34,1.56,.64,1), box-shadow .25s cubic-bezier(.25,1,.5,1); }
 
-/* GLOSSY (current): gradient frame + colored glow + specular + frosted label */
-[data-mat="glossy"] .tile {
-  border-radius: 22px; padding: 4px;
-  background: linear-gradient(180deg, var(--c1), var(--c2));
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05),
-    inset 0 1px 1px rgba(255,255,255,0.55); }
-[data-mat="glossy"] .tile:hover { transform: translateY(-6px) scale(1.025);
-  box-shadow: 0 2px 6px rgba(0,0,0,0.07), 0 14px 28px rgba(40,50,80,0.13),
-    inset 0 1px 1px rgba(255,255,255,0.55); }
-[data-mat="glossy"] .art { border-radius: 18px;
-  /* match the real app: OPAQUE white label (no orange bleed through) */
-  background: #ffffff;
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
-
-/* FLAT (target): hard gradient stroke, embedded label, no glow/no frost */
+/* FLAT: hard gradient stroke, embedded label, no glow/no frost */
 [data-mat="flat"] .tile {
   border-radius: 19px; padding: 5px;
   background: linear-gradient(180deg, var(--c1), var(--c2));
@@ -57,31 +42,11 @@
 [data-mat="flat"] .tile:hover { transform: translateY(-5px) scale(1.02);
   box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(var(--frame-deep),0.18); }
 [data-mat="flat"] .art { border-radius: 14px; background: #fff; }
-/* 4th option: flat + the crisp division hairline restored */
-.tileWrap.hairline[data-mat="flat"] .art { box-shadow: inset 0 0 0 1px rgba(var(--frame-deep),0.10); }
-
-/* HYBRID (new, geometry pilot): the glossy body — sheen, frosted moat badge,
-   original 22px/4px frame size — but the RIM wears the flat material: one hard
-   contact shadow + the deep warm inner rim line, no white specular. */
-[data-mat="hybrid"] .tile {
-  border-radius: 22.25px; padding: 4.25px; margin: -0.25px;
-  background: linear-gradient(180deg, var(--c1), var(--c2));
-  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16),
-    inset 0 0 0 1px rgba(var(--frame-deep),0.18); }
-[data-mat="hybrid"] .tile:hover { transform: translateY(-6px) scale(1.025);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(var(--frame-deep),0.18); }
-[data-mat="hybrid"] .art { border-radius: 18px; background: #ffffff;
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%); }
 
 /* ---- LABEL (art) shared ---------------------------------------------- */
 .art { position: relative; height: 100%; overflow: hidden;
   display: flex; flex-direction: column; justify-content: flex-end; }
 .cover { position: absolute; inset: 0; width: 100%; height: 100%; z-index: 0; }
-
-/* GLOSSY label keeps the diagonal specular sheen; FLAT removes it */
-.sheen { position: absolute; inset: 0; z-index: 1; pointer-events: none;
-  background: linear-gradient(150deg, rgba(255,255,255,0.55) 0%, rgba(255,255,255,0.10) 26%, transparent 50%); }
-[data-mat="flat"] .sheen { display: none; }
 
 /* legibility = HALO (the app's default): nothing covered, art fully intact,
    a tight white outline crisps the glyphs over the line art. Scrim retired. */
@@ -104,20 +69,11 @@
   background: linear-gradient(150deg, var(--c1), var(--c2));
   -webkit-background-clip: text; background-clip: text; -webkit-text-fill-color: transparent; color: transparent; }
 
-/* GLOSSY badge = nested moat (grey tray + floating white ::before pill) */
-[data-mat="glossy"] .badge { background: rgba(234,237,244,0.72);
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-  box-shadow: inset 0 1px 2px rgba(80,95,130,0.12); }
-[data-mat="glossy"] .badge::before { content: ""; position: absolute; inset: 3px; z-index: 0;
-  border-radius: 12px 5px 11px 5px; background: #fff;
-  box-shadow: 0 1px 2px rgba(40,50,80,0.10), 0 0 2px rgba(40,50,80,0.06), inset 0 1px 1px rgba(255,255,255,0.9); }
-
-/* FLAT + HYBRID badge = single flat chip embedded directly in the label (no grey
-   moat, no floating pill, no blur) — just a hairline outline, no top recess shadow.
-   Same footprint + position as the moat tray. */
-[data-mat="flat"] .badge, [data-mat="hybrid"] .badge { background: #fff;
+/* FLAT badge = single flat chip embedded directly in the label (no grey
+   moat, no floating pill, no blur) — just a hairline outline, no top recess shadow. */
+[data-mat="flat"] .badge { background: #fff;
   box-shadow: inset 0 0 0 1px rgba(var(--frame-deep),0.16); }
-[data-mat="flat"] .badge::before, [data-mat="hybrid"] .badge::before { display: none; }
+[data-mat="flat"] .badge::before { display: none; }
 
 /* ---- CARTRIDGE (featured Lab card — Knot Atlas pilot) ----------------
    Same shell + materials; proportions match the home Projects rail exactly:
@@ -129,13 +85,6 @@
 .tileWrap[data-tkind="cartridge"] .name { font-size: 1.18rem; }
 .tileWrap[data-tkind="cartridge"] .badge { min-width: 44px; height: 36px; font-size: 0.92rem;
   border-radius: 16px 7px 15px 7px; }
-[data-mat="glossy"][data-tkind="cartridge"] .badge::before { border-radius: 13px 5px 12px 5px; }
-
-/* 3rd cartridge option: flat, minus the hairlines/shadows — no contact shadow,
-   no inner rim line, no badge outline. Same cartridge size. */
-.tileWrap.clean[data-mat="flat"] .tile,
-.tileWrap.clean[data-mat="flat"] .tile:hover { box-shadow: none; }
-.tileWrap.clean[data-mat="flat"] .badge { box-shadow: none; }
 
 /* COMPOSED: art + words are ONE drawing — the words live inside the SVG and
    crossing lines break at letter edges. HTML text hides; regular Flat rim. */

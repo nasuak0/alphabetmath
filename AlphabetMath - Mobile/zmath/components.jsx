@@ -1,7 +1,7 @@
 /* Zmath components — Sidebar (Miiverse rail), Dock, Tile, Modal, screens. */
 import React from "react";
 import { Icon, GlyphIcon, CapsuleIcon } from "./icons.jsx";
-import { CoverArt } from "./coverart.jsx";
+import { ZMATH_COMPOSED } from "./tile-covers.js";
 import { ZMATH_PByID, ZMATH_TByID, NOTE_GLYPH } from "./data.js";
 import { ZFIGURES } from "./figures-registry.js";
 import "./figures.jsx";   // side-effect: registers the 8 note figures into ZFIGURES
@@ -50,7 +50,7 @@ const NAV = [
   { id: 'About',    icon: 'user',   colors: ['#ff86ac', '#c2326b'], glow: 'rgba(220,70,130,0.42)' },
 ];
 
-function Sidebar({ page, setPage, searchInRail, onSearch, capsuleDepth = 'raised', homeMaterial = 'grey', homeIconFinish = 'glossy' }) {
+function Sidebar({ page, setPage, searchInRail, onSearch, capsuleDepth = 'raised', homeMaterial = 'grey', homeIconFinish = 'glossy', iconFinish = 'glossy' }) {
   const NavIcon = CapsuleIcon;
   const COLLAPSED = 90, EXPANDED = 248, MID = (COLLAPSED + EXPANDED) / 2;
   const [open, setOpen] = useState(false);
@@ -108,8 +108,8 @@ function Sidebar({ page, setPage, searchInRail, onSearch, capsuleDepth = 'raised
         </div>
         {searchInRail && (
           <button className="nav-item nav-search" onClick={onSearch}>
-            <span className="ni-ic">
-              <NavIcon name="search" size={34} sw={2.5} rim={5.5} colors={['#3d4250', '#3d4250']} glow="rgba(90,100,120,0.42)" depth={capsuleDepth} />
+            <span className="ni-ic" style={{ '--ni-glow': 'rgba(90,100,120,0.45)' }}>
+              <NavIcon name="search" size={37} sw={2.8} rim={iconFinish === 'flat' ? 4.8 : 6} colors={iconFinish === 'flat' ? ['#4a4a52', '#0c0c10'] : ['#3d4250', '#3d4250']} glow="rgba(90,100,120,0.42)" depth={capsuleDepth} finish={iconFinish} />
             </span>
             <span className="ni-tx">Search</span>
             <span className="ni-cur"><Icon name="chevron" size={16} sw={2.4} /></span>
@@ -118,8 +118,8 @@ function Sidebar({ page, setPage, searchInRail, onSearch, capsuleDepth = 'raised
         <div className="rail-label">Menu</div>
         {NAV.map(n => (
           <button key={n.id} className={'nav-item' + (page === n.id ? ' on' : '')} onClick={() => setPage(n.id)}>
-            <span className="ni-ic">
-              <NavIcon name={n.icon} size={36} sw={2.5} colors={n.colors} glow={n.glow} active={page === n.id} depth={capsuleDepth} finish={n.id === 'Home' ? homeIconFinish : 'glossy'} material={n.id === 'Home' && homeMaterial === 'grey' ? 'moat' : 'color'} />
+            <span className="ni-ic" style={{ '--ni-glow': n.glow }}>
+              <NavIcon name={n.icon} size={40} sw={2.5} colors={n.colors} glow={n.glow} active={page === n.id} depth={capsuleDepth} finish={iconFinish === 'flat' ? 'flat' : (n.id === 'Home' ? homeIconFinish : 'glossy')} material={n.id === 'Home' && homeMaterial === 'grey' ? 'moat' : 'color'} />
             </span>
             <span className="ni-tx">{n.id}</span>
             <span className="ni-cur"><Icon name="chevron" size={16} sw={2.4} /></span>
@@ -160,25 +160,27 @@ function Dock({ onSearch, onRandom }) {
 }
 
 /* ---- TILE (topic or project) ---- */
-function Tile({ item, idx, onOpen }) {
+function Tile({ item, idx, onOpen, selected }) {
   const isProj = item.kind === 'project';
   const data = isProj ? ZMATH_PByID[item.id] : ZMATH_TByID[item.id];
   const topic = isProj ? ZMATH_TByID[data.topic] : data;
-  const cls = 'tile' + (item.w === 2 ? ' w2' : '') + (item.h === 2 ? ' h2' : '') +
-    (item.h === 2 ? ' t-lg' : item.w === 2 ? ' t-md' : ' t-sm');
   const ref = useRef(null);
+  /* entrance stagger via state (NOT classList) so re-renders — e.g. selection —
+     can't wipe the 'in' class and blank the tile */
+  const [seen, setSeen] = useState(false);
   useEffect(() => {
-    const el = ref.current; if (!el) return;
-    const t = setTimeout(() => el.classList.add('in'), 60 + idx * 45);
+    const t = setTimeout(() => setSeen(true), 60 + idx * 45);
     return () => clearTimeout(t);
   }, [idx]);
+  const cls = 'tile' + (item.w === 2 ? ' w2' : '') + (item.h === 2 ? ' h2' : '') +
+    (item.h === 2 ? ' t-lg' : item.w === 2 ? ' t-md' : ' t-sm') + (seen ? ' in' : '') + (selected ? ' sel' : '');
 
   return (
     <div ref={ref} className={cls} data-topic={topic.id} data-kind={item.kind} style={{ ...grad(topic), ...badgeGrad(topic), '--tglow': hexA(topic.grad[1], 0.21), '--ink': `var(--${topic.ink})` }}
       onClick={() => onOpen(isProj ? { type: 'project', data } : { type: 'topic', data })}>
       <span className="badge"><span>{topic.sym}</span></span>
       <div className="tile-art">
-        <CoverArt topic={topic} color={topic.grad[1]} className="tile-cover" />
+        <svg className="tile-cover" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href={isProj ? ZMATH_COMPOSED[topic.id].cart : ZMATH_COMPOSED[topic.id].tile} /></svg>
         <div className="tile-tx">
           {isProj
             ? <><div className="tile-kind">{data.kind}</div><div className="tile-name">{data.title}</div></>
@@ -218,8 +220,7 @@ function Modal({ entry, onClose }) {
       <div className={'modal' + (shake ? ' shake' : '')} onClick={ev => ev.stopPropagation()} style={grad(topic)}>
         <div className="modal-cover">
           <div className="mc-grad" />
-          <CoverArt topic={topic} className="tile-cover" />
-          <div className="tile-sheen" /><div className="tile-scrim" />
+          <svg className="tile-cover" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href={ZMATH_COMPOSED[topic.id].art} /></svg>
           <div className="modal-glyph" style={badgeGrad(topic)}><span>{topic.sym}</span></div>
           <button className="modal-close" onClick={onClose}><Icon name="x" size={18} sw={2.2} /></button>
         </div>
@@ -341,7 +342,7 @@ function NoteReader({ entry, onClose }) {
       <article className="reader" onClick={ev => ev.stopPropagation()} style={grad(topic)}>
         <div className="reader-cover">
           <div className="mc-grad" />
-          <CoverArt topic={topic} className="tile-cover" />
+          <svg className="tile-cover" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href={ZMATH_COMPOSED[topic.id].art} /></svg>
           <div className="tile-sheen" />
           <button className="modal-close" onClick={onClose}><Icon name="x" size={18} sw={2.2} /></button>
           <div className="reader-cover-tx">

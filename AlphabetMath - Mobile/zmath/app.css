@@ -272,8 +272,13 @@ html[data-fit="hd"] .rail:not(.open):not(.dragging) { flex-basis: 146px !importa
 
 .nav-item .ni-ic {
   position: relative; z-index: 1;
-  width: 46px; height: 46px; flex-shrink: 0;
+  width: 50px; height: 50px; flex-shrink: 0;
   display: flex; align-items: center; justify-content: center;
+}
+.nav-item .ni-ic::before {
+  content: ""; position: absolute; inset: 4px; z-index: -1; border-radius: 50%;
+  background: radial-gradient(circle, var(--ni-glow, transparent) 0%, transparent 72%);
+  filter: blur(7px); opacity: 0.5; pointer-events: none;
 }
 /* labels hidden when collapsed; revealed inline when the rail is dragged open */
 .nav-item .ni-tx { display: none; white-space: nowrap; font-weight: 600; font-size: 0.95rem; letter-spacing: -0.01em; }
@@ -312,15 +317,25 @@ html[data-fit="hd"] .rail:not(.open):not(.dragging) { flex-basis: 146px !importa
 .topbar .title { font-family: var(--font-ui); font-weight: 700; font-size: 1.7rem;
   color: var(--wii-ink); letter-spacing: -0.01em; line-height: 1; }
 .topbar .sub { font-size: 0.86rem; color: var(--wii-ink-2); margin-top: 3px; font-weight: 500; }
+/* clock pill — Lab cbtn furniture, sized up: white pill, hairline ring + soft
+   shadow, time-of-day glyph circle, bold ink text. Uniform on all 5 pages. */
 .status-pill { margin-left: auto; flex-shrink: 0; white-space: nowrap; display: flex; align-items: center; gap: 10px;
-  padding: 9px 16px; border-radius: 999px;
-  background: var(--wii-panel); -webkit-backdrop-filter: blur(18px) saturate(170%); backdrop-filter: blur(18px) saturate(170%);
-  border: 1px solid var(--wii-edge); box-shadow: var(--shadow-xs), var(--glass-spec); }
-.status-pill .clock { font-family: var(--font-mono); font-weight: 500; font-size: 0.84rem; color: var(--wii-ink);
+  padding: 10px 18px 10px 11px; border-radius: 999px;
+  /* eyebrow-pill material, shadow wrapped evenly around the capsule */
+  background: rgba(255,255,255,0.95);
+  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
+  border: 1px solid rgba(255,255,255,0.7);
+  box-shadow:
+    0 0 9px rgba(40,50,80,0.09),
+    0 0 2px rgba(40,50,80,0.05),
+    inset 0 1px 1px rgba(255,255,255,0.9); }
+.status-pill .g { display: flex; align-items: center; justify-content: center; flex-shrink: 0; color: var(--wii-ink-2); }
+/* (time-of-day colored circle retired — plain grey clock glyph) */
+.status-pill .clock { font: 700 15px var(--font-ui); color: var(--wii-ink);
   font-variant-numeric: tabular-nums; }
-.status-pill .date { font-size: 0.78rem; color: var(--wii-ink-2); font-weight: 500; }
+.status-pill .date { font: 700 15px var(--font-ui); color: var(--wii-ink-2); }
 .status-pill .sep { width: 1px; height: 16px; background: var(--hairline-strong); }
-.status-pill svg { color: var(--wii-ink-2); }
+.status-pill .g svg { color: var(--wii-ink-2); }
 
 /* ============================================================
    MOSAIC  (Wii-U mixed-size grid)
@@ -339,10 +354,10 @@ html[data-fit="hd"] .rail:not(.open):not(.dragging) { flex-basis: 146px !importa
 /* the whole screen becomes a flex column that fills the stage; the hero stays put
    and the tile-tray takes the rest, bottom-aligned with the left rail. scrolling
    happens INSIDE the tray, not the page. (also applies to the Projects page) */
-.stage:has(.topics-screen), .stage:has(.projects-screen) { overflow: hidden; padding-bottom: 18px; }
-.stage:has(.topics-screen) .stage-inner, .stage:has(.projects-screen) .stage-inner { height: 100%; display: flex; flex-direction: column; }
+.stage:has(.topics-screen), .stage:has(.projects-screen), .stage:has(.lab-spot) { overflow: hidden; padding-bottom: 18px; }
+.stage:has(.topics-screen) .stage-inner, .stage:has(.projects-screen) .stage-inner, .stage:has(.lab-spot) .stage-inner { height: 100%; display: flex; flex-direction: column; }
 .topics-screen, .projects-screen { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-.topics-screen .topics-hero, .projects-screen .topics-hero { flex: 0 0 auto; }
+.topics-screen .topics-hero, .projects-screen .topics-hero, .lab-spot .topics-hero { flex: 0 0 auto; }
 .topics-screen .tile-tray, .projects-screen .tile-tray { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-bottom: 0;
   scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
 .topics-screen .tile-tray::-webkit-scrollbar, .projects-screen .tile-tray::-webkit-scrollbar { width: 9px; }
@@ -656,22 +671,9 @@ html[data-tilelabel="combo"] .tile-name {
    a sunken cool-grey track (rgba 233,235,241) with a soft inner well shadow,
    carrying the white frosted clock pill inset with an even 5px grey moat. total
    height tuned to 44px so it lines up with the All/Pure/Applied widget. */
-.th-pill { position: relative; z-index: 1; flex-shrink: 0;
-  padding: 12px 16px;
-  background: rgba(240,242,247,0.72);
-  -webkit-backdrop-filter: blur(16px) saturate(125%); backdrop-filter: blur(16px) saturate(125%);
-  border: none;
-  box-shadow: inset 0 1px 2px rgba(80,95,130,0.08); }
-.th-pill::before {
-  content: ""; position: absolute; inset: 5px; z-index: 0;
-  border-radius: 999px;
-  background: #ffffff;
-  border: 0.5px solid rgba(40,50,80,0.04);
-  box-shadow:
-    0 0 6px rgba(40,50,80,0.16),
-    0 0 2px rgba(40,50,80,0.10),
-    inset 0 1px 1px rgba(255,255,255,0.9),
-    inset 0 -1px 1px rgba(255,255,255,0.9); }
+/* hero clock — same Lab cbtn furniture as .status-pill (base rules above);
+   only sizing quirks live here. */
+.th-pill { position: relative; z-index: 1; }
 .th-pill svg, .th-pill .clock, .th-pill .date, .th-pill .sep { position: relative; z-index: 1; }
 
 /* signature Zperiod segmented control — grey moat embedment (matches .rail-tag
@@ -736,16 +738,7 @@ html[data-tilelabel="combo"] .tile-name {
   overflow: hidden;
   clip-path: inset(0 round var(--r-tile));
 }
-/* the faint blue→pink ambient hue, brought INSIDE the tray and pooled around the
-   clock widget at top-right. clipped by the panel's rounded corners (overflow +
-   clip-path above), so the corner design stays intact. sits behind content (z0). */
-.topics-hero::after {
-  content: ""; position: absolute; z-index: 0; pointer-events: none;
-  top: 18%; right: 0; width: 30%; height: 82%;
-  background:
-    linear-gradient(90deg, rgba(150,178,252,0) 0%, rgba(150,178,252,0.2) 34%, rgba(200,180,232,0.14) 62%, rgba(247,168,206,0.24) 100%);
-  filter: blur(20px);
-}
+/* (removed) faint blue→pink ambient hue that pooled around the clock widget — user cut it on all pages */
 .mainbar { position: relative; margin-bottom: 56px; padding: 0; }
 /* two stacked panels butted together (gap filled) so they read as ONE continuous
    main bar: shared outer rounding, square inner edges where they meet, a hairline
@@ -1090,33 +1083,31 @@ body.rail-open .dock { left: calc(50% + 124px); }
   opacity: 0; pointer-events: none; transition: opacity var(--dur-base) ease; }
 .scrim.open { opacity: 1; pointer-events: auto; }
 .modal { width: min(540px, 100%); border-radius: var(--r-modal); overflow: hidden;
-  background: var(--glass-bg-strong); -webkit-backdrop-filter: var(--glass-blur-lg); backdrop-filter: var(--glass-blur-lg);
+  background: #fff;
   border: 1px solid var(--wii-edge); box-shadow: var(--shadow-float), var(--spec-strong);
   transform: translateY(14px) scale(0.95); transition: transform var(--dur-base) var(--ease-bounce); }
 .scrim.open .modal { transform: none; }
-.modal-cover { height: 150px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 16px; }
-.modal-cover .mc-grad { position: absolute; inset: 0; z-index: 0; background: linear-gradient(150deg, var(--c1), var(--c2)); }
+.modal-cover { height: 190px; position: relative; overflow: hidden; display: flex; align-items: flex-end; padding: 16px; }
+.modal-cover .mc-grad { position: absolute; inset: 0; z-index: 0; background: #fff; }
 .modal-cover .tile-sheen, .modal-cover .tile-scrim { z-index: 1; }
 /* soft fade: the artwork dissolves into the white body at the bottom edge (matches the gentler look) */
-.modal-cover::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 58%; z-index: 2; pointer-events: none;
-  background: linear-gradient(to bottom, rgba(255,255,255,0) 0%, rgba(255,255,255,0.55) 55%, rgba(255,255,255,0.92) 100%); }
+
 .modal-glyph { position: absolute; left: 18px; bottom: -26px; z-index: 3; width: 64px; height: 64px; border-radius: 18px;
   display: flex; align-items: center; justify-content: center; color: #fff; font-family: var(--font-display); font-weight: 700; font-size: 1.4rem;
-  background: linear-gradient(155deg, var(--b1), var(--b2));
-  box-shadow: inset 0 2px 3px rgba(255,255,255,0.6), inset 0 -4px 8px rgba(0,0,0,0.22), 0 6px 14px rgba(0,0,0,0.3); }
-.modal-glyph::after { content:""; position:absolute; inset:0; border-radius:18px; background: linear-gradient(155deg, rgba(255,255,255,0.55), transparent 48%); }
-.modal-glyph span { position: relative; z-index: 1; text-shadow: 0 1px 2px rgba(0,0,0,0.3); }
+  background: #fff; color: var(--b2);
+  box-shadow: 0 0 14px rgba(30,40,70,0.16), 0 4px 12px rgba(30,40,70,0.12); }
+.modal-glyph span { position: relative; z-index: 1; }
 .modal-close { position: absolute; top: 14px; right: 14px; z-index: 4; width: 34px; height: 34px; border-radius: 50%;
   border: none; background: rgba(255,255,255,0.85); color: var(--wii-ink); cursor: pointer; display: flex; align-items: center; justify-content: center;
   box-shadow: 0 2px 6px rgba(0,0,0,0.18); transition: transform var(--dur-fast) ease; }
 .modal-close:hover { background: #fff; } .modal-close:active { transform: scale(0.9); }
-.modal-body { padding: 40px 26px 8px; }
+.modal-body { padding: 40px 26px 8px; background: #eaecf0; }
 .modal-body .kicker { font-size: 0.7rem; font-weight: 800; letter-spacing: 0.12em; text-transform: uppercase; color: var(--wii-ink-2); }
 .modal-body h3 { font-family: var(--font-display); font-weight: 700; font-size: 1.7rem; color: var(--wii-ink); margin: 5px 0 10px; }
 .modal-tags { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 14px; }
 .modal-tags .tg { font-size: 0.72rem; font-weight: 700; padding: 4px 11px; border-radius: 999px; }
 .modal-body p { color: var(--wii-ink-2); line-height: 1.6; font-size: 0.98rem; margin: 0; }
-.modal-foot { padding: 18px 26px 24px; display: flex; gap: 11px; }
+.modal-foot { padding: 18px 26px 24px; display: flex; gap: 11px; background: #eaecf0; }
 .btn-primary { background: var(--ink-button); color: #fff; border: none; padding: 12px 22px; border-radius: var(--r-button);
   font-family: inherit; font-weight: 600; font-size: 0.9rem; cursor: pointer; display: inline-flex; align-items: center; gap: 8px;
   transition: all var(--dur-base) var(--ease-smooth); }

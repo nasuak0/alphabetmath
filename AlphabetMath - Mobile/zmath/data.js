@@ -16,13 +16,13 @@ export const ZMATH_TOPICS = [
 export const ZMATH_TByID = Object.fromEntries(ZMATH_TOPICS.map(t => [t.id, t]));
 
 export const ZMATH_PROJECTS = [
-  { id:'p7', topic:'analysis', title:'Riemann sum',       kind:'Interactive', year:'2026', desc:'Slice the area under a curve into rectangles and watch the sum sharpen into the integral as the partition shrinks.' },
-  { id:'p1', topic:'geometry', title:'Knot Atlas',        kind:'Interactive', year:'2026', desc:'Drag the strands of every prime knot up to nine crossings and watch its invariants update live.' },
+  { id:'p1', topic:'geometry', title:'Geometric Areas',   kind:'Interactive', year:'2026', desc:'Slide the vertices of triangles and circles and watch their areas recompute — every formula drawn live.' },
   { id:'p2', topic:'linalg',   title:'Matrix Playground', kind:'Interactive', year:'2026', desc:'Compose transformations on the plane and see eigenvectors snap into place in real time.' },
   { id:'p3', topic:'numberth', title:'Prime Spiral',      kind:'Demo',        year:'2025', desc:'The Ulam spiral, animated — pan across a million integers and find the hidden diagonals.' },
-  { id:'p4', topic:'calculus', title:'Heat on a Wire',    kind:'Demo',        year:'2025', desc:'Set an initial temperature and watch the heat equation smooth it out, step by step.' },
-  { id:'p5', topic:'geometry', title:'Penrose Studio',    kind:'Interactive', year:'2025', desc:'Lay down aperiodic tiles by hand and let the matching rules guide your next move.' },
+  { id:'p4', topic:'calculus', title:'Heat Equation',     kind:'Demo',        year:'2025', desc:'Set an initial temperature and watch the heat equation smooth it out, step by step.' },
+  { id:'p5', topic:'algebra',  title:'Balance Scales',    kind:'Interactive', year:'2025', desc:'Keep the scales level while you solve for x — every algebraic move mirrored on both pans.' },
   { id:'p6', topic:'prob',     title:'Random Walks',      kind:'Demo',        year:'2024', desc:'Race a thousand walkers and watch the bell curve assemble itself from pure chance.' },
+  { id:'p7', topic:'analysis', title:'Riemann sum',       kind:'Interactive', year:'2026', desc:'Slice the area under a curve into rectangles and watch the sum sharpen into the integral as the partition shrinks.' },
 ];
 export const ZMATH_PByID = Object.fromEntries(ZMATH_PROJECTS.map(p => [p.id, p]));
 
