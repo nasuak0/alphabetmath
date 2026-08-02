@@ -1,0 +1,1205 @@
+{
+  "$schema": "alphabetmath-architecture/1.0",
+  "project": "AlphabetMath",
+  "version": "0.11",
+  "generated": "2026-07-28",
+  "architecture": "Client-side single-page React application. Zero backend, zero build in the live reader. Single shared source ('the brain') consumed by two independent shells (no-build browser loader + Vite build). Static content modules, layered CSS token system, fixed-canvas uniform scaling instead of responsive reflow.",
+  "layers": [
+    {
+      "id": "shell",
+      "label": "Shells & Runtime",
+      "note": "Two readers + the CDN runtime they resolve React and JSX through.",
+      "plain": {
+        "label": "How it starts up",
+        "note": "The two ways the app can be opened, plus the helpers it borrows from the internet."
+      }
+    },
+    {
+      "id": "entry",
+      "label": "Entry",
+      "note": "The one mount point both shells reach.",
+      "plain": {
+        "label": "The front door",
+        "note": "The first file that runs. Both ways in arrive here."
+      }
+    },
+    {
+      "id": "core",
+      "label": "App Shell",
+      "note": "State, routing-by-state, global data-attributes, chrome.",
+      "plain": {
+        "label": "The conductor",
+        "note": "Remembers which screen you are on and sets the app-wide look."
+      }
+    },
+    {
+      "id": "screens",
+      "label": "Screens",
+      "note": "Fixed-canvas tray screens ported from the Design Lab study.",
+      "plain": {
+        "label": "The screens",
+        "note": "The three tile screens, each drawn at a fixed size and scaled to fit."
+      }
+    },
+    {
+      "id": "ui",
+      "label": "UI Primitives",
+      "note": "Reusable components, icons, figures, tweak controls.",
+      "plain": {
+        "label": "Reusable pieces",
+        "note": "Parts used all over: navigation, tiles, icons, diagrams."
+      }
+    },
+    {
+      "id": "data",
+      "label": "Static Data",
+      "note": "Compiled-in constants. No API, no database.",
+      "plain": {
+        "label": "The content",
+        "note": "The lessons and artwork, typed into the app. Nothing is fetched."
+      }
+    },
+    {
+      "id": "style",
+      "label": "Style Cascade",
+      "note": "One stylesheet entry that @imports an ordered chain.",
+      "plain": {
+        "label": "The look",
+        "note": "Six stylesheets loaded in a fixed order. Later ones can overrule earlier ones."
+      }
+    }
+  ],
+  "nodes": [
+    {
+      "id": "mobile_index",
+      "label": "index.html",
+      "sub": "Mobile shell — the live product",
+      "layer": "shell",
+      "file": "AlphabetMath - Mobile/index.html",
+      "role": "Shell",
+      "notes": "Links the brain's single stylesheet, declares the import map, paints the phone gate + boot placeholder, then hands off to the loader. Holds no app logic.",
+      "plain": {
+        "sub": "the live product — double-click and it runs",
+        "notes": "The page you actually open. It holds no app code: it loads the look, shows a placeholder so the screen is never blank, and hands off to the loader."
+      }
+    },
+    {
+      "id": "loader",
+      "label": "zmath-loader",
+      "sub": "no-build ESM + JSX graph loader",
+      "layer": "shell",
+      "file": "AlphabetMath - Mobile/index.html (inline script)",
+      "role": "Runtime compiler",
+      "notes": "Babel-standalone only compiles the script tag it owns, so this walks the import graph itself: fetch each relative module, transform JSX, rewrite relative specifiers to blob URLs, pin import.meta.url, dynamic-import the entry. Bare specifiers pass through to the import map untouched.",
+      "plain": {
+        "sub": "reads your raw files and translates them",
+        "notes": "The app’s code is written in a dialect browsers do not understand. This walks through every file, fetches it, translates it, and rewires its references to its neighbours — so there is no publishing step. Save and refresh is the whole loop."
+      }
+    },
+    {
+      "id": "babel",
+      "label": "@babel/standalone",
+      "sub": "7.29.0 · CDN",
+      "layer": "shell",
+      "file": "unpkg.com",
+      "role": "External",
+      "notes": "JSX → JS in the browser. Only needed by the no-build reader; Vite does this at build time.",
+      "plain": {
+        "sub": "the translator, fetched from the internet",
+        "notes": "Converts the source dialect into something the browser can run. Only the live version needs it; the packaged build does this ahead of time."
+      }
+    },
+    {
+      "id": "esmsh",
+      "label": "esm.sh · React 18.3.1",
+      "sub": "resolved by the import map",
+      "layer": "shell",
+      "file": "https://esm.sh/react@18.3.1",
+      "role": "External",
+      "notes": "The import map maps the same bare specifiers ('react', 'react-dom/client') that Vite resolves — which is exactly why one set of source files runs in both readers.",
+      "plain": {
+        "sub": "the app toolkit, fetched from the internet",
+        "notes": "React, the toolkit the app is built with. Both ways of opening the app ask for it by the same name — which is exactly why one set of files works in both."
+      }
+    },
+    {
+      "id": "vite_index",
+      "label": "index.html",
+      "sub": "Vite shell",
+      "layer": "shell",
+      "file": "AlphabetMath - App/index.html",
+      "role": "Shell",
+      "notes": "Standard Vite host page. Loads src/main.jsx as a module.",
+      "plain": {
+        "sub": "the packaged version’s page",
+        "notes": "A plain host page for the packaged build. Nothing of the app lives here."
+      }
+    },
+    {
+      "id": "vite_main",
+      "label": "src/main.jsx",
+      "sub": "thin reader — 2 imports",
+      "layer": "shell",
+      "file": "AlphabetMath - App/src/main.jsx",
+      "role": "Adapter",
+      "notes": "Contains no app source. Imports the brain's styles.css and the brain's main.jsx from the sibling folder. Vite follows the graph, so dist/ is self-contained.",
+      "plain": {
+        "sub": "two lines, no app code",
+        "notes": "Points at the brain: one line for the look, one for the app. This is what makes the packaged build a reader rather than a copy."
+      }
+    },
+    {
+      "id": "vite_config",
+      "label": "vite.config.js",
+      "sub": "build config",
+      "layer": "shell",
+      "file": "AlphabetMath - App/vite.config.js",
+      "role": "Config",
+      "notes": "base: '/alphabetmath/' for GitHub Pages; server.fs.allow ['..'] so the dev server may serve the sibling brain folder.",
+      "plain": {
+        "sub": "packaging settings",
+        "notes": "Tells the packager where the app will live online, and gives it permission to read the brain folder next door."
+      }
+    },
+    {
+      "id": "main",
+      "label": "main.jsx",
+      "sub": "brain entry",
+      "layer": "entry",
+      "file": "AlphabetMath - Mobile/zmath/main.jsx",
+      "role": "Entry point",
+      "notes": "createRoot(#root) renders <App/> wrapped in an ErrorBoundary that prints the real stack instead of a blank screen. Also sets document.title — the brain owns shell chrome so neither shell needs it.",
+      "plain": {
+        "sub": "the front door",
+        "notes": "Ten lines. Starts the app and wraps it in a safety net that prints a real error instead of a blank white screen."
+      }
+    },
+    {
+      "id": "app",
+      "label": "app.jsx",
+      "sub": "App shell + 5 screens",
+      "layer": "core",
+      "file": "AlphabetMath - Mobile/zmath/app.jsx",
+      "role": "Application shell",
+      "notes": "Holds page state (Home/Topics/Projects/Notes/About) and swaps components from a screens map — no router. Owns the modal entry state, the tweak state, the resize→--ipad-scale/--hd-scale effect, and the effect that writes data-ambience/-material/-fit/-tilemat/-traymat onto <html>. Optional ?page= and ?fit= URL overrides.",
+      "plain": {
+        "sub": "the conductor — five screens",
+        "notes": "Remembers which screen you are on and swaps them like changing channels; the address bar never moves. Also owns the pop-up panel and writes the app-wide appearance switches."
+      }
+    },
+    {
+      "id": "picker_screens",
+      "label": "picker-screens.jsx",
+      "sub": "HomeTray · TopicsTray",
+      "layer": "screens",
+      "file": "AlphabetMath - Mobile/zmath/picker-screens.jsx",
+      "role": "Screen module",
+      "notes": "980×612 logical canvas scaled with useFit (min(w/980, h/612) capped at 1.6×). Tiles 218×162, cartridges 294×162. TRAY-CONTAINMENT RULE: tiles are direct children of .scr so tray + tiles scale as one unit. Lab tap rhythm: first tap rings, second opens. Arrow-key navigation.",
+      "plain": {
+        "sub": "Home shelves + Topics grid",
+        "notes": "Drawn once at a fixed size and scaled to fit your window like a photo — nothing rearranges. The tiles sit inside the tray so both scale as one unit. Tap once to select, twice to open."
+      }
+    },
+    {
+      "id": "lab_screen",
+      "label": "lab-screen.jsx",
+      "sub": "LabSpotlight",
+      "layer": "screens",
+      "file": "AlphabetMath - Mobile/zmath/lab-screen.jsx",
+      "role": "Screen module",
+      "notes": "The Projects screen: spotlight cartridge rail on the same fixed-canvas scaling recipe. Selected cartridge calls onOpen({type:'project'}) into the shared modal.",
+      "plain": {
+        "sub": "the Projects screen",
+        "notes": "A spotlight rail of cartridges. This screen came first; Home and Topics were modelled on it."
+      }
+    },
+    {
+      "id": "components",
+      "label": "components.jsx",
+      "sub": "Sidebar · Tile · Modal · NoteBlock",
+      "layer": "ui",
+      "file": "AlphabetMath - Mobile/zmath/components.jsx",
+      "role": "UI primitives",
+      "notes": "Navigation rail, tiles, the shared modal, note article blocks and reader, PixelLetter brand mark. Registers its own 'parallelogram' figure into ZFIGURES and imports figures.jsx purely for its registration side-effect.",
+      "plain": {
+        "sub": "the parts bin",
+        "notes": "Pieces used all over: the side navigation, the tiles, the pop-up panel, the note reader, the pixel logo."
+      }
+    },
+    {
+      "id": "icons",
+      "label": "icons.jsx",
+      "sub": "Icon · GlyphIcon · CapsuleIcon",
+      "layer": "ui",
+      "file": "AlphabetMath - Mobile/zmath/icons.jsx",
+      "role": "UI primitives",
+      "notes": "Inline SVG path table; three finishes (line, glossy glyph, capsule badge) driven by props rather than separate assets.",
+      "plain": {
+        "sub": "every icon, drawn in code",
+        "notes": "Icons are drawn by code rather than stored as image files, so one icon can appear in three finishes without drawing it three times."
+      }
+    },
+    {
+      "id": "tweaks_panel",
+      "label": "tweaks-panel.jsx",
+      "sub": "useTweaks + controls",
+      "layer": "ui",
+      "file": "AlphabetMath - Mobile/zmath/tweaks-panel.jsx",
+      "role": "Tooling",
+      "notes": "Design-time control surface. useTweaks holds values; setTweak persists by asking the host to rewrite the EDITMODE block in app.jsx on disk. Self-injecting stylesheet, so it drops into any page.",
+      "plain": {
+        "sub": "design-time tuning knobs",
+        "notes": "A control panel for adjusting the look without editing code. A tool for building the app, not a feature of it. Choices are saved back into the source."
+      }
+    },
+    {
+      "id": "figures",
+      "label": "figures.jsx",
+      "sub": "8 note diagrams",
+      "layer": "ui",
+      "file": "AlphabetMath - Mobile/zmath/figures.jsx",
+      "role": "Content components",
+      "notes": "Generative SVG diagrams for note articles. Each registers itself into the shared ZFIGURES object — imported for side-effect, never called directly.",
+      "plain": {
+        "sub": "eight lesson diagrams",
+        "notes": "Illustrations drawn by code, so they stay sharp at any size. Each one hangs itself on the shared hook when the app starts."
+      }
+    },
+    {
+      "id": "figkit",
+      "label": "figkit.jsx",
+      "sub": "DETACHED — not in the runtime graph",
+      "layer": "ui",
+      "file": "AlphabetMath - Mobile/zmath/figkit.jsx",
+      "role": "Orphan module",
+      "notes": "Reusable figure primitives (lattice/area widgets, paper controls). Converted to ESM during the migration but nothing imports it — it does not load at runtime. Either wire it into figures.jsx or retire it.",
+      "plain": {
+        "sub": "unused — nothing loads it",
+        "notes": "A box of reusable diagram parts that nothing refers to. It never loads and has no effect on the app. It looks alive, which wastes a future reader’s time — wire it in or delete it."
+      }
+    },
+    {
+      "id": "data_js",
+      "label": "data.js",
+      "sub": "topics · projects · notes",
+      "layer": "data",
+      "file": "AlphabetMath - Mobile/zmath/data.js",
+      "role": "Static content",
+      "notes": "ZMATH_TOPICS, ZMATH_PROJECTS, ZMATH_NOTES (article bodies + exercises inline), ZMATH_HOME mosaic spec, NOTE_GLYPH palettes, plus derived ById lookup maps. Content is compiled in, never fetched.",
+      "plain": {
+        "sub": "every topic, note and exercise",
+        "notes": "The book itself: all the content typed straight into the app. Adding a lesson means editing this file. Nothing is fetched from a server."
+      }
+    },
+    {
+      "id": "tile_covers",
+      "label": "tile-covers.js",
+      "sub": "ZMATH_COMPOSED + defs",
+      "layer": "data",
+      "file": "AlphabetMath - Mobile/zmath/tile-covers.js",
+      "role": "Static assets",
+      "notes": "Registry of composed SVG cover art keyed by topic id (tile / cart / art variants). injectComposedDefs() writes one hidden <defs> block into the document; every cover is then a lightweight <use href> reference.",
+      "plain": {
+        "sub": "the tile artwork",
+        "notes": "Cover art stored once and referred to wherever it appears, instead of copied per tile."
+      }
+    },
+    {
+      "id": "fig_registry",
+      "label": "figures-registry.js",
+      "sub": "ZFIGURES",
+      "layer": "data",
+      "file": "AlphabetMath - Mobile/zmath/figures-registry.js",
+      "role": "Shared registry",
+      "notes": "One exported object that figures.jsx and components.jsx populate and NoteBlock reads. Replaced the old window.ZFIGURES global so the import graph has a single well-defined owner with no load-order dependence.",
+      "plain": {
+        "sub": "the coat check",
+        "notes": "A shared list. Diagrams hang themselves up by name when the app starts; articles collect them by name. Neither side needs to know about the other, and nothing depends on load order."
+      }
+    },
+    {
+      "id": "styles_css",
+      "label": "styles.css",
+      "sub": "the one stylesheet entry",
+      "layer": "style",
+      "file": "AlphabetMath - Mobile/zmath/styles.css",
+      "role": "Style entry",
+      "notes": "Both shells load exactly this file. Order is the contract: tokens → app → flat-composed → lab → picker → tweaks-overrides. New sheets are added here, never in a shell.",
+      "plain": {
+        "sub": "the one stylesheet both ways load",
+        "notes": "Pulls in five others in a deliberate order. New styling goes on this list, never onto a page — otherwise the two versions would look different."
+      }
+    },
+    {
+      "id": "tokens_css",
+      "label": "tokens.css",
+      "sub": "design tokens",
+      "layer": "style",
+      "file": "AlphabetMath - Mobile/zmath/tokens.css",
+      "role": "Foundation",
+      "notes": "Color, type, spacing and material variables — the base every later sheet reads.",
+      "plain": {
+        "sub": "the colours and sizes",
+        "notes": "Named values everything else refers to. Change one here and it changes everywhere."
+      }
+    },
+    {
+      "id": "app_css",
+      "label": "app.css",
+      "sub": "layout + chrome",
+      "layer": "style",
+      "file": "AlphabetMath - Mobile/zmath/app.css",
+      "role": "Layout",
+      "notes": "Shell layout, sidebar, stage, modal, notes reader, and the pure-CSS rotate guard rule body:has(#rotate-guard) #root{display:none}.",
+      "plain": {
+        "sub": "the frame of the app",
+        "notes": "Navigation, stage, pop-ups, the note reader — plus the rule that hides the app when the tablet is held the wrong way."
+      }
+    },
+    {
+      "id": "flat_css",
+      "label": "flat-composed.css",
+      "sub": "tile material",
+      "layer": "style",
+      "file": "AlphabetMath - Mobile/zmath/flat-composed.css",
+      "role": "Material",
+      "notes": "The flat molded tile look — THE material since Phase 5 (the shiny variant was retired).",
+      "plain": {
+        "sub": "the tile material",
+        "notes": "The flat moulded look of the tiles. The shiny alternative was retired."
+      }
+    },
+    {
+      "id": "lab_css",
+      "label": "lab.css",
+      "sub": "Lab tray",
+      "layer": "style",
+      "file": "AlphabetMath - Mobile/zmath/lab.css",
+      "role": "Screen styles",
+      "notes": "Scoped under .lab-spot. Owns the base tile material and the cartridge rail that Home/Topics also inherit from.",
+      "plain": {
+        "sub": "the Lab’s styling",
+        "notes": "Owns the base tile look and the cartridge rail that Home and Topics inherit."
+      }
+    },
+    {
+      "id": "picker_css",
+      "label": "picker.css",
+      "sub": "Home + Topics trays",
+      "layer": "style",
+      "file": "AlphabetMath - Mobile/zmath/picker.css",
+      "role": "Screen styles",
+      "notes": "Shelves and grid trays, capsule heads, ghost art, corner badges. Also scoped under .lab-spot.",
+      "plain": {
+        "sub": "Home and Topics styling",
+        "notes": "Shelves, grid, labels, badges. Tile sizes are fixed numbers here — the sliver of the next tile you see at full width falls out of those numbers, and tells you there is more to scroll to without needing an arrow."
+      }
+    },
+    {
+      "id": "tweaks_overrides",
+      "label": "tweaks-overrides.css",
+      "sub": "last in the chain",
+      "layer": "style",
+      "file": "AlphabetMath - Mobile/zmath/tweaks-overrides.css",
+      "role": "Overrides",
+      "notes": "Reacts to the data-* attributes App writes on <html>. Loaded last so it wins.",
+      "plain": {
+        "sub": "loaded last, so it wins",
+        "notes": "Watches for the appearance switches and restyles accordingly. Being last means it can overrule everything above."
+      }
+    }
+  ],
+  "edges": [
+    {
+      "from": "mobile_index",
+      "to": "styles_css",
+      "kind": "loads",
+      "label": "<link>"
+    },
+    {
+      "from": "mobile_index",
+      "to": "babel",
+      "kind": "loads",
+      "label": "<script>"
+    },
+    {
+      "from": "mobile_index",
+      "to": "esmsh",
+      "kind": "resolves",
+      "label": "import map"
+    },
+    {
+      "from": "mobile_index",
+      "to": "loader",
+      "kind": "runs",
+      "label": "inline"
+    },
+    {
+      "from": "loader",
+      "to": "babel",
+      "kind": "uses",
+      "label": "transform"
+    },
+    {
+      "from": "loader",
+      "to": "main",
+      "kind": "compiles",
+      "label": "blob import"
+    },
+    {
+      "from": "vite_index",
+      "to": "vite_main",
+      "kind": "loads",
+      "label": "module"
+    },
+    {
+      "from": "vite_config",
+      "to": "vite_main",
+      "kind": "configures",
+      "label": "fs.allow"
+    },
+    {
+      "from": "vite_main",
+      "to": "styles_css",
+      "kind": "imports",
+      "label": ""
+    },
+    {
+      "from": "vite_main",
+      "to": "main",
+      "kind": "imports",
+      "label": ""
+    },
+    {
+      "from": "main",
+      "to": "esmsh",
+      "kind": "imports",
+      "label": "react"
+    },
+    {
+      "from": "main",
+      "to": "app",
+      "kind": "imports",
+      "label": "App"
+    },
+    {
+      "from": "app",
+      "to": "picker_screens",
+      "kind": "imports",
+      "label": "HomeTray · TopicsTray"
+    },
+    {
+      "from": "app",
+      "to": "lab_screen",
+      "kind": "imports",
+      "label": "LabSpotlight"
+    },
+    {
+      "from": "app",
+      "to": "components",
+      "kind": "imports",
+      "label": "Sidebar · Modal"
+    },
+    {
+      "from": "app",
+      "to": "icons",
+      "kind": "imports",
+      "label": "Icon"
+    },
+    {
+      "from": "app",
+      "to": "tweaks_panel",
+      "kind": "imports",
+      "label": "useTweaks"
+    },
+    {
+      "from": "app",
+      "to": "data_js",
+      "kind": "reads",
+      "label": ""
+    },
+    {
+      "from": "app",
+      "to": "tile_covers",
+      "kind": "reads",
+      "label": ""
+    },
+    {
+      "from": "picker_screens",
+      "to": "data_js",
+      "kind": "reads",
+      "label": ""
+    },
+    {
+      "from": "picker_screens",
+      "to": "tile_covers",
+      "kind": "reads",
+      "label": ""
+    },
+    {
+      "from": "lab_screen",
+      "to": "data_js",
+      "kind": "reads",
+      "label": ""
+    },
+    {
+      "from": "lab_screen",
+      "to": "tile_covers",
+      "kind": "reads",
+      "label": ""
+    },
+    {
+      "from": "components",
+      "to": "icons",
+      "kind": "imports",
+      "label": ""
+    },
+    {
+      "from": "components",
+      "to": "figures",
+      "kind": "imports",
+      "label": "side-effect"
+    },
+    {
+      "from": "components",
+      "to": "data_js",
+      "kind": "reads",
+      "label": ""
+    },
+    {
+      "from": "components",
+      "to": "tile_covers",
+      "kind": "reads",
+      "label": ""
+    },
+    {
+      "from": "components",
+      "to": "fig_registry",
+      "kind": "reads",
+      "label": "ZFIGURES"
+    },
+    {
+      "from": "figures",
+      "to": "fig_registry",
+      "kind": "registers",
+      "label": "8 figures"
+    },
+    {
+      "from": "styles_css",
+      "to": "tokens_css",
+      "kind": "imports",
+      "label": "1"
+    },
+    {
+      "from": "styles_css",
+      "to": "app_css",
+      "kind": "imports",
+      "label": "2"
+    },
+    {
+      "from": "styles_css",
+      "to": "flat_css",
+      "kind": "imports",
+      "label": "3"
+    },
+    {
+      "from": "styles_css",
+      "to": "lab_css",
+      "kind": "imports",
+      "label": "4"
+    },
+    {
+      "from": "styles_css",
+      "to": "picker_css",
+      "kind": "imports",
+      "label": "5"
+    },
+    {
+      "from": "styles_css",
+      "to": "tweaks_overrides",
+      "kind": "imports",
+      "label": "6"
+    }
+  ],
+  "flows": [
+    {
+      "id": "boot_nobuild",
+      "label": "Boot — no-build (live product)",
+      "summary": "How index.html turns raw .jsx files on disk into a running React app with no build step.",
+      "path": [
+        "mobile_index",
+        "babel",
+        "loader",
+        "esmsh",
+        "main",
+        "app"
+      ],
+      "steps": [
+        {
+          "node": "mobile_index",
+          "title": "Shell paints first",
+          "detail": "styles.css is linked, the phone gate rule and the #zmath-boot placeholder render immediately so the page never flashes blank while modules download.",
+          "plain": {
+            "title": "The screen is never blank",
+            "detail": "The look loads first and a placeholder appears, so a slow start looks like loading rather than breakage."
+          }
+        },
+        {
+          "node": "babel",
+          "title": "Babel standalone loads",
+          "detail": "Pinned 7.29.0 with an integrity hash. It is the only thing that can turn JSX into JS in this reader.",
+          "plain": {
+            "title": "The translator arrives",
+            "detail": "A small translator is fetched from the internet to turn the source dialect into something the browser can run."
+          }
+        },
+        {
+          "node": "loader",
+          "title": "loadGraph walks the import graph",
+          "detail": "Starting at ./zmath/main.jsx it fetches the source, regex-collects every relative specifier, and recurses depth-first with a cache so each module is built once.",
+          "plain": {
+            "title": "The files are walked, one leading to the next",
+            "detail": "Starting from one file, the loader reads it, notices which other files it mentions, fetches those, and keeps going until everything is collected. Each file is fetched only once."
+          }
+        },
+        {
+          "node": "loader",
+          "title": "Transform, rewrite, blob-ify",
+          "detail": "Each module is Babel-transformed, its relative imports are rewritten to the blob URLs of the already-built dependencies, and import.meta.url is pinned to the real file URL (a blob: URL is not a resolvable base).",
+          "plain": {
+            "title": "Each file is translated and rewired",
+            "detail": "Every file is converted, and its references to its neighbours are pointed at the already-translated copies held in memory. This is the fiddly part, and the price of having no build step."
+          }
+        },
+        {
+          "node": "esmsh",
+          "title": "Bare specifiers fall through",
+          "detail": "'react' and 'react-dom/client' are left untouched and resolved by the import map to esm.sh — the same specifiers Vite resolves, which is what keeps one source set valid for both readers.",
+          "plain": {
+            "title": "The toolkit is fetched",
+            "detail": "The toolkit’s names are left untouched and looked up on the internet — the same names the packaged build uses, which is why one set of files works both ways."
+          }
+        },
+        {
+          "node": "main",
+          "title": "Dynamic import of the entry blob",
+          "detail": "The finished blob URL is imported. main.jsx sets document.title and calls createRoot(#root).",
+          "plain": {
+            "title": "The app starts",
+            "detail": "The finished file is handed to the browser. The app takes over the page and the placeholder disappears."
+          }
+        },
+        {
+          "node": "app",
+          "title": "App mounts inside the ErrorBoundary",
+          "detail": "A render failure prints the real stack in monospace instead of a blank screen; a loader failure prints its own message into #root.",
+          "plain": {
+            "title": "With a safety net around it",
+            "detail": "If anything fails, the real error is printed on the page instead of a blank white screen."
+          }
+        }
+      ],
+      "plain": {
+        "label": "Opening the app (the live version)",
+        "summary": "How raw files on disk become a running app with no publishing step."
+      }
+    },
+    {
+      "id": "boot_vite",
+      "label": "Boot — Vite build (desktop app)",
+      "summary": "The second reader. Same brain files, resolved natively at build time instead of in the browser.",
+      "path": [
+        "vite_config",
+        "vite_index",
+        "vite_main",
+        "styles_css",
+        "main",
+        "app"
+      ],
+      "steps": [
+        {
+          "node": "vite_config",
+          "title": "Config points outward",
+          "detail": "server.fs.allow ['..'] lets the dev server read the sibling brain folder; base '/alphabetmath/' matches the GitHub Pages repo path.",
+          "plain": {
+            "title": "Settings point next door",
+            "detail": "Tells the packager where the app will live online, and gives it permission to read the brain folder."
+          }
+        },
+        {
+          "node": "vite_index",
+          "title": "Vite host page loads src/main.jsx",
+          "detail": "A conventional Vite entry — no app markup of its own beyond #root.",
+          "plain": {
+            "title": "The host page loads",
+            "detail": "A plain page with nothing of the app in it."
+          }
+        },
+        {
+          "node": "vite_main",
+          "title": "The thin reader imports the brain",
+          "detail": "Two lines: the brain's styles.css and the brain's main.jsx, both by relative path into '../../AlphabetMath - Mobile/zmath/'. No source is ever copied here.",
+          "plain": {
+            "title": "Two lines point at the brain",
+            "detail": "One line for the look, one for the app. No app code is ever copied here."
+          }
+        },
+        {
+          "node": "styles_css",
+          "title": "Vite follows the CSS chain",
+          "detail": "styles.css @imports all six sheets in order, so the built bundle carries the identical cascade the no-build page gets.",
+          "plain": {
+            "title": "The look follows automatically",
+            "detail": "The one stylesheet pulls in all six, so the packaged version gets the identical look."
+          }
+        },
+        {
+          "node": "main",
+          "title": "Same entry, no Babel",
+          "detail": "Vite's React plugin compiled the JSX at build time; the loader and Babel-standalone are simply absent from this path.",
+          "plain": {
+            "title": "Same front door, no translator",
+            "detail": "Translation already happened during packaging, so the loader and the translator are simply absent from this path."
+          }
+        },
+        {
+          "node": "app",
+          "title": "Identical app, self-contained dist/",
+          "detail": "The build inlines the brain, so the shipped folder stands alone — the two readers cannot drift because there is only one copy of the source.",
+          "plain": {
+            "title": "Identical app, nothing borrowed",
+            "detail": "Everything is baked in, so it needs no internet at startup. The two versions cannot drift, because there is only one copy of the source."
+          }
+        }
+      ],
+      "plain": {
+        "label": "Opening the app (the packaged version)",
+        "summary": "The second way in. Same files, prepared ahead of time instead of translated on the spot."
+      }
+    },
+    {
+      "id": "navigate",
+      "label": "Navigation — rail → screen → modal",
+      "summary": "State-driven screen swapping. There is no router and no URL change.",
+      "path": [
+        "components",
+        "app",
+        "picker_screens",
+        "data_js",
+        "tile_covers",
+        "components"
+      ],
+      "steps": [
+        {
+          "node": "components",
+          "title": "Sidebar rail click",
+          "detail": "Sidebar calls setPage(p) and scrolls .stage back to the top.",
+          "plain": {
+            "title": "You tap the side rail",
+            "detail": "The rail tells the conductor which screen you want, and scrolls back to the top."
+          }
+        },
+        {
+          "node": "app",
+          "title": "App swaps the screen component",
+          "detail": "page state indexes a plain screens map { Home, Topics, Projects, Notes, About }. The key={page} on the rendered screen forces a fresh mount and the fade-in.",
+          "plain": {
+            "title": "The conductor swaps screens",
+            "detail": "It changes one remembered word — Home, Topics, Projects — and shows the matching screen. Like changing channels; the address bar never moves."
+          }
+        },
+        {
+          "node": "app",
+          "title": "Global attributes are rewritten",
+          "detail": "An effect sets data-fit (native on Home/Topics, fluid elsewhere), data-traymat, data-tilemat and friends on <html> — screens change their material by cascade, not by prop drilling.",
+          "plain": {
+            "title": "App-wide switches are rewritten",
+            "detail": "Labels for material and fit are set on the page. Screens change appearance through the stylesheet rather than being told individually."
+          }
+        },
+        {
+          "node": "picker_screens",
+          "title": "The tray screen renders",
+          "detail": "HomeTray (two glide shelves) or TopicsTray (4×2 grid) mounts inside the fixed 980×612 canvas.",
+          "plain": {
+            "title": "The screen appears",
+            "detail": "Home’s shelves or the Topics grid mounts inside the fixed-size canvas and fades in."
+          }
+        },
+        {
+          "node": "data_js",
+          "title": "Content comes from constants",
+          "detail": "ZMATH_TOPICS and ZMATH_PROJECTS drive the tiles; ById maps resolve a selection back to its record. Nothing is fetched.",
+          "plain": {
+            "title": "Content comes from the content file",
+            "detail": "Topics and projects are read straight from the file. Nothing is fetched."
+          }
+        },
+        {
+          "node": "tile_covers",
+          "title": "Cover art by reference",
+          "detail": "Each tile's art is a <use href> into the single injected <defs> block, so eight covers cost one copy of the geometry.",
+          "plain": {
+            "title": "Artwork by reference",
+            "detail": "Each tile points at one stored copy of its cover art rather than carrying its own."
+          }
+        },
+        {
+          "node": "components",
+          "title": "Second tap opens the modal",
+          "detail": "Lab tap rhythm — first tap rings the selection, second calls onOpen({type,data}); App stores it as entry and the shared Modal in components.jsx renders it.",
+          "plain": {
+            "title": "A second tap opens it",
+            "detail": "First tap highlights, second tap opens the pop-up panel. On a touch screen with no hover, that lets you look before you leap."
+          }
+        }
+      ],
+      "plain": {
+        "label": "Tapping through the app",
+        "summary": "How a tap on the side rail or a tile becomes a new screen."
+      }
+    },
+    {
+      "id": "tray_scale",
+      "label": "Fixed-canvas tray scaling",
+      "summary": "The defining layout decision: screens are drawn once at a logical size and scaled like a TV picture, not reflowed.",
+      "path": [
+        "app",
+        "picker_screens",
+        "lab_screen",
+        "picker_css",
+        "lab_css"
+      ],
+      "steps": [
+        {
+          "node": "app",
+          "title": "Viewport → CSS variables",
+          "detail": "A resize listener writes --ipad-scale = min(w/1180, h/820) and --hd-scale = min(w/1920, h/1080) onto <html> for the fixed canvases the shell chrome uses.",
+          "plain": {
+            "title": "The window is measured",
+            "detail": "The app works out how much room it has and writes it down as a simple multiplier."
+          }
+        },
+        {
+          "node": "picker_screens",
+          "title": "useFit measures the tray",
+          "detail": "A ResizeObserver on .lab-stage measures the padded box each frame it changes — the tray footprint, not the window.",
+          "plain": {
+            "title": "The tray is measured, not the window",
+            "detail": "What matters is the space the tray itself has, so that is watched directly."
+          }
+        },
+        {
+          "node": "picker_screens",
+          "title": "scale = min(w/980, h/612, 1.6)",
+          "detail": "The 980×612 design scales up to fill, but the 1.6× cap stops growth on large monitors so the tray centers with margin instead of ballooning.",
+          "plain": {
+            "title": "Scale up — but only so far",
+            "detail": "The design grows to fill the space, then stops at about 1.6 times its natural size and centres with margin. Without the cap, a big monitor would inflate the tiles absurdly."
+          }
+        },
+        {
+          "node": "picker_screens",
+          "title": "heroScale → .scr → tiles",
+          "detail": "heroScale is sized cw×scale in real pixels; .scr keeps the logical size and carries transform: scale(). Tiles are direct children of .scr — the TRAY-CONTAINMENT RULE — so tray and tiles are one scaling unit.",
+          "plain": {
+            "title": "Tray and tiles scale together",
+            "detail": "The tiles sit inside the tray, so the whole picture zooms as one unit. Separate them and they drift out of alignment at some window sizes."
+          }
+        },
+        {
+          "node": "lab_screen",
+          "title": "The Lab uses the same recipe",
+          "detail": "LabSpotlight was the original; Home and Topics were ported onto its shell pattern so all three trays behave identically.",
+          "plain": {
+            "title": "The Lab does exactly the same",
+            "detail": "Home and Topics were modelled on it, so all three screens behave identically."
+          }
+        },
+        {
+          "node": "picker_css",
+          "title": "Fixed logical geometry",
+          "detail": "Tiles 218×162, cartridges 294×162, gaps 16 — all in canvas units. The full-screen peek (5th tile, 4th cartridge sliver) is a consequence of these fixed numbers, not a media query.",
+          "plain": {
+            "title": "Fixed sizes, not window rules",
+            "detail": "A tile is always the same size. The sliver of the next tile you see at full width falls out of those numbers — it says there is more to scroll to, without an arrow."
+          }
+        },
+        {
+          "node": "lab_css",
+          "title": "Material inherited",
+          "detail": "Both tray sheets are scoped under .lab-spot and read the base tile material from lab.css, so a material change lands on all three screens at once.",
+          "plain": {
+            "title": "One material, shared",
+            "detail": "Both tray screens inherit their base look from the Lab, so a material change lands on all three at once."
+          }
+        }
+      ],
+      "plain": {
+        "label": "Why nothing ever rearranges",
+        "summary": "Screens are drawn once at a fixed size and scaled like a photo, instead of reflowing."
+      }
+    },
+    {
+      "id": "figures",
+      "label": "Note figures — registry pattern",
+      "summary": "How a string in a data file becomes a rendered SVG diagram without any load-order fragility.",
+      "path": [
+        "data_js",
+        "app",
+        "components",
+        "fig_registry",
+        "figures"
+      ],
+      "steps": [
+        {
+          "node": "data_js",
+          "title": "A note body is an array of blocks",
+          "detail": "ZMATH_NOTES entries carry body blocks — { sec }, { p }, { fig: 'name' } — plus inline exercises with answers and solutions.",
+          "plain": {
+            "title": "An article is a list of pieces",
+            "detail": "A heading, some paragraphs, a diagram named “lattice”, more paragraphs — all typed into the content file."
+          }
+        },
+        {
+          "node": "app",
+          "title": "NotesScreen renders the article",
+          "detail": "Reading state slides the list pane out and the reader pane in; each body block is handed to NoteBlock.",
+          "plain": {
+            "title": "The article is laid out",
+            "detail": "The list pane slides away, the reader slides in, and each piece is handed off to be drawn."
+          }
+        },
+        {
+          "node": "components",
+          "title": "NoteBlock dispatches on block shape",
+          "detail": "For { fig: 'name' } it looks up ZFIGURES[name] and renders the component it finds.",
+          "plain": {
+            "title": "Each piece is looked at in turn",
+            "detail": "A paragraph is printed. A diagram name is looked up on the shared hook."
+          }
+        },
+        {
+          "node": "fig_registry",
+          "title": "One registry object, one owner",
+          "detail": "figures-registry.js exports a single empty object. It replaced window.ZFIGURES so the import graph — not script order — decides who populates it.",
+          "plain": {
+            "title": "The coat check",
+            "detail": "One shared list with one clear owner. Nothing depends on files loading in a particular order — which is what the old approach got wrong."
+          }
+        },
+        {
+          "node": "figures",
+          "title": "Figures self-register on import",
+          "detail": "components.jsx imports figures.jsx purely for the side-effect; each diagram adds itself to ZFIGURES, and components.jsx adds its own 'parallelogram'. Arrows point one way.",
+          "plain": {
+            "title": "Diagrams hang themselves up",
+            "detail": "Each diagram adds itself to the list when the app starts. Adding a new one needs no changes anywhere else."
+          }
+        }
+      ],
+      "plain": {
+        "label": "How a lesson diagram appears",
+        "summary": "How a word in an article becomes a drawing on the page — the coat-check idea."
+      }
+    },
+    {
+      "id": "tweaks",
+      "label": "Tweaks → live restyling",
+      "summary": "The design-time control surface, and how a toggle becomes a cascade change.",
+      "path": [
+        "app",
+        "tweaks_panel",
+        "tweaks_overrides",
+        "tokens_css"
+      ],
+      "steps": [
+        {
+          "node": "app",
+          "title": "Defaults live in a marked block",
+          "detail": "TWEAK_DEFAULTS sits between EDITMODE-BEGIN/END comments in app.jsx so the host can rewrite it on disk — the values persist as source, not as browser storage.",
+          "plain": {
+            "title": "Settings live in the source",
+            "detail": "Default choices sit in a marked block in the code, so they persist as source rather than in the browser."
+          }
+        },
+        {
+          "node": "tweaks_panel",
+          "title": "useTweaks holds the values",
+          "detail": "A single state object; setTweak accepts either a key/value pair or a patch object, and notifies the host to persist.",
+          "plain": {
+            "title": "The panel holds the current values",
+            "detail": "Flip a control and the new value is saved back into that block."
+          }
+        },
+        {
+          "node": "app",
+          "title": "An effect writes data-* on <html>",
+          "detail": "data-material, data-fit, data-tilemat, data-traymat, data-ambience, data-energy, data-capsule — one effect, re-run on tweak or page change.",
+          "plain": {
+            "title": "A label is written onto the page",
+            "detail": "Something like “material: flat.” That is all the code does."
+          }
+        },
+        {
+          "node": "tweaks_overrides",
+          "title": "CSS reacts, React does not re-render",
+          "detail": "tweaks-overrides.css is last in the chain and keys off those attributes, so a material switch is a pure cascade change with no component churn.",
+          "plain": {
+            "title": "The stylesheet reacts",
+            "detail": "It is watching for those labels and restyles accordingly. Nothing is rebuilt: code decides the state, the stylesheet decides the look."
+          }
+        },
+        {
+          "node": "tokens_css",
+          "title": "Tokens do the actual work",
+          "detail": "Overrides mostly reassign token variables, so one attribute flip repaints every surface that reads them.",
+          "plain": {
+            "title": "Named values do the real work",
+            "detail": "Most switches just reassign colours and sizes, so one flip repaints every surface using them."
+          }
+        }
+      ],
+      "plain": {
+        "label": "Changing the look instantly",
+        "summary": "How one switch repaints the whole app without rebuilding anything."
+      }
+    },
+    {
+      "id": "gates",
+      "label": "Device gates — phone & orientation",
+      "summary": "Two guards, both owned by the brain so the shells cannot drift apart.",
+      "path": [
+        "mobile_index",
+        "app",
+        "app_css"
+      ],
+      "steps": [
+        {
+          "node": "mobile_index",
+          "title": "Phone gate is pure CSS",
+          "detail": "Under 700px wide (or 500px tall) #root is hidden and a notice shows. No JS, no React — it works before a single module has loaded. Kept identical in both shells.",
+          "plain": {
+            "title": "Phones are turned away by styling alone",
+            "detail": "Below a certain width the app is hidden and a notice shows. No code involved — it works before anything has loaded."
+          }
+        },
+        {
+          "node": "app",
+          "title": "RotateGuard is portalled to <body>",
+          "detail": "createPortal places the overlay outside #root deliberately, so a CSS rule can hide the app behind it.",
+          "plain": {
+            "title": "The rotate notice sits above everything",
+            "detail": "It is placed outside the app’s normal container deliberately, so it can cover the whole page."
+          }
+        },
+        {
+          "node": "app_css",
+          "title": "body:has(#rotate-guard) #root { display:none }",
+          "detail": "In portrait the guard exists and the app is hidden by selector alone. Living in the brain means both readers get the same guard from one source.",
+          "plain": {
+            "title": "One rule hides the app behind it",
+            "detail": "When the notice exists, the app is hidden. A single line of styling, no code juggling."
+          }
+        },
+        {
+          "node": "app",
+          "title": "Reduced motion respected",
+          "detail": "A matchMedia check adds .reduce-motion to <body> on mount, letting the whole animation layer stand down from CSS.",
+          "plain": {
+            "title": "Motion preferences are respected",
+            "detail": "If your device asks for reduced motion, the app marks the page and the animations stand down."
+          }
+        }
+      ],
+      "plain": {
+        "label": "Blocking the wrong device",
+        "summary": "Two checks that stop the app on a phone, or when the tablet is held the wrong way."
+      }
+    }
+  ],
+  "observations": [
+    {
+      "kind": "pattern",
+      "title": "Shared core, thin adapters",
+      "detail": "All logic in zmath/; both shells are adapters. Duplication is structurally impossible because there is exactly one copy of the source.",
+      "plain": {
+        "title": "One brain, two readers",
+        "detail": "All the code lives in one folder; both ways of opening the app point at it. Duplication is impossible because there is only one copy."
+      }
+    },
+    {
+      "kind": "pattern",
+      "title": "Routing by state, not by URL",
+      "detail": "A screens map indexed by a page string. URL params exist only as optional deep-link overrides (?page=, ?fit=) used by comparison harnesses.",
+      "plain": {
+        "title": "Screens change like channels",
+        "detail": "The app remembers a word and shows the matching screen. No web addresses, no back-button expectations."
+      }
+    },
+    {
+      "kind": "pattern",
+      "title": "Attribute-driven theming",
+      "detail": "React writes data-* attributes on <html>; CSS owns every visual consequence. Material changes cost no re-render.",
+      "plain": {
+        "title": "Flip a switch, do not repaint",
+        "detail": "Code sets a label; the stylesheet decides what it looks like. Appearance changes cost nothing."
+      }
+    },
+    {
+      "kind": "pattern",
+      "title": "Fixed canvas, uniform scale",
+      "detail": "980×612 (trays), 1180×820 (iPad), 1920×1080 (HD) — scaled, never reflowed. Layout bugs are geometry bugs, not breakpoint bugs.",
+      "plain": {
+        "title": "Drawn once, then scaled",
+        "detail": "Fixed sizes scaled like a photo, never reflowed. Layout problems are measurement problems, not window-size problems."
+      }
+    },
+    {
+      "kind": "pattern",
+      "title": "Registry over globals",
+      "detail": "figures-registry.js gives the figure table one importable owner, eliminating script-order dependence.",
+      "plain": {
+        "title": "A coat check, not a pile",
+        "detail": "Diagrams hang themselves up by name, so nothing depends on the order files happen to load in."
+      }
+    },
+    {
+      "kind": "risk",
+      "title": "figkit.jsx is detached",
+      "detail": "Converted to ESM but imported by nothing — it does not load at runtime. Wire it in or retire it.",
+      "plain": {
+        "title": "A tool nobody picks up",
+        "detail": "One file of diagram parts is referenced by nothing and never loads. It looks alive, which wastes a future reader’s time. Wire it in or delete it."
+      }
+    },
+    {
+      "kind": "risk",
+      "title": "CDN dependency at boot",
+      "detail": "The live reader needs unpkg (Babel) and esm.sh (React) at load time. Offline or blocked, the page shows the loader's error panel.",
+      "plain": {
+        "title": "Needs the internet to start",
+        "detail": "The live version fetches the translator and the toolkit at startup. Offline, it shows an error instead of an app. The packaged build does not have this problem."
+      }
+    },
+    {
+      "kind": "risk",
+      "title": "Compile cost on every load",
+      "detail": "The no-build reader re-fetches and re-compiles the whole graph per page load. Fine for a study build; the Vite output is the answer for production.",
+      "plain": {
+        "title": "Re-translated on every load",
+        "detail": "The live version redoes the whole translation each time it opens. Fine while building; the packaged build is the answer for real use."
+      }
+    },
+    {
+      "kind": "note",
+      "title": "No backend",
+      "detail": "No API, no database, no auth, no persistence beyond the host-written EDITMODE block. Content ships as constants in data.js.",
+      "plain": {
+        "title": "Nothing is stored anywhere",
+        "detail": "No server, no database, no login. All content is typed into the app itself."
+      }
+    }
+  ],
+  "$note": "Every layer, node, flow, step and observation carries a `plain` twin: plain.label/note, plain.sub/notes, plain.label/summary, plain.title/detail. Technical text is the default field; `plain` is the same meaning in non-specialist English."
+}

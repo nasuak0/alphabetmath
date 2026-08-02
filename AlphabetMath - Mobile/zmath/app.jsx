@@ -69,12 +69,12 @@ function TopBar({ title, sub }) {
 }
 
 /* ---- HOME (one paper tray, two shelf-less rows: topic tiles + project cartridges) ---- */
-function HomeScreen({ onOpen, go, eyebrows }) {
+function HomeScreen({ onOpen, go, eyebrows, fit }) {
   /* Design Lab port: study-exact shelves tray (picker-screens.jsx), scaled to the Lab-tray footprint. */
   return (
     <div className="fade picker-home lab-spot">
       <HeroWidget compact pillEyebrow eyebrow={eyebrows.home} />
-      <HomeTray onOpen={onOpen} />
+      <HomeTray onOpen={onOpen} fit={fit} />
     </div>
   );
 }
@@ -103,12 +103,12 @@ function HeroWidget({ eyebrow, title, sub, compact, pillEyebrow, children }) {
 }
 
 /* ---- TOPICS ---- */
-function TopicsScreen({ onOpen, eyebrows }) {
+function TopicsScreen({ onOpen, eyebrows, fit }) {
   /* Design Lab port: study-exact 4×2 grid tray (picker-screens.jsx). */
   return (
     <div className="fade picker-topics lab-spot">
       <HeroWidget compact pillEyebrow eyebrow={eyebrows.topics} />
-      <TopicsTray onOpen={onOpen} />
+      <TopicsTray onOpen={onOpen} fit={fit} />
     </div>
   );
 }
@@ -269,13 +269,12 @@ function AboutScreen({ eyebrows }) {
 const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
   "navLabels": "menu",
   "ambience": "day",
-  "material": "liquid",
   "energy": "lively",
   "capsuleDepth": "raised",
   "capsuleShape": "plain",
   "homeMaterial": "color",
-  "fit": "fluid",
-  "iconMat": "flat"
+  "trayAlign": "aligned",
+  "screenFit": "poster"
 }/*EDITMODE-END*/;
 
 /* Optional deep-link overrides (read from the URL once):
@@ -313,14 +312,33 @@ function App() {
   uE(() => {
     const r = document.documentElement;
     r.setAttribute('data-ambience', 'day');
-    r.setAttribute('data-material', t.material);
+    r.setAttribute('data-material', 'liquid');   /* liquid is THE chrome (frosted retired) */
     r.setAttribute('data-energy', 'lively');
     r.setAttribute('data-capsule', 'plain');
-    r.setAttribute('data-fit', FIT_OVERRIDE || t.fit || 'fluid');
-    /* Phase 5: flat-composed is THE look (shiny retired). Flat Lab-paper tray on Topics + Home + Projects (Lab). */
+    /* every page gets the WIDE content column. Home/Topics used to be pinned to
+       'native' (base .stage-inner cap of 1080px) while every other page ran
+       'fluid' (min(1760px, 95vw)) — on a big display that made Menu/Library sit
+       shrunk in the middle while Lab filled the pane. One fit for all pages. */
+    r.setAttribute('data-fit', FIT_OVERRIDE || 'fluid');
+    /* TILE MATERIAL — "flat-composed" is the Design Tile study's Flat + Composed
+       build (explore/Design Tile.html + explore/flat-tile.css), ported to
+       zmath/flat-composed.css: hard gradient frame, white card, ink cover art
+       with the words baked into the drawing. It is THE tile look — hardcoded,
+       no alternative, no control. Not to be confused with data-traymat="flat"
+       (Design Lab paper tray) or the retired data-material chrome values. */
     r.setAttribute('data-tilemat', 'flat-composed');
+    /* TRAY MATERIAL — "flat" is the Design Lab study's paper ground
+       (explore/Design Lab.html + explore/flat-lab.css .scr: radial paper
+       gradient, one crisp shadow, hairline inset ring), now living in
+       zmath/lab.css. NOTE: currently UNREAD — the rules that consumed this
+       attribute were scoped to .tile-tray / .homestack, markup the picker
+       screens replaced, and went out with them. lab.css styles .scr directly
+       instead. Kept deliberately: it is the last trace of "trays may differ
+       per page", and the hook to restore a glass tray on Notes/Projects. */
     r.setAttribute('data-traymat', (page === 'Topics' || page === 'Home' || page === 'Projects') ? 'flat' : 'glass');
-  }, [t.material, t.fit, page]);
+    /* tray bottom-align: ON unless explicitly centred (see app.css .lab-spot rule) */
+    r.setAttribute('data-tray-bottom', t.trayAlign === 'centred' ? '0' : '1');
+  }, [t.trayAlign, page]);
 
   const onOpen = (e) => setEntry(e);
   const nav = (p) => { setPage(p); document.querySelector('.stage')?.scrollTo(0, 0); };
@@ -340,25 +358,24 @@ function App() {
     <div className="os">
       <RotateGuard />
       <Sidebar page={page} setPage={(p) => { setPage(p); document.querySelector('.stage')?.scrollTo(0, 0); }}
-               searchInRail={true} onSearch={() => nav('Topics')} capsuleDepth="raised" homeMaterial="color" homeIconFinish="glossy" iconFinish={t.iconMat} />
+               searchInRail={true} onSearch={() => nav('Topics')} capsuleDepth="raised" homeMaterial="color" iconFinish="flat" />
       <main className="stage">
         <div className="stage-inner">
-          <Screen key={page} onOpen={onOpen} go={nav} eyebrows={eyebrows} />
+          <Screen key={page} onOpen={onOpen} go={nav} eyebrows={eyebrows} fit={t.screenFit} />
         </div>
       </main>
       <Modal entry={entry && entry.type !== 'note' ? entry : null} onClose={() => setEntry(null)} />
       <TweaksPanel title="Tweaks">
-        <TweakSection label="Display size" />
-        <TweakRadio label="Fit" value={t.fit}
-                    options={['ipad', 'fluid', 'desktop', 'hd']}
-                    onChange={(v) => setTweak('fit', v)} />
-        <TweakSection label="Material" />
-        <TweakRadio label="Chrome" value={t.material}
-                    options={['liquid', 'frosted']}
-                    onChange={(v) => setTweak('material', v)} />
-        <TweakRadio label="Icons" value={t.iconMat}
-                    options={['glossy', 'flat']}
-                    onChange={(v) => setTweak('iconMat', v)} />
+        <TweakSection label="Layout" />
+        <TweakRadio label="Tray" value={t.trayAlign}
+                    options={['aligned', 'centred']}
+                    onChange={(v) => setTweak('trayAlign', v)} />
+        {/* Screen fit (Menu + Library only): poster = the Design Lab drawing at its
+            true proportions, enlarged as one unit. stretch = the legacy reshape-
+            plus---grow behaviour. Lab is deliberately untouched. */}
+        <TweakRadio label="Screen fit" value={t.screenFit}
+                    options={['poster', 'stretch']}
+                    onChange={(v) => setTweak('screenFit', v)} />
       </TweaksPanel>
     </div>
   );

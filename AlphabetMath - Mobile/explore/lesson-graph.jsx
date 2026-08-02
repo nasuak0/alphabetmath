@@ -5,7 +5,7 @@
 (function () {
   const { useState, useRef, useEffect } = React;
   const NAVY = '#26345f', BLUE = '#3a5694', RED = '#bf3535';
-  const GRID = '#ccd5e8', AXIS = '#a2aec9';
+  const GRID = '#c3cde2';
   const BLUEFILL = 'rgba(74,110,190,0.16)', PINK = 'rgba(226,138,166,0.38)', PINKEDGE = 'rgba(191,53,53,0.28)';
   const REDFILL = 'rgba(191,53,53,0.13)', NEUT = 'rgba(80,95,140,0.07)';
   const lerp = (a, b, k) => a + (b - a) * k;
@@ -80,16 +80,9 @@
     // ---- grid + axes (edge to edge, integer lattice) ----
     const x0 = Math.floor(A.cx - w / 2 / A.S), x1 = Math.ceil(A.cx + w / 2 / A.S);
     const y0 = Math.floor(A.cy - h / 2 / A.S), y1 = Math.ceil(A.cy + h / 2 / A.S);
-    const grid = [], ticks = [];
-    const tickStep = A.S >= 34 ? 1 : 2;
-    for (let x = x0; x <= x1; x++) {
-      grid.push(<line key={'v' + x} x1={X(x)} y1={0} x2={X(x)} y2={h} stroke={x === 0 ? AXIS : GRID} strokeWidth={x === 0 ? 1.5 : 1} />);
-      if (labels && x !== 0 && x % tickStep === 0) ticks.push(<text key={'tx' + x} x={X(x)} y={Y(0) + 16} textAnchor="middle" className="fig-tick">{x}</text>);
-    }
-    for (let y = y0; y <= y1; y++) {
-      grid.push(<line key={'h' + y} x1={0} y1={Y(y)} x2={w} y2={Y(y)} stroke={y === 0 ? AXIS : GRID} strokeWidth={y === 0 ? 1.5 : 1} />);
-      if (labels && y !== 0 && y % tickStep === 0) ticks.push(<text key={'ty' + y} x={X(0) - 7} y={Y(y) + 4} textAnchor="end" className="fig-tick">{y}</text>);
-    }
+    const grid = [];
+    for (let x = x0; x <= x1; x++) grid.push(<line key={'v' + x} x1={X(x)} y1={0} x2={X(x)} y2={h} stroke={GRID} strokeWidth="1" />);
+    for (let y = y0; y <= y1; y++) grid.push(<line key={'h' + y} x1={0} y1={Y(y)} x2={w} y2={Y(y)} stroke={GRID} strokeWidth="1" />);
 
     // ---- pin drag (step modes) ----
     const toWorld = (e) => {
@@ -234,7 +227,7 @@
       <div ref={hostRef} className="lp-graph-host">
         <svg ref={gRef} className="lp-graph" viewBox={`0 0 ${w} ${h}`} width={w} height={h}
           onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}>
-          <g>{grid}</g><g>{ticks}</g>
+          <g opacity="0.85">{grid}</g>
           {scene}
         </svg>
       </div>

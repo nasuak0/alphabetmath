@@ -1,0 +1,117 @@
+<!DOCTYPE html>
+<html lang="en"><head><meta charset="utf-8"><title>Menu — Console Feel · Planning Sheet</title>
+<script src="doc-page.js"></script>
+<style>
+:root{--ink:#1d232e;--ink2:#5b6577;--rule:#dfe3ea;--acc:#2a3db0;--warm:#b0730f}
+doc-page{--dp-desk:#eceff4}
+.body{font:400 11.5pt/1.62 "Iowan Old Style","Palatino Linotype",Palatino,Georgia,serif;color:var(--ink);max-width:6.4in;margin:0 auto}
+.eyebrow{font:700 8.5pt/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.18em;text-transform:uppercase;color:var(--acc);margin:0 0 10px}
+h1{font:700 25pt/1.1 ui-sans-serif,system-ui,sans-serif;letter-spacing:-.02em;margin:0 0 6px}
+.dek{font:400 12pt/1.5 ui-sans-serif,system-ui,sans-serif;color:var(--ink2);margin:0 0 26px}
+h2{font:700 13pt/1.25 ui-sans-serif,system-ui,sans-serif;letter-spacing:-.01em;margin:30px 0 10px;padding-top:12px;border-top:1.5px solid var(--ink)}
+h3{font:700 10.5pt/1.3 ui-sans-serif,system-ui,sans-serif;margin:20px 0 6px;color:var(--ink)}
+p{margin:0 0 11px;text-wrap:pretty}
+ul{margin:0 0 11px;padding-left:20px}li{margin:0 0 5px}
+.lede{font-size:12pt;color:var(--ink)}
+.phase{display:grid;grid-template-columns:auto 1fr;gap:0 14px;margin:0 0 4px;align-items:start}
+.n{font:700 15pt/1 ui-sans-serif,system-ui,sans-serif;color:var(--acc);min-width:1.1em}
+.ph-t{font:700 11.5pt/1.3 ui-sans-serif,system-ui,sans-serif;margin:1px 0 6px}
+.grid{display:grid;grid-template-columns:5.2em 1fr;gap:6px 14px;font:400 10pt/1.5 ui-sans-serif,system-ui,sans-serif;margin:0 0 6px}
+.k{font-weight:700;color:var(--ink2);text-transform:uppercase;letter-spacing:.06em;font-size:8.5pt;padding-top:3px}
+.box{border:1.5px solid var(--rule);border-radius:8px;padding:13px 16px;margin:0 0 12px;background:#f8f9fb}
+.box.warn{border-color:#e6d3a8;background:#fdf9ef}
+.box p:last-child,.box ul:last-child{margin-bottom:0}
+.box-t{font:700 9.5pt/1 ui-sans-serif,system-ui,sans-serif;letter-spacing:.09em;text-transform:uppercase;color:var(--warm);margin:0 0 7px}
+code{font:500 9.5pt/1.4 ui-monospace,"SF Mono",Menlo,monospace;background:#eef1f6;padding:1px 4px;border-radius:3px}
+.no li{color:var(--ink2)}
+a{color:var(--acc)}a:hover{color:#1a2775}
+.ftr{font:400 8.5pt/1.4 ui-sans-serif,system-ui,sans-serif;color:var(--ink2);text-align:center}
+</style></head>
+<body>
+<doc-page>
+<div class="body">
+<p class="eyebrow">Planning sheet · Menu screen</p>
+<h1>Making Menu behave like a console</h1>
+<p class="dek">Four changes, two files. Three of the four are Lab's own code applied to Menu.</p>
+
+<h2>The goal</h2>
+<p class="lede">Menu should feel like moving through game cards on a console, the way the Lab screen already does — without changing how Menu looks.</p>
+<p>Lab feels like a console for one reason: the card you are on is <em>genuinely a bigger object</em> than the ones around it. Its cartridges are 96 units tall at rest and 196 when selected. They grow on a springy curve, and as they grow the rim thickens, the corners round out and the corner badge swells. The column slides so the selected card sits mid-screen. That is Lab's entire animation vocabulary — there is nothing else.</p>
+<p>Menu looks like it does the same thing but does not. Its selected card is the same size as every other card, blown up four percent after the fact, and it is that blow-up that gets animated. Nothing re-forms, nothing is pushed aside, nothing changes shape. Four percent is under the threshold anyone notices, so the screen reads as a flat page of equal choices with a thin outline marking your place.</p>
+<p><strong>The outcome we want:</strong> pressing left or right on Menu should feel like sliding a physical card into a slot — the arriving card swells and thickens, its neighbours shove over to let it in, and the shelf glides to bring it to centre. Same furniture, same colours, same layout. Different physics.</p>
+
+<h2>The principle</h2>
+<p>Do not invent motion. Every behaviour here already exists in <code>lab.css</code> and <code>lab-screen.jsx</code> and is proven on the Lab screen. Menu's job is to stop overriding it. Three of the four phases below <em>delete</em> a Menu-specific override so Lab's shared rules take over; only one writes genuinely new logic.</p>
+<p>This matters for a practical reason as much as an aesthetic one: anything inherited stays in sync with Lab forever. Anything reinvented drifts.</p>
+
+<h2>The four phases</h2>
+
+<div class="phase"><div class="n">1</div><div>
+<div class="ph-t">Give the selected card a real size</div>
+<div class="grid">
+<div class="k">File</div><div><code>picker-screens.jsx</code></div>
+<div class="k">Change</div><div>Add a promotion factor and compute a second, larger width/height for whichever card is selected. Hand it to that card the same way Lab hands <code>196</code> to its selected cartridge instead of <code>96</code>.</div>
+<div class="k">Why</div><div>This is the whole effect. Everything in phases 2 and 3 is a consequence of the card being truly larger rather than visually inflated.</div>
+<div class="k">Check</div><div>Selected card measurably wider and taller in the page, not just scaled.</div>
+</div></div></div>
+
+<div class="phase"><div class="n">2</div><div>
+<div class="ph-t">Inherit Lab's growth animation</div>
+<div class="grid">
+<div class="k">File</div><div><code>picker.css</code></div>
+<div class="k">Change</div><div>Delete Menu's <code>transition: transform</code> rule and its <code>scale(1.04)</code> selected state. Keep only the stacking order so the big card paints above its neighbours.</div>
+<div class="k">Why</div><div>With the override gone, Menu falls through to Lab's base rules, which animate real width, height, rim thickness, corner radius and badge size together on the same 0.32s springy curve. The card visibly re-forms as it grows. This is inheritance, not new code — the transitions are already written and already tuned.</div>
+<div class="k">Check</div><div>Growth eases rather than snapping; the corner badge grows with the card.</div>
+</div></div></div>
+
+<div class="phase"><div class="n">3</div><div>
+<div class="ph-t">Make the row push neighbours aside</div>
+<div class="grid">
+<div class="k">File</div><div><code>picker-screens.jsx</code></div>
+<div class="k">Change</div><div>The code that centres the shelf assumes every card is the same width, which stops being true the moment one card is promoted. Replace it with a walk along the row that sums each card's real width — the promoted one included — finds the centre of the focused card and slides the shelf so that centre lands mid-tray.</div>
+<div class="k">Why</div><div>This is the only genuinely new logic in the job, and even it is a port: Lab's column already walks its cartridges this way to account for its one tall card. Without it the shelf would centre on a stale measurement and the selected card would drift off-centre as it grew.</div>
+<div class="k">Check</div><div>Selected card sits centred; cards either side visibly move over as it grows; ends of the shelf still park correctly against the tray edge.</div>
+</div></div></div>
+
+<div class="phase"><div class="n">4</div><div>
+<div class="ph-t">Match Lab's slide timing</div>
+<div class="grid">
+<div class="k">File</div><div><code>picker.css</code></div>
+<div class="k">Change</div><div>Shelf glide from 0.45s on a bounce curve to 0.38s on Lab's smooth curve.</div>
+<div class="k">Why</div><div>Two screens that move at different speeds feel like two different apps. Lab's slide is quicker and settles cleanly instead of rocking; the rocking now reads as sloppy next to a card that springs.</div>
+<div class="k">Check</div><div>Stepping through Menu and Lab back to back feels like one machine.</div>
+</div></div></div>
+
+<h2>The limit, stated up front</h2>
+<div class="box warn"><p class="box-t">Menu cannot double the way Lab does</p>
+<p>Lab's card grows to 2.04× because its column runs off the top and bottom of the screen with nothing above it to collide with. Menu's cards live in a lane with a capsule header 12 units above them, and the card grows about its lane's centre — so half the growth travels upward into that gap. Past roughly <strong>18%</strong> the growing card starts covering its own header.</p>
+<p>18% is therefore the ceiling, and it is a property of the two-shelf layout, not a choice. It is still a real size change on a springy curve with the rim, corners and badge all re-forming, so it should read clearly — just less dramatically than Lab. If it turns out to read as too subtle, the honest next move is a structural one (a taller lane, or the inactive shelf collapsing), and that is a separate decision.</p></div>
+
+<h2>Deliberately not doing</h2>
+<ul class="no">
+<li><strong>Idle breathing</strong> on the selected card — Lab has none. It was my invention.</li>
+<li><strong>Edge bump</strong> instead of wrap-around — Lab wraps. Matching Lab means keeping the wrap.</li>
+<li><strong>Staggered arrival</strong> — a one-time flourish, gone after half a second.</li>
+<li><strong>Follow-through on the row</strong> — the glide curve already carries the weight.</li>
+<li><strong>Background parallax</strong> — Lab's watermark art is static.</li>
+<li><strong>Sound</strong> — ruled out.</li>
+</ul>
+
+<h2>Untouched by this work</h2>
+<p>Both shelves stay equal and both stay visible. Lane heights, capsule headers, tile artwork, rim treatment, corner badges, colours, the watermark art, the tray footprint, the growth cap on resting card size, the tap rhythm (first tap rings, second tap opens), arrow-key navigation and Enter to open — all exactly as they are.</p>
+<p>The tray-containment rule holds: cards remain children of the tray and scale as one unit with it. Reduced-motion is already handled globally for these trays, so nothing new needs guarding.</p>
+
+<h2>If something goes wrong</h2>
+<ul>
+<li><strong>Card clips at the top of its lane</strong> → promotion factor is above 18%; lower it.</li>
+<li><strong>Selected card drifts off-centre</strong> → phase 3's row walk is reading the wrong card as focused.</li>
+<li><strong>Growth snaps instead of easing</strong> → a Menu override is still shadowing Lab's transition; find and delete it.</li>
+<li><strong>Neighbours overlap instead of moving</strong> → the size is still being applied as a transform somewhere rather than as real width and height.</li>
+</ul>
+<p>Each phase is independently reversible, and phases 2 and 4 are single-line reverts.</p>
+
+<hr style="border:0;border-top:1.5px solid var(--rule);margin:26px 0 12px">
+<p class="ftr">AlphabetMath · Menu console-feel plan · Library follows once Menu is approved</p>
+</div>
+</doc-page>
+</body></html>

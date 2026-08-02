@@ -1,0 +1,112 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — Project Tree</title>
+<style>
+:root{--paper:#fbfaf8;--ink:#1b2130;--mut:#8a91a2;--line:#d6dae2;
+--shell:#b45309;--entry:#7c3aed;--core:#2563eb;--screens:#0891b2;--ui:#059669;--data:#e11d48;--style:#64748b}
+*{box-sizing:border-box}
+html,body{margin:0}
+body{background:var(--paper);color:var(--ink);font:15px/1.6 ui-sans-serif,system-ui,-apple-system,"Segoe UI",sans-serif;-webkit-font-smoothing:antialiased;padding:44px 32px 80px}
+a{color:var(--core)}a:hover{color:#1e40af}
+.wrap{max-width:1000px;margin:0 auto}
+h1{font-size:26px;font-weight:650;letter-spacing:-.01em;margin:0 0 6px}
+.sub{color:var(--mut);font-size:14px;margin:0 0 30px}
+.legend{display:flex;flex-wrap:wrap;gap:8px 20px;margin:0 0 34px;padding:16px 18px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.lg{display:flex;align-items:center;gap:8px;font-size:13px;color:#4a5163}
+.sw{width:10px;height:10px;border-radius:3px;flex:0 0 auto}
+.tree{font-family:ui-monospace,"SF Mono",Menlo,monospace;font-size:15px;line-height:2.05;white-space:pre;overflow-x:auto;padding:26px 24px;background:#fff;border:1px solid var(--line);border-radius:10px}
+.row{display:block}
+.row.k{cursor:pointer;border-radius:5px}
+.row.k:hover{background:#f2f4f8}
+.pre{color:#b9bfcb}
+.nm{font-weight:650}
+.cm{color:var(--mut);font-weight:400}
+.note{display:none;white-space:pre-wrap;font-family:ui-sans-serif,system-ui,sans-serif;font-size:13.5px;line-height:1.62;color:#4a5163;background:#f6f7fa;border-left:3px solid var(--line);border-radius:0 7px 7px 0;padding:11px 15px;margin:2px 0 10px}
+.note.on{display:block}
+.hint{color:var(--mut);font-size:13px;margin:14px 2px 0}
+.err{padding:18px;border:1px solid #f0c9c9;background:#fdf3f3;border-radius:10px;color:#9b2c2c;font-size:14px}
+@media print{body{padding:0}.tree,.legend{border:none;padding:0}.hint{display:none}}
+</style>
+</head>
+<body>
+<div class="wrap">
+<h1>AlphabetMath — Project Tree</h1>
+<p class="sub">Every file, where it sits, and what it does. Reads from <span style="font-family:ui-monospace,Menlo,monospace">AlphabetMath - Architecture.json</span>, so it can never drift from the other architecture docs.</p>
+<div class="legend" id="legend"></div>
+<div class="tree" id="tree">loading…</div>
+<p class="hint">Click any file for a longer explanation.</p>
+</div>
+<script>
+/* The JSON owns the CONTENT (names, one-line summaries, longer notes).
+   This file owns the SHAPE (which folder holds what, and what nests inside
+   what). Keeping them apart is the point: add a file to the JSON and it shows
+   up in every architecture view at once. */
+const SHAPE=[
+ {folder:"AlphabetMath - Mobile/",cm:"the live product — the one you open",kids:[
+   {id:"mobile_index",kids:[{id:"loader"}]},
+   {folder:"zmath/",cm:"THE BRAIN — all app code lives here, nowhere else",kids:[
+     {id:"main"},{id:"app"},
+     {id:"picker_screens"},{id:"lab_screen"},
+     {id:"components"},{id:"icons"},{id:"figures"},{id:"figkit"},{id:"tweaks_panel"},
+     {id:"data_js"},{id:"tile_covers"},{id:"fig_registry"},
+     {id:"styles_css",kids:[
+       {id:"tokens_css"},{id:"app_css"},{id:"lab_css"},
+       {id:"picker_css"},{id:"flat_css"},{id:"tweaks_overrides"}]}]}]},
+ {folder:"AlphabetMath - App/",cm:"the packaged version — a thin reader, no app code",kids:[
+   {id:"vite_index"},{id:"vite_config"},{id:"vite_main"}]},
+ {folder:"from the internet",cm:"fetched when the app starts — not stored here",kids:[
+   {id:"babel"},{id:"esmsh"}]}
+];
+const LAYERS=["shell","entry","core","screens","ui","data","style"];
+const esc=s=>String(s==null?"":s).replace(/[&<>]/g,c=>({"&":"&amp;","<":"&lt;",">":"&gt;"}[c]));
+
+fetch(encodeURI("AlphabetMath - Architecture.json")).then(r=>r.json()).then(j=>{
+  const by={};j.nodes.forEach(n=>by[n.id]=n);
+  const lay={};j.layers.forEach(l=>lay[l.id]=l);
+  document.getElementById("legend").innerHTML=LAYERS.map(id=>
+    '<span class="lg"><span class="sw" style="background:var(--'+id+')"></span>'+esc(lay[id]?(lay[id].plain||lay[id].label):id)+'</span>').join("");
+
+  /* longest name across the whole tree, so every # comment starts in one column */
+  let wide=0;
+  (function scan(list,d){list.forEach(it=>{
+    const nm=it.folder||(by[it.id]?by[it.id].label:it.id);
+    wide=Math.max(wide,d*3+nm.length);
+    if(it.kids)scan(it.kids,d+1)})})(SHAPE,1);
+  const pad=wide+4;
+
+  let out="AlphabetMath/\n";
+  (function draw(list,prefix,depth){
+    list.forEach((it,i)=>{
+      const last=i===list.length-1,n=by[it.id];
+      const nm=it.folder||(n?n.label:it.id);
+      const cm=it.cm!==undefined?it.cm:(n&&n.plain?n.plain.sub:"");
+      const color=it.folder?"var(--mut)":"var(--"+(n?n.layer:"style")+")";
+      const line=prefix+(last?"└─ ":"├─ ")+nm;
+      const gap=" ".repeat(Math.max(2,pad-(depth*3+nm.length)));
+      const body='<span class="pre">'+esc(prefix+(last?"└─ ":"├─ "))+'</span>'+
+        '<span class="nm" style="color:'+color+'">'+esc(nm)+'</span>'+gap+
+        (cm?'<span class="cm"># '+esc(cm)+'</span>':"");
+      out+= (n&&n.plain&&n.plain.notes)
+        ? '<span class="row k" data-n="'+esc(it.id)+'">'+body+'</span>'+
+          '<span class="note" id="n-'+esc(it.id)+'">'+esc(n.plain.notes)+'</span>'
+        : '<span class="row">'+body+'</span>';
+      out+="\n";
+      if(it.kids)draw(it.kids,prefix+(last?"   ":"│  "),depth+1);
+    });
+  })(SHAPE,"",1);
+
+  const t=document.getElementById("tree");
+  t.innerHTML=out;
+  t.addEventListener("click",e=>{
+    const r=e.target.closest(".row.k");if(!r)return;
+    document.getElementById("n-"+r.dataset.n).classList.toggle("on");
+  });
+}).catch(()=>{
+  document.getElementById("tree").outerHTML='<div class="err">Could not read <b>AlphabetMath - Architecture.json</b>. It has to sit in the same folder as this file.</div>';
+});
+</script>
+</body>
+</html>

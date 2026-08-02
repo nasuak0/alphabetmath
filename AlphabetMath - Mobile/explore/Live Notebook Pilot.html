@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Live Notebook Pilot &mdash; Section 1</title>
+<link rel="stylesheet" href="../zmath/tokens.css" />
+<link rel="stylesheet" href="../zmath/app.css" />
+<link rel="stylesheet" href="nb-pilot.css" />
+</head>
+<body>
+<div id="root"></div>
+
+<script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
+<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="nb-state.jsx"></script>
+<script type="text/babel" src="nb-figure.jsx"></script>
+<script type="text/babel" src="nb-blocks.jsx"></script>
+<script type="text/babel">
+/* ---- Section 1 of note n6, rewritten to READ the notebook's numbers.
+   Prose text is unchanged except where {{ }} makes a value live. ---- */
+const SECTION_1 = [
+  { sec:'1', t:'Drawing Squares: What Is a Square Root?' },
+  { sub:'The central idea' },
+  { p:'Every positive integer <i>n</i> is the area of some square, and that square&rsquo;s <em>side length</em> is, by definition, &#8730;<i>n</i>. So a square root is never just a number off a calculator &mdash; it is a <em>length you can draw</em>. The only real question is how to draw a square of area <i>n</i> when <i>n</i> is awkward.' },
+  { sub:'Every square is a step (p, q)' },
+  { p:'One move handles all of them at once. Choose a <em>step</em> &mdash; <i>p</i> units across and <i>q</i> units up &mdash; and let that be one side of the square. Its four corners always land on grid points, and its area always comes out to <i>p</i>&sup2; + <i>q</i>&sup2;. Right now your step is ({{p}}, {{q}}), so the square below has area <b>{{p*p+q*q}}</b> and side &#8730;{{p*p+q*q}}.' },
+  { kit:true, cap:'<b>Figure 1.</b> One square, one step (<i>p</i>, <i>q</i>). Drag the red corner, move a slider, or tap a row in the table &mdash; every number on this page follows.' },
+  { p:'A perfect square is simply the flat case <i>q</i> = 0: no tilt, area <i>p</i>&sup2;. Raise <i>q</i> and the same square tilts, reaching the in-between values 2, 5, 8, 13&hellip; There are not two kinds of square &mdash; there is one rule, seen from two angles.' },
+  { sub:'Trap and peel: why the area is p\u00b2 + q\u00b2' },
+  { p:'To measure a tilted square, <em>trap</em> it inside the smallest upright square that contains it &mdash; that bounding square has side <i>p</i> + <i>q</i> = {{p+q}}. Four identical right triangles fill the corners, each with legs <i>p</i> and <i>q</i>, so each has area &frac12;<i>pq</i> = {{p*q/2}}. <em>Peel</em> all four away and only the tilted square is left:' },
+  { box:'(<i>p</i>+<i>q</i>)&sup2; &minus; 4&middot;&frac12;<i>pq</i> = (<i>p</i>+<i>q</i>)&sup2; &minus; 2<i>pq</i> = <i>p</i>&sup2; + <i>q</i>&sup2;',
+    live:'({{p}}+{{q}})&sup2; &minus; 2({{p}})({{q}}) = {{(p+q)*(p+q)}} &minus; {{2*p*q}} = {{p*p+q*q}}' },
+  { p:'Flatten the square back to <i>q</i> = 0 and the four corners shrink to nothing &mdash; the bounding square <em>is</em> the square, and the formula collapses to plain <i>p</i>&sup2;. Same identity, no special case. The table below reads straight off the step: the first three rows are flat (<i>q</i> = 0, whole-number sides), then the square tilts.' },
+  { table:{ cols:['<i>n</i>','Step (<i>p</i>,<i>q</i>)','Side','Area check'], rows:[
+      { pq:[1,0], cells:['1','(1, 0)','&#8730;1 = 1','(1+0)&sup2; &minus; 2(1)(0) = 1'] },
+      { pq:[2,0], cells:['4','(2, 0)','&#8730;4 = 2','(2+0)&sup2; &minus; 2(2)(0) = 4'] },
+      { pq:[3,0], cells:['9','(3, 0)','&#8730;9 = 3','(3+0)&sup2; &minus; 2(3)(0) = 9'] },
+      { pq:[1,1], cells:['2','(1, 1)','&#8730;2','(1+1)&sup2; &minus; 2(1)(1) = 2'] },
+      { pq:[1,2], cells:['5','(1, 2)','&#8730;5','(1+2)&sup2; &minus; 2(1)(2) = 5'] },
+      { pq:[2,2], cells:['8','(2, 2)','&#8730;8','(2+2)&sup2; &minus; 2(2)(2) = 8'] },
+      { pq:[2,3], cells:['13','(2, 3)','&#8730;13','(2+3)&sup2; &minus; 2(2)(3) = 13'] },
+      { pq:[3,4], cells:['25','(3, 4)','&#8730;25 = 5','(3+4)&sup2; &minus; 2(3)(4) = 25'] },
+  ] } },
+  { sub:'The exponent law behind the notation' },
+  { box:'<i>x</i><sup>1/2</sup> &middot; <i>x</i><sup>1/2</sup> = <i>x</i><sup>1/2+1/2</sup> = <i>x</i><sup>2/2</sup> = <i>x</i><sup>1</sup> = <i>x</i>' },
+  { p:'Squaring <i>x</i><sup>1/2</sup> returns <i>x</i>, so <i>x</i><sup>1/2</sup> is precisely the square root. The notation is not cosmetic &mdash; it is forced by the exponent-addition rule.' },
+];
+
+/* answers are COMPUTED from the same formula the figure draws */
+const EXERCISES = [
+  { q:'A lattice square is drawn with step (<i>p</i>,<i>q</i>) = (3, 4). What is its area <i>n</i>?',
+    at:{ p:3, q:4 }, answerExpr:'p*p+q*q',
+    sol:'<i>n</i> = <i>p</i>&sup2; + <i>q</i>&sup2; = {{p*p}} + {{q*q}} = <strong>{{p*p+q*q}}</strong>, so the side is &#8730;{{p*p+q*q}} = {{(p*p+q*q)**0.5}}.' },
+  { q:'Join the midpoints of a 3&times;3 grid to inscribe a tilted square. What is its area?',
+    at:{ p:1, q:2 }, answerExpr:'p*p+q*q',
+    sol:'The side is the step ({{p}}, {{q}}), so the area is {{p*p}} + {{q*q}} = <strong>{{p*p+q*q}}</strong>.' },
+  { q:'Flatten the step to <i>q</i> = 0 with <i>p</i> = 4. What area does the identity give?',
+    at:{ p:4, q:0 }, answerExpr:'p*p+q*q',
+    sol:'The four corner triangles vanish, so the bounding square <em>is</em> the square: ({{p}})&sup2; = <strong>{{p*p+q*q}}</strong>.' },
+];
+
+function App() {
+  return (
+    <NotebookProvider vars={{ p:1, q:2 }}>
+      <div className="nbp-wrap">
+        <div className="nbp-card" style={{ '--c1':'#f0a24a', '--c2':'#d9641a' }}>
+          <div className="nbp-scroll">
+            <div className="nbp-head">
+              <span className="nbp-badge">Pilot &middot; live notebook</span>
+              <h1>Square Roots, Geometric Areas &amp; the Pythagorean Theorem</h1>
+            </div>
+            <div className="nbp-body">
+            <div className="reader-grid">
+              <div className="reader-main">
+                <div className="reader-prose">
+                  {SECTION_1.map((b, i) => <NBBlock key={i} b={b} />)}
+                </div>
+              </div>
+              <aside className="reader-rail">
+                <div className="rail-head">Exercises</div>
+                {EXERCISES.map((ex, i) => <NBExercise key={i} ex={ex} n={i + 1} />)}
+              </aside>
+            </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </NotebookProvider>
+  );
+}
+ReactDOM.createRoot(document.getElementById('root')).render(<App />);
+</script>
+</body>
+</html>

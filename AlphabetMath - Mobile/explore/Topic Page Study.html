@@ -1,0 +1,96 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>Topic Page &mdash; design study</title>
+<link rel="stylesheet" href="../zmath/tokens.css" />
+<link rel="stylesheet" href="topic-study.css" />
+</head>
+<body>
+<div class="ts-wrap">
+  <div class="ts-card" style="--c1:#ffac5e;--c2:#e0702a">
+    <div class="ts-top">
+      <button class="ts-back" type="button" aria-label="Back to Library">&#8249;</button>
+      <span class="ts-crumb">Library &middot; Topic 02</span>
+    </div>
+
+    <div class="ts-grid">
+      <!-- LEFT — the modal, expanded -->
+      <div class="ts-left">
+        <div class="ts-cover">
+          <svg class="tile-cover" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#geo-cart-cover"></use></svg>
+          <div class="tile-sheen"></div>
+        </div>
+        <div class="ts-rule"><span class="ts-glyph">Ge</span></div>
+        <p class="ts-num">Topic 02</p>
+        <h1 class="ts-name">Geometry</h1>
+        <p class="ts-desc">Curvature, tilings, and constructions. Every shape here is something you can draw &mdash; and every formula is something you can drag until it makes sense.</p>
+        <div class="ts-chips">
+          <span class="ts-chip tone">Geometry</span>
+          <span class="ts-chip">1 field note</span>
+          <span class="ts-chip">4 figures</span>
+        </div>
+      </div>
+
+      <!-- RIGHT — what's in the topic, one row per thing -->
+      <div class="ts-right">
+        <div class="ts-row">
+          <span class="ts-rowtx">
+            <span class="ts-kick">Field note</span>
+            <span class="ts-title">Square Roots, Geometric Areas &amp; the Pythagorean Theorem</span>
+            <span class="ts-sub">12 min &middot; live figures &middot; 3 exercises</span>
+          </span>
+          <span class="ts-go" aria-hidden="true">&#8250;</span>
+        </div>
+
+        <div class="ts-row">
+          <span class="ts-rowtx">
+            <span class="ts-kick">Figure</span>
+            <span class="ts-title">One square, one step (<i>p</i>, <i>q</i>)</span>
+            <span class="ts-sub">Drag the corner &mdash; the area follows</span>
+          </span>
+          <span class="ts-go" aria-hidden="true">&#8250;</span>
+        </div>
+
+        <div class="ts-row">
+          <span class="ts-rowtx">
+            <span class="ts-kick">Figure</span>
+            <span class="ts-title">Trap and peel</span>
+            <span class="ts-sub">Why the area is <i>p</i>&sup2; + <i>q</i>&sup2;</span>
+          </span>
+          <span class="ts-go" aria-hidden="true">&#8250;</span>
+        </div>
+
+        <div class="ts-row">
+          <span class="ts-rowtx">
+            <span class="ts-kick">Figure</span>
+            <span class="ts-title">Vectors and the rectangle they span</span>
+            <span class="ts-sub">Area as a cross product</span>
+          </span>
+          <span class="ts-go" aria-hidden="true">&#8250;</span>
+        </div>
+
+        <div class="ts-row">
+          <span class="ts-rowtx">
+            <span class="ts-kick">Figure</span>
+            <span class="ts-title">The machine in the background</span>
+            <span class="ts-sub">Four triangles around a tilted square</span>
+          </span>
+          <span class="ts-go" aria-hidden="true">&#8250;</span>
+        </div>
+
+        <div class="ts-row soon">
+          <span class="ts-rowtx">
+            <span class="ts-kick">Lab &middot; not yet</span>
+            <span class="ts-title">Geometric Areas</span>
+            <span class="ts-sub">Coming to the Lab</span>
+          </span>
+        </div>
+      </div>
+    </div>
+  </div>
+</div>
+<script type="module" src="../zmath/tile-covers.js"></script>
+</body>
+</html>

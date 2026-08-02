@@ -6,4 +6,7 @@
 @import "./flat-composed.css";
 @import "./lab.css";
 @import "./picker.css";
+/* selection ring + nudge — shared with the Design Lab study, which links this
+   same file. Must load AFTER picker.css to win the poster-fit cascade. */
+@import "./picker-select.css";
 @import "./tweaks-overrides.css";

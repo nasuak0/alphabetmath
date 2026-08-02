@@ -69,10 +69,11 @@
     return <div className="lp-sheet">
       <div className="lp-left">
         <div className="lp-head">
-          <div className="lp-tag"><span>{sec.tag[0]}</span><span>{sec.tag[1]}</span></div>
+          <svg className="lp-head-art" viewBox="0 0 200 200" preserveAspectRatio="xMidYMid slice" aria-hidden="true"><use href="#geo-cart-cover" /></svg>
+          <div className="lp-tag lp-head-ink"><span>{sec.tag[0]}</span><span>{sec.tag[1]}</span></div>
           <div className="lp-headtx">
-            <div className="lp-sym" dangerouslySetInnerHTML={{ __html: sec.sym }} />
-            <div className="lp-name">{sec.name}</div>
+            <div className="lp-sym lp-head-ink" dangerouslySetInnerHTML={{ __html: sec.sym }} />
+            <div className="lp-name lp-head-ink">{sec.name}</div>
           </div>
         </div>
         <div className="lp-body">

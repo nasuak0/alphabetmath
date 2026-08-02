@@ -50,7 +50,9 @@ const NAV = [
   { id: 'About',    icon: 'user',   colors: ['#ff86ac', '#c2326b'], glow: 'rgba(220,70,130,0.42)' },
 ];
 
-function Sidebar({ page, setPage, searchInRail, onSearch, capsuleDepth = 'raised', homeMaterial = 'grey', homeIconFinish = 'glossy', iconFinish = 'glossy' }) {
+/* iconFinish is always 'flat' in the app (app.jsx); the glossy branch and the
+   Home-only homeIconFinish override are retired. */
+function Sidebar({ page, setPage, searchInRail, onSearch, capsuleDepth = 'raised', homeMaterial = 'grey', iconFinish = 'flat' }) {
   const NavIcon = CapsuleIcon;
   const COLLAPSED = 90, EXPANDED = 248, MID = (COLLAPSED + EXPANDED) / 2;
   const [open, setOpen] = useState(false);
@@ -119,7 +121,7 @@ function Sidebar({ page, setPage, searchInRail, onSearch, capsuleDepth = 'raised
         {NAV.map(n => (
           <button key={n.id} className={'nav-item' + (page === n.id ? ' on' : '')} onClick={() => setPage(n.id)}>
             <span className="ni-ic" style={{ '--ni-glow': n.glow }}>
-              <NavIcon name={n.icon} size={40} sw={2.5} colors={n.colors} glow={n.glow} active={page === n.id} depth={capsuleDepth} finish={iconFinish === 'flat' ? 'flat' : (n.id === 'Home' ? homeIconFinish : 'glossy')} material={n.id === 'Home' && homeMaterial === 'grey' ? 'moat' : 'color'} />
+              <NavIcon name={n.icon} size={40} sw={2.5} colors={n.colors} glow={n.glow} active={page === n.id} depth={capsuleDepth} finish="flat" material={n.id === 'Home' && homeMaterial === 'grey' ? 'moat' : 'color'} />
             </span>
             <span className="ni-tx">{n.id}</span>
             <span className="ni-cur"><Icon name="chevron" size={16} sw={2.4} /></span>

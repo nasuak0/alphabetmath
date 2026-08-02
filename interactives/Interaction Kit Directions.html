@@ -17,14 +17,14 @@
   *{box-sizing:border-box;}
   html,body{height:100%;}
   body{margin:0;font-family:var(--ui);color:var(--ink);background:#ece8df;
-    display:flex;align-items:center;justify-content:center;padding:32px;}
-  .stage{width:100%;max-width:960px;}
+    display:flex;align-items:center;justify-content:center;padding:20px;}
+  .stage{width:100%;max-width:1280px;}
   .stage-title{font-family:var(--display);font-weight:700;font-size:30px;color:var(--ink);margin:0 0 18px 4px;letter-spacing:-0.01em;}
   .stage-card{background:#fff;border:1px solid var(--edge);border-radius:18px;
-    box-shadow:0 10px 40px rgba(38,52,95,0.10);overflow:hidden;}
+    overflow:hidden;}
 
   /* ---- kit frame ---- */
-  .kit{display:flex;flex-direction:column;align-items:stretch;padding:14px 16px 16px;height:100%;}
+  .kit{display:flex;flex-direction:column;align-items:stretch;padding:20px 24px 24px;height:100%;}
   .kit-svg{width:100%;height:auto;touch-action:none;user-select:none;display:block;}
 
   /* ============ Direction B — Notebook (chosen) ============ */
@@ -151,7 +151,7 @@
 <script type="text/babel" src="kit-directions.jsx"></script>
 <script type="text/babel">
   const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
-    "braceSide": "RQ",
+    "braceSide": "OP",
     "panelLayout": "full",
     "accent": "#bf3535"
   }/*EDITMODE-END*/;
@@ -163,7 +163,6 @@
     }, [t.accent]);
     return (
       <div className="stage">
-        <h1 className="stage-title">Direction B — Notebook</h1>
         <div className="stage-card"><KitNotebook braceSide={t.braceSide} panelLayout={t.panelLayout} /></div>
         <TweaksPanel>
           <TweakSection label="Panel layout" />

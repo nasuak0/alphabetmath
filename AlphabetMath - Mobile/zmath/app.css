@@ -90,14 +90,6 @@ html[data-fit="native"] .os { width: 100%; height: 100vh; height: 100dvh; transf
 html[data-fit="fluid"] { --vph: 100vh; --vph: 100dvh; font-size: clamp(16px, 0.45vw + 12.6px, 21px); }
 html[data-fit="fluid"] .os { width: 100%; height: 100vh; height: 100dvh; transform: none; }
 html[data-fit="fluid"] .stage-inner { max-width: min(1760px, 95vw); }
-html[data-fit="fluid"] .mosaic,
-html[data-fit="fluid"] .grid-uniform {
-  grid-template-columns: repeat(auto-fill, minmax(clamp(190px, 14.5vw, 250px), 1fr));
-  grid-auto-rows: clamp(172px, 13vw, 238px);
-}
-html[data-fit="fluid"] .projects-screen .mosaic {
-  grid-template-columns: none; grid-auto-columns: clamp(458px, 32vw, 580px);
-}
 
 /* ============================================================
    DESKTOP FIT — the default. NOT a fluid reflow: it takes the mobile /
@@ -111,9 +103,6 @@ html[data-fit="desktop"] .os { width: 100%; height: 100vh; height: 100dvh; trans
 /* slightly wider than the mobile ~1080 content — enough to fill a desktop without
    reflowing into a different layout. */
 html[data-fit="desktop"] .stage-inner { max-width: 1300px; }
-/* keep the mobile 4-column grid; give rows a little extra height so the modest
-   width bump stays proportional and two rows still fit the tray uncropped. */
-html[data-fit="desktop"] .grid-uniform { grid-auto-rows: clamp(178px, 27vh, 248px); }
 
 /* ============================================================
    HD CANVAS FIT — the iPad layout RE-DIMENSIONED to a fixed
@@ -129,15 +118,7 @@ html[data-fit="hd"] .os {
   transform: scale(var(--hd-scale, 1)); transform-origin: center center; will-change: transform;
 }
 html[data-fit="hd"] .stage-inner { max-width: 1760px; }
-/* iPad's fixed 4-column grid, tiles scaled up — NOT fluid auto-fill */
-html[data-fit="hd"] .mosaic,
-html[data-fit="hd"] .grid-uniform {
-  grid-template-columns: repeat(4, 1fr);
-  grid-auto-rows: 290px;
-}
-html[data-fit="hd"] .projects-screen .mosaic {
-  grid-template-columns: none; grid-auto-columns: 745px;
-}
+
 /* collapsed rail at the iPad proportion (90/1180 scaled to 1920). Dragging/open
    states keep inline width. */
 html[data-fit="hd"] .rail:not(.open):not(.dragging) { flex-basis: 146px !important; }
@@ -340,45 +321,23 @@ html[data-fit="hd"] .rail:not(.open):not(.dragging) { flex-basis: 146px !importa
 /* ============================================================
    MOSAIC  (Wii-U mixed-size grid)
    ============================================================ */
-/* frosted glass tray holding the whole grid (matches rail + dock chrome) */
-.tile-tray { border-radius: var(--r-tile);
-  background: var(--glass-bg-nav);
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--glass-border); box-shadow: var(--shadow-nav), var(--spec-strong);
-  padding: 18px; margin-bottom: 56px; }
-.mosaic { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 172px;
-  gap: 16px; grid-auto-flow: dense; padding-top: 0; }
-.grid-uniform { display: grid; grid-template-columns: repeat(4, 1fr); grid-auto-rows: 172px; gap: 16px; }
 
 /* ---- TOPICS PAGE: lock the tray to the viewport; only the grid scrolls ---- */
 /* the whole screen becomes a flex column that fills the stage; the hero stays put
    and the tile-tray takes the rest, bottom-aligned with the left rail. scrolling
    happens INSIDE the tray, not the page. (also applies to the Projects page) */
-.stage:has(.topics-screen), .stage:has(.projects-screen), .stage:has(.lab-spot) { overflow: hidden; padding-bottom: 18px; }
-.stage:has(.topics-screen) .stage-inner, .stage:has(.projects-screen) .stage-inner, .stage:has(.lab-spot) .stage-inner { height: 100%; display: flex; flex-direction: column; }
-.topics-screen, .projects-screen { flex: 1 1 auto; min-height: 0; display: flex; flex-direction: column; }
-.topics-screen .topics-hero, .projects-screen .topics-hero, .lab-spot .topics-hero { flex: 0 0 auto; }
-.topics-screen .tile-tray, .projects-screen .tile-tray { flex: 1 1 auto; min-height: 0; overflow-y: auto; margin-bottom: 0;
-  scrollbar-width: thin; -webkit-overflow-scrolling: touch; }
-.topics-screen .tile-tray::-webkit-scrollbar, .projects-screen .tile-tray::-webkit-scrollbar { width: 9px; }
-.topics-screen .tile-tray::-webkit-scrollbar-thumb, .projects-screen .tile-tray::-webkit-scrollbar-thumb { background: rgba(70,90,130,0.18); border-radius: 5px; }
-/* the floating dock sits over the bottom-middle of the tray — give the grid room
-   to scroll its last row clear of it. */
-.topics-screen .grid-uniform, .projects-screen .mosaic { padding-bottom: 84px; }
-
-/* ---- PROJECTS PAGE: scroll SIDEWAYS inside the locked tray ----
-   cards flow into columns that fill the tray height (2 rows) and overflow to the
-   right. extra bottom padding keeps the bottom row clear of the floating dock. */
-.projects-screen .tile-tray { overflow-x: auto; overflow-y: hidden; padding: 24px 22px 40px;
-  scrollbar-width: none; -ms-overflow-style: none; }
-.projects-screen .tile-tray::-webkit-scrollbar { display: none; height: 0; width: 0; }
-.projects-screen .mosaic {
-  grid-auto-flow: column; grid-template-columns: none;
-  grid-template-rows: 1fr 1fr; grid-auto-rows: auto;
-  grid-auto-columns: 458px; height: 100%; padding-bottom: 0;
-}
-.projects-screen .mosaic .tile.w2 { grid-column: auto; }
-.projects-screen .mosaic .tile.h2 { grid-row: auto; }
+/* Home, Library and Projects all render from picker-screens.jsx and share the
+   .lab-spot root, so one selector covers all three. (.topics-screen is gone from
+   the markup; .projects-screen still ships but sits on the same node as
+   .lab-spot, so listing it was a duplicate match.) */
+.stage:has(.lab-spot) { overflow: hidden; padding-bottom: 18px; }
+/* TRAY BOTTOM-ALIGN (Tweaks ▸ Layout ▸ Tray). Default ON: the rail pads 18px
+   top and bottom, so matching the column to 18/18 lifts the top tray onto the
+   rail's top edge and drops the main tray's bottom onto the rail's bottom edge.
+   "centred" restores the old look. */
+html:not([data-tray-bottom="0"]) .stage:has(.lab-spot) { padding-top: 18px; padding-bottom: 18px; }
+.stage:has(.lab-spot) .stage-inner { height: 100%; display: flex; flex-direction: column; }
+.lab-spot .topics-hero { flex: 0 0 auto; }
 
 /* tile = crisp colored gradient LINE around a white glass card (icon framework) */
 .tile {
@@ -419,32 +378,6 @@ html[data-fit="hd"] .rail:not(.open):not(.dragging) { flex-basis: 146px !importa
 .tile.t-lg .tile-name { font-size: 1.7rem; }
 .tile-sym-bg { display: none; }
 
-/* GEOMETRY tile: the tiling art bleeds off all four edges by default, so shapes
-   get sliced at the corners and crowd the badge. Scale it down in place (centered)
-   so the whole composition sits INSIDE the frame — but only a little, so the shapes
-   fill most of the white card (small even margin, uncropped corners), matching the
-   reference. Applies to BOTH materials (glossy + flat). */
-[data-tilemat="glossy"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-cover,
-[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-cover {
-  transform: scale(0.92); transform-origin: center center;
-}
-
-/* GLOSSY geometry tile: give the white card the same EMBEDDED-in-a-frame look as
-   the flat material — matching frame geometry (5px gutter, 14px inner) + a recessed
-   white label — but keep the finish GLOSSY: the recess is COOL-toned (glassy blue-
-   grey, not warm plastic), there's a bright glassy lip along the bottom, the colored
-   gradient frame + glow is untouched, and the diagonal .tile-sheen stays on. */
-[data-tilemat="glossy"] .home .tile[data-topic="geometry"][data-kind="topic"] {
-  border-radius: 19px; padding: 5px;
-}
-[data-tilemat="glossy"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-art {
-  border-radius: 14px;
-  box-shadow:
-    inset 0 0 0 1px rgba(70,95,150,0.12),
-    inset 0 2.5px 5px -1px rgba(55,75,130,0.22),
-    inset 0 -1.5px 1px rgba(255,255,255,0.65);
-}
-
 /* ============================================================
    FLAT TILE MATERIAL  (home-page tweak: html[data-tilemat="flat"])
    Molded-cartridge look — keeps the tile geometry but swaps the material:
@@ -453,79 +386,6 @@ html[data-fit="hd"] .rail:not(.open):not(.dragging) { flex-basis: 146px !importa
    Scoped to the GEOMETRY topic tile on the home page ONLY — every other
    tile (and the Topics/Projects grids) keeps the glossy material.
    ============================================================ */
-/* molded-cartridge frame: thicker padding + tighter inner radius so the gradient
-   stroke reads as a solid wall, and a WARM deep-orange inner rim (150,60,12) — NOT
-   black — so it looks like colored plastic in shadow, not a dirty grey line. */
-[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"] {
-  border-radius: 19px; padding: 5px;
-  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(150,60,12,0.18);
-}
-[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"]:hover {
-  box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(150,60,12,0.18);
-}
-/* white label embedded into the frame: crisp warm division hairline + a soft warm
-   top recess so the label reads as pressed down into the molded plastic. */
-[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-art {
-  border-radius: 14px;
-  -webkit-backdrop-filter: none; backdrop-filter: none;
-  box-shadow: inset 0 0 0 1px rgba(150,60,12,0.10), inset 0 2.5px 4px -1px rgba(150,60,12,0.22);
-}
-[data-tilemat="flat"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-sheen { display: none; }
-
-/* FLAT BADGE STYLE — tweak: data-flatbadge (only meaningful under the flat material).
-   "solid" (default): one flat white chip with a warm hairline, no moat/pill — same
-   footprint (46×38) as the moat tray.
-   "moat": the base nested capsule — grey tray/moat with the white pill nested inside.
-   No override needed for "moat"; it's the base .badge look. */
-[data-tilemat="flat"][data-flatbadge="solid"] .home .tile[data-topic="geometry"][data-kind="topic"] .badge {
-  background: #ffffff;
-  -webkit-backdrop-filter: none; backdrop-filter: none;
-  box-shadow: inset 0 0 0 1px rgba(150,60,12,0.16);
-}
-[data-tilemat="flat"][data-flatbadge="solid"] .home .tile[data-topic="geometry"][data-kind="topic"] .badge::before {
-  display: none;
-}
-
-/* FLAT 2 — the explore/Design Tile.html rendering, verbatim (tweak: data-tilemat="flat2").
-   Same molded-cartridge shell as flat, but: solid badge BAKED IN with the study's
-   snugger geometry (42×32 @ 6,6 — molded into the corner, not floating near it),
-   full-bleed cover art (no 0.92 inset — the scale rule above targets glossy|flat only),
-   and the study's softer hover lift (-5px/1.02). */
-[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] {
-  border-radius: 19px; padding: 5px;
-  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(150,60,12,0.18);
-}
-[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"]:hover {
-  transform: translateY(-5px) scale(1.02);
-  box-shadow: 0 6px 14px rgba(0,0,0,0.18), inset 0 0 0 1px rgba(150,60,12,0.18);
-}
-[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-art {
-  border-radius: 14px;
-  -webkit-backdrop-filter: none; backdrop-filter: none;
-  box-shadow: inset 0 0 0 1px rgba(150,60,12,0.10), inset 0 2.5px 4px -1px rgba(150,60,12,0.22);
-}
-[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] .tile-sheen { display: none; }
-[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] .badge {
-  top: 6px; left: 6px; min-width: 42px; height: 32px;
-  border-radius: 15px 7px 14px 7px; font-size: 0.86rem;
-  background: #ffffff;
-  -webkit-backdrop-filter: none; backdrop-filter: none;
-  box-shadow: inset 0 0 0 1px rgba(150,60,12,0.16);
-}
-[data-tilemat="flat2"] .home .tile[data-topic="geometry"][data-kind="topic"] .badge::before { display: none; }
-
-/* Geometry badge is inset off the frame corner PERMANENTLY — independent of the
-   material tweak (applies under flat, glossy, and the untweaked default). Other
-   tiles keep the base top/left:4px. The grey moat/tray is also a touch larger here
-   (wider grey ring + slightly bigger tray) while the white pill stays the same size. */
-.home .tile[data-topic="geometry"][data-kind="topic"] .badge {
-  top: 8px; left: 8px;
-  min-width: 46px; height: 38px;
-}
-.home .tile[data-topic="geometry"][data-kind="topic"] .badge::before {
-  inset: 4px;
-  border-radius: 12px 4px 11px 4px;
-}
 
 /* ============================================================
    LABEL LEGIBILITY TREATMENTS  (tweakable: data-tilelabel)
@@ -722,74 +582,9 @@ html[data-tilelabel="combo"] .tile-name {
 /* ============================================================
    HOME MAIN BAR  (two separate bars glide together into one tray)
    ============================================================ */
-/* home fills the stage so the merged tray bottom lines up with the left sidebar */
-.home { display: flex; flex-direction: column; min-height: calc(var(--vph) - 46px); }
-.stage:has(.home) { padding-bottom: 24px; }
-.home .topics-hero { flex: 0 0 auto; }
-/* top notch (1) nudged up flush with the sidebar top — transform keeps the main
-   bar in place; (2) made a solid, defined panel like the main tray: fully opaque
-   white, a faint hairline edge + lifted shadow so it no longer blends into the page. */
-.home .topics-hero {
-  position: relative; z-index: 12;
-  background: var(--glass-bg-nav);
-  border: 1px solid var(--glass-border);
-  box-shadow: var(--shadow-nav), var(--spec-strong);
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-  overflow: hidden;
-  clip-path: inset(0 round var(--r-tile));
-}
+
 /* (removed) faint blue→pink ambient hue that pooled around the clock widget — user cut it on all pages */
 .mainbar { position: relative; margin-bottom: 56px; padding: 0; }
-/* two stacked panels butted together (gap filled) so they read as ONE continuous
-   main bar: shared outer rounding, square inner edges where they meet, a hairline
-   seam, and the float shadow on the wrapper so the seam stays flat. */
-.home .homestack {
-  flex: 0 0 auto;
-  border-radius: var(--r-tile);
-  box-shadow: var(--shadow-nav), var(--spec-strong);
-  margin: 0 0 28px;
-}
-.home .homebar {
-  position: relative; isolation: isolate;
-  flex: 0 0 auto;
-  overflow: hidden;
-  display: flex; flex-direction: column; align-items: stretch;
-  padding: 15px 0 16px;
-  background: var(--glass-bg-nav);
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-  border: 1px solid var(--glass-border);
-}
-/* top panel rounds only its top corners; bottom panel only its bottom — the meeting
-   edges are square and share a single hairline so the gap between them is filled. */
-.home .homebar-top {
-  border-radius: var(--r-tile) var(--r-tile) 0 0;
-  border-bottom: none;
-  clip-path: inset(0 round var(--r-tile) var(--r-tile) 0 0);
-  /* symmetric inner padding so the inter-rail gap stays proportional to the
-     16px above the top pill and the 17px below the bottom tiles. */
-  padding-bottom: 6px;
-}
-.home .homebar-bottom {
-  border-radius: 0 0 var(--r-tile) var(--r-tile);
-  clip-path: inset(0 round 0 0 var(--r-tile) var(--r-tile));
-  padding-bottom: 8px;
-  /* match the top bar's inner padding so the seam sits centered in an even gap. */
-  padding-top: 6px;
-}
-/* dim the tile glow inside the home-page bars — tighter, lower-spread shadow so the
-   colored glow fades out before it reaches the bar's rounded corners. */
-.home .homebar .tile {
-  box-shadow: 0 1px 3px rgba(0,0,0,0.05), 0 5px 11px var(--tglow, rgba(0,0,0,0.10)),
-    inset 0 1px 1px rgba(255,255,255,0.55);
-}
-
-/* one unified frosted glass tray — always present, no merge animation.
-   matches the Topics .tile-tray chrome exactly, just taller (two rails). */
-.merge-bg { position: absolute; inset: 0; z-index: 0; border-radius: var(--r-tile);
-  background: var(--glass-bg-nav);
-  -webkit-backdrop-filter: blur(20px) saturate(180%); backdrop-filter: blur(20px) saturate(180%);
-  border: none; box-shadow: var(--spec-strong);
-  opacity: 1; }
 
 /* each rail row sits inside the one shared tray — no own shell, no animation.
    top/bottom padding is kept tight so the tray stays a slim wrap; the only
@@ -922,8 +717,6 @@ html[data-tilelabel="combo"] .tile-name {
    and 3 project cartridges still fit, just noticeably more compact. */
 .hrail-topics .tile { flex: 0 0 calc((100% - 72px) / 4); height: auto; aspect-ratio: 1.4 / 1; }
 .hrail-projects .tile { flex: 0 0 calc((100% - 52px) / 3); height: auto; aspect-ratio: 1.9 / 1; }
-
-body.reduce-motion .merge-bg { opacity: 1; }
 
 /* ============================================================
    NOTES LIST

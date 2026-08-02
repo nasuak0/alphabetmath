@@ -30,17 +30,21 @@
   .lp-left::after{content:"";position:absolute;top:0;right:0;bottom:0;width:1px;
     background:var(--hairline-strong);}
 
-  /* header band — warm-white, stacked mass/number + big symbol + name */
-  .lp-head{flex:0 0 auto;display:flex;align-items:center;gap:16px;
-    padding:22px 34px 18px;background:linear-gradient(180deg,#faf7f1,#f6f2ea);}
+  /* header band — topic-modal surface, stacked mass/number + symbol + name */
+  .lp-head{position:relative;overflow:hidden;flex:0 0 auto;display:flex;align-items:center;gap:16px;
+    padding:22px 34px 18px;background:#fff;border-bottom:1px solid rgba(30,40,70,0.07);}
+  .lp-head-art{position:absolute;inset:0;width:100%;height:100%;z-index:0;pointer-events:none;}
+  .lp-head > .lp-tag,.lp-head > .lp-headtx{position:relative;z-index:2;}
+  /* header lettering — cartridge/tile treatment: white halo under a colored fill */
+  .lp-head-ink{-webkit-text-stroke:2px #fff;paint-order:stroke fill;}
   .lp-tag{display:flex;flex-direction:column;font-family:var(--font-display);
-    font-weight:800;font-size:1.2rem;line-height:0.96;color:var(--fg1);letter-spacing:-0.01em;}
-  .lp-tag span:last-child{color:var(--fg3);}
+    font-weight:800;font-size:1.2rem;line-height:0.96;color:#bd5410;letter-spacing:-0.01em;}
+  .lp-tag span:last-child{color:rgba(189,84,16,0.62);}
   .lp-sym{font-family:var(--font-display);font-weight:800;font-size:2.5rem;line-height:0.9;
-    color:var(--fg1);letter-spacing:-0.02em;}
+    color:#bd5410;letter-spacing:-0.02em;}
   .lp-sym .v-p{color:var(--red-var);}
   .lp-sym .v-q{color:var(--blue-var);}
-  .lp-name{font-family:var(--font-ui);font-weight:700;font-size:1.02rem;color:var(--fg1);
+  .lp-name{font-family:var(--font-ui);font-weight:700;font-size:1.02rem;color:rgba(189,84,16,0.78);
     line-height:1.12;text-wrap:balance;}
 
   /* body — facts, paragraph, controls */
@@ -71,8 +75,7 @@
   .lp-lock.unlocked{color:var(--green-2);}
 
   /* ---- RIGHT GRAPH (the picture) ---- */
-  .lp-right{position:relative;flex:1 1 60%;min-width:0;
-    background:radial-gradient(130% 100% at 60% 0%,#fbfbfd,#f4f5f8 60%,#eef0f4 100%);}
+  .lp-right{position:relative;flex:1 1 60%;min-width:0;background:#fff;}
   .lp-graph{position:absolute;inset:0;width:100%;height:100%;touch-action:none;
     user-select:none;-webkit-user-select:none;display:block;}
 
@@ -205,6 +208,9 @@
 </style>
 </head>
 <body>
+<svg width="0" height="0" style="position:absolute" aria-hidden="true"><defs>
+<g id="geo-cart-cover"><path d="M-12 100.5 L213 51.6" fill="none" stroke="rgba(224,112,42,0.32)" stroke-width="1.6" stroke-linecap="round"/><path d="M62 22 L138 172" fill="none" stroke="rgba(224,112,42,0.32)" stroke-width="1.6" stroke-linecap="round"/><circle cx="118" cy="96" r="62" fill="none" stroke="rgba(224,112,42,0.65)" stroke-width="2.4"/><circle cx="66" cy="44" r="34" fill="none" stroke="var(--gdot1, rgba(224,112,42,0.65))" stroke-width="2.1" stroke-dasharray="6 5"/><circle cx="46" cy="98" r="30" fill="none" stroke="var(--gdot2, rgba(224,112,42,0.65))" stroke-width="2" stroke-dasharray="10 4 2 4"/><circle cx="196" cy="150" r="30" fill="none" stroke="rgba(224,112,42,0.38)" stroke-width="1.8"/><path d="M168.8 60.4 L148.3 64.9 A21 21 0 0 0 156.8 77.6 Z" fill="rgba(224,112,42,1)" opacity="0.75"/><path d="M57 85.2 L68.3 102.9 A21 21 0 0 0 77.5 80.7 Z" fill="rgba(224,112,42,0.62)" opacity="0.75"/><path d="M102 155.9 L114 138.7 A21 21 0 0 0 90.7 138.2 Z" fill="rgba(224,112,42,0.34)" opacity="0.75"/><path d="M168.8 60.4 L57 85.2 L102 155.9 Z" fill="none" stroke="rgba(224,112,42,0.9)" stroke-width="2.6" stroke-linejoin="round" stroke-linecap="round"/><circle cx="168.8" cy="60.4" r="3.4" fill="rgba(224,112,42,0.95)"/><circle cx="57" cy="85.2" r="3.4" fill="rgba(224,112,42,0.95)"/><circle cx="102" cy="155.9" r="3.4" fill="rgba(224,112,42,0.95)"/><circle cx="76.5" cy="50.6" r="2.6" fill="#fff" stroke="rgba(224,112,42,0.8)" stroke-width="1.8"/><circle cx="46" cy="68" r="2.6" fill="#fff" stroke="rgba(224,112,42,0.8)" stroke-width="1.8"/></g>
+</defs></svg>
 <div id="root"></div>
 
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>

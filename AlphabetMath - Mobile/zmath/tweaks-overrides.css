@@ -2,7 +2,7 @@
    TWEAK OVERRIDES — three expressive "feel" levers, driven by
    data-attributes on <html> set by the Tweaks panel:
      data-ambience = day | dusk | night     (the ground it floats on)
-     data-material = liquid | frosted | flat (how glassy the chrome is)
+     data-material = liquid (frosted retired; app.jsx hardcodes liquid)
      data-energy   = calm | lively | springy (motion personality)
    Defaults (day / liquid / lively) == the original design, so an
    un-tweaked load looks exactly as before.
@@ -54,51 +54,6 @@ html[data-ambience="night"] .stage::-webkit-scrollbar-thumb { background: rgba(2
    MATERIAL — how the chrome is made. Liquid (default) is glossy
    liquid-glass; Frosted is soft milk-glass; Flat is opaque paper.
    ------------------------------------------------------------ */
-
-/* FROSTED — milkier, less specular, softer shadows. Still blurred. */
-html[data-material="frosted"] {
-  --glass-bg:        rgba(255, 255, 255, 0.80);
-  --glass-bg-nav:    rgba(255, 255, 255, 0.84);
-  --glass-bg-strong: rgba(255, 255, 255, 0.92);
-  --glass-spec:  inset 0 1px 2px rgba(255, 255, 255, 0.4);
-  --spec-strong: inset 0 1px 2px rgba(255, 255, 255, 0.45);
-  --shadow-nav:  0 2px 12px rgba(0, 0, 0, 0.05);
-}
-html[data-material="frosted"] .tile-sheen { opacity: 0.45; }
-html[data-material="frosted"] .topics-hero { background: rgba(255, 255, 255, 0.84); }
-
-/* FLAT — opaque paper cards, no blur, no gloss, flat single-layer shadow. */
-html[data-material="flat"] {
-  --glass-bg:        rgba(252, 251, 248, 0.97);
-  --glass-bg-nav:    rgba(252, 251, 248, 0.97);
-  --glass-bg-strong: rgba(255, 255, 255, 0.99);
-  --glass-spec:  inset 0 0 0 1px rgba(0, 0, 0, 0);
-  --spec-strong: inset 0 0 0 1px rgba(0, 0, 0, 0);
-  --shadow-nav:  0 1px 2px rgba(0, 0, 0, 0.10);
-  --shadow-wii:  0 1px 2px rgba(0, 0, 0, 0.08);
-}
-html[data-material="flat"] .rail-panel,
-html[data-material="flat"] .merge-bg,
-html[data-material="flat"] .topics-hero,
-html[data-material="flat"] .status-pill,
-html[data-material="flat"] .dock,
-html[data-material="flat"] .tile-art,
-html[data-material="flat"] .seg,
-html[data-material="flat"] .rail-tag,
-html[data-material="flat"] .note-row,
-html[data-material="flat"] .badge,
-html[data-material="flat"] .card {
-  -webkit-backdrop-filter: none !important;
-  backdrop-filter: none !important;
-}
-html[data-material="flat"] .topics-hero { background: #fcfbf8; }
-html[data-material="flat"] .tile-sheen { opacity: 0; }
-html[data-material="flat"] .tile {
-  box-shadow: 0 1px 2px rgba(0, 0, 0, 0.10) !important;
-}
-html[data-material="flat"] .tile:hover {
-  box-shadow: 0 5px 14px rgba(0, 0, 0, 0.14) !important;
-}
 
 /* ------------------------------------------------------------
    ENERGY — the springiness of every hover/press. Reshapes how

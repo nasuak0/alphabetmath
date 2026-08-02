@@ -7,6 +7,10 @@
 <link rel="stylesheet" href="../zmath/tokens.css" />
 <link rel="stylesheet" href="flat-tile.css" />
 <link rel="stylesheet" href="flat-lab.css" />
+<!-- selection ring + nudge: the brain owns it (zmath/picker-select.css) and the
+     live app links the same file, so the study and the product can't drift.
+     Loads after flat-lab.css so it wins the .ptile.sel .pring cascade. -->
+<link rel="stylesheet" href="../zmath/picker-select.css" />
 <style>
   /* ---- full-width centered stage (screen matches index.html Lab size) ---- */
   .page.wide { max-width: none; padding-left: clamp(24px, 4vw, 60px); padding-right: clamp(24px, 4vw, 60px); }

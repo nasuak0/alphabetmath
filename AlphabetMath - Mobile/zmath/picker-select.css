@@ -1,0 +1,50 @@
+/* ============================================================
+   PICKER SELECTION — ONE source of truth, imported by BOTH readers
+   ------------------------------------------------------------
+   The Design Lab study (explore/Design Lab.html) and the live app
+   (zmath/picker.css, "Screen fit: poster") now render selection from
+   THIS file, so the two can no longer drift.
+
+   Why this file exists: the study's selection ring was previously
+   hand-copied into the app from Design Lab.html's inline <style>.
+   Those inline values never actually render — flat-lab.css declares
+   `.scr[data-layout="home"] .ptile.sel .pring` one class heavier, so
+   IT wins regardless of order. Copying the inline numbers produced a
+   deep-tinted -6/27 halo instead of the quiet neutral -4/22 hug the
+   Lab really shows. Read the rendered result, not the last rule.
+
+   The Lab's own note, kept here verbatim in spirit: never the
+   deep-colour halo — against the packed pale shelf it reads as a
+   floating card. The grey hug + the nudge carry selection.
+
+   SCOPING: the study's .scr carries no data-screenfit; the app's
+   always does. The :where() clause therefore matches the study and
+   the app's poster fit, and deliberately leaves the app's legacy
+   "stretch" fit alone. :where() adds no specificity, so [data-layout]
+   is what lifts these to (0,5,0) — enough to outrank flat-lab.css
+   when this file is linked after it.
+   ============================================================ */
+
+/* the ring — IDENTICAL on Home and Topics */
+.scr[data-layout]:where([data-screenfit="poster"], :not([data-screenfit])) .ptile.sel .pring {
+  display: block; opacity: 1; background: transparent; border: 0;
+  -webkit-backdrop-filter: none; backdrop-filter: none;
+  inset: -4px; border-radius: 22px; box-shadow: 0 0 0 2px rgba(120,130,150,0.30);
+}
+
+/* the nudge — the card is NOT re-sized, it only scales in place */
+.scr[data-layout]:where([data-screenfit="poster"], :not([data-screenfit])) .ptile {
+  transition: transform 0.32s var(--ease-bounce);
+}
+.scr[data-layout="home"]:where([data-screenfit="poster"], :not([data-screenfit])) .ptile.sel {
+  transform: scale(1.045); z-index: 3;
+}
+.scr[data-layout="topics"]:where([data-screenfit="poster"], :not([data-screenfit])) .ptile.sel {
+  transform: scale(1.03); z-index: 3;
+}
+
+/* the selected card keeps its RESTING rim shadow — no float, no halo */
+.scr[data-layout]:where([data-screenfit="poster"], :not([data-screenfit])) .ptile.fc.sel::before,
+.scr[data-layout]:where([data-screenfit="poster"], :not([data-screenfit])) .ptile.flat.sel::before {
+  box-shadow: 0 1.5px 3px rgba(0,0,0,0.16), inset 0 0 0 1px rgba(var(--deep),0.18);
+}

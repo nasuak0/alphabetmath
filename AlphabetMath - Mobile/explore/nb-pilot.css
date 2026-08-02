@@ -1,0 +1,140 @@
+/* Live-notebook pilot styling. The kit sheds its own card and takes the app's
+   tokens, so it survives a palette change instead of hardcoding cream. */
+:root{--nb-ink:#26345f;--nb-accent:#bf3535;--nb-p:#bf3535;--nb-q:#2f5fbf;--nb-serif:Georgia,"Times New Roman",serif;
+  --nb-well:rgba(120,140,180,0.07);--nb-well-2:rgba(120,140,180,0.10);--nb-rule:rgba(38,52,95,0.16)}
+
+/* ---- pilot shell (stands in for the notes reader pane) ---- */
+.nbp-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:22px}
+.nbp-card{width:100%;max-width:1240px;height:100%;max-height:920px;display:flex;flex-direction:column;
+  border-radius:var(--r-tile);overflow:hidden;background:var(--glass-bg-nav);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--wii-edge);box-shadow:var(--shadow-float)}
+.nbp-head{position:relative;padding:20px 28px;display:flex;align-items:center;gap:16px;
+  background:linear-gradient(105deg,var(--c1),var(--c2))}
+.nbp-head h1{margin:0;font-family:var(--font-display);font-weight:700;font-size:1.32rem;color:#fff;letter-spacing:-.01em}
+.nbp-badge{flex:none;font-family:var(--font-ui);font-weight:700;font-size:.64rem;letter-spacing:.14em;text-transform:uppercase;
+  color:#fff;background:rgba(255,255,255,0.22);border:1px solid rgba(255,255,255,0.34);border-radius:var(--r-chip);padding:5px 11px}
+.nbp-scroll{flex:1 1 auto;min-height:0;overflow-y:auto;scrollbar-width:thin}
+.nbp-body{padding:26px 32px 40px}
+.nbp-scroll::-webkit-scrollbar{width:9px}
+.nbp-scroll::-webkit-scrollbar-thumb{background:rgba(70,90,130,0.18);border-radius:5px}
+
+/* ---- prose ink: black, not grey ---- */
+.nbp-body .rd-p,.nbp-body .rd-list li,.nbp-body .rd-cap{color:var(--wii-ink)}
+
+/* ---- live numbers in prose / boxes ---- */
+.nb-live{font-family:var(--nb-serif);font-style:italic;font-weight:700;color:var(--nb-accent);
+  background:rgba(191,53,53,0.08);border-radius:5px;padding:0 4px}
+.nb-box{flex-direction:column;gap:8px}
+.nb-boxlive{font-family:var(--nb-serif);font-style:italic;font-size:1.06rem;color:var(--wii-ink-2);
+  padding-top:9px;border-top:1px dashed var(--nb-rule);width:100%;text-align:center}
+
+/* ---- the table that walks ---- */
+.nb-table-wrap .nb-trow{cursor:pointer;transition:background var(--dur-fast) ease}
+.nb-table-wrap .nb-trow:hover{background:var(--nb-well)}
+.nb-table-wrap .nb-trow.on{background:rgba(191,53,53,0.09)}
+.nb-table-wrap .nb-trow.on td{color:var(--nb-accent);font-weight:600}
+.nb-table-wrap .nb-trow.on td:first-child{box-shadow:inset 3px 0 0 var(--nb-accent)}
+.nb-tablehint{margin:8px 2px 0;font-family:var(--font-ui);font-size:.76rem;color:var(--fg3)}
+
+/* the figure sits where it is written, and scrolls with the page */
+.nb-sticky{margin:6px 0 22px}
+.nb-figcard{container-type:inline-size;border-radius:var(--r-card);border:1px solid var(--wii-edge);
+  background:rgba(255,255,255,0.55);box-shadow:var(--shadow-card);padding:14px 16px 12px}
+.nb-expand{display:block;margin:10px auto 0;background:none;border:none;cursor:pointer;padding:4px 8px;
+  font-family:var(--font-ui);font-weight:600;font-size:.78rem;color:var(--wii-ink-2);
+  text-decoration:underline;text-underline-offset:3px}
+.nb-expand:hover{color:var(--wii-ink)}
+
+/* ---- the kit itself ---- */
+.nb-kit{display:flex;align-items:stretch;gap:0}
+.nb-svg{order:2;flex:1 1 72%;min-width:0;width:100%;height:auto;align-self:flex-start;
+  padding-left:18px;touch-action:none;user-select:none;display:block}
+.nb-panel{order:1;flex:0 0 28%;display:flex;flex-direction:column;justify-content:center;gap:11px;
+  padding-right:18px;border-right:2px solid var(--nb-ink)}
+.nb-kit--full .nb-panel{flex:0 0 40%;justify-content:flex-start;gap:7px}
+.nb-kit--full .nb-svg{flex:1 1 58%}
+.nb-slidercard{background:var(--nb-well);border:1px solid var(--wii-edge-2);border-radius:10px;padding:8px 11px}
+.nb-sliders{display:flex;flex-direction:column;gap:7px}
+.nb-sliders label{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:600;font-size:13px;color:var(--nb-ink)}
+.nb-sliders label b{font-family:var(--font-display);background:var(--nb-ink);color:#fff;border-radius:6px;padding:1px 7px;font-size:12.5px;min-width:22px;text-align:center}
+.nb-sliders label.nb-var-p{color:var(--nb-p)}
+.nb-sliders label.nb-var-p b{background:var(--nb-p)}
+.nb-sliders label.nb-var-q{color:var(--nb-q)}
+.nb-sliders label.nb-var-q b{background:var(--nb-q)}
+.nb-step b .nb-var-p{color:#ffb3b3}
+.nb-step b .nb-var-q{color:#a9c4ff}
+.nb-sliders input{flex:1;min-width:0}
+.nb-kit input[type=range]{-webkit-appearance:none;appearance:none;height:6px;background:var(--nb-well-2);border-radius:99px}
+.nb-kit input[type=range]::-webkit-slider-thumb{-webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:var(--nb-accent);cursor:grab;border:3px solid #fff;box-shadow:0 2px 5px rgba(0,0,0,.25)}
+.nb-kit .nb-sliders label.nb-var-p input[type=range]::-webkit-slider-thumb{background:var(--nb-p)}
+.nb-kit .nb-sliders label.nb-var-q input[type=range]::-webkit-slider-thumb{background:var(--nb-q)}
+.nb-step{display:flex;align-items:center;gap:6px;margin-top:9px;padding-top:9px;border-top:1px dashed var(--wii-edge-2);
+  font-family:var(--font-display);font-weight:600;font-size:13px;color:var(--nb-ink)}
+.nb-step-key{font-size:9px;letter-spacing:.07em;text-transform:uppercase;color:var(--fg3)}
+.nb-step i{font-family:var(--nb-serif);font-style:italic;font-weight:400;font-size:14px;color:var(--wii-ink-2)}
+.nb-step b{font-family:var(--nb-serif);font-style:italic;font-size:14px;background:var(--nb-ink);color:#fff;border-radius:6px;padding:1px 9px}
+
+.nb-sh-grid{display:grid;grid-template-columns:1fr 1fr;column-gap:16px;row-gap:8px;align-items:baseline;
+  margin-top:13px;padding:11px 6px 12px;border-top:2.5px solid var(--nb-ink);border-bottom:2.5px solid var(--nb-ink)}
+.nb-sh-rule{grid-column:1/-1;height:0;border-top:1px solid var(--wii-edge-2);margin:1px 0}
+.nb-sh-h{font-family:var(--nb-serif);font-style:italic;font-size:15px;color:var(--wii-ink);text-align:center}
+.nb-sh-f{font-family:var(--nb-serif);font-style:italic;font-size:13px;color:var(--fg3);text-align:center;white-space:nowrap;display:block}
+.nb-sh-n{font-family:var(--nb-serif);font-style:italic;font-size:14px;color:var(--wii-ink-2);text-align:center;white-space:nowrap;display:block}
+.nb-sh-v{font-family:var(--nb-serif);font-style:italic;font-size:16px;color:var(--nb-ink);text-align:center;white-space:nowrap;display:block}
+
+.nb-toggle{display:flex;align-items:center;justify-content:space-between;gap:10px;width:100%;
+  background:var(--nb-well);border:1px solid var(--wii-edge-2);border-radius:9px;padding:7px 10px;cursor:pointer;text-align:left}
+.nb-tgl-text{display:flex;flex-direction:column}
+.nb-tgl-title{font-family:var(--font-ui);font-weight:600;font-size:11.5px;color:var(--wii-ink)}
+.nb-tgl-sub{font-family:var(--font-ui);font-size:10px;color:var(--wii-ink-2)}
+.nb-switch{flex:none;width:36px;height:20px;border-radius:99px;background:var(--nb-well-2);position:relative;transition:.16s}
+.nb-switch span{position:absolute;top:3px;left:3px;width:14px;height:14px;border-radius:50%;background:#fff;box-shadow:0 1px 3px rgba(0,0,0,.25);transition:.16s}
+.nb-switch.on{background:var(--nb-accent)}
+.nb-switch.on span{left:19px}
+
+/* svg labels */
+.nb-trilab{font-family:var(--nb-serif);font-style:italic;font-size:11px;fill:var(--nb-accent);opacity:.85}
+.nb-brace{stroke:var(--nb-ink);stroke-width:1.4;opacity:.6}
+.nb-brace.nb-b-p{stroke:var(--nb-p);opacity:.75}
+.nb-brace.nb-b-q{stroke:var(--nb-q);opacity:.75}
+.nb-bracelab{font-family:var(--nb-serif);font-style:italic;font-size:12.5px;fill:var(--nb-ink)}
+.nb-bracelab.nb-b-p{fill:var(--nb-p);font-weight:600}
+.nb-bracelab.nb-b-q{fill:var(--nb-q);font-weight:600}
+.nb-vlab{font-family:var(--nb-serif);font-style:italic;font-size:11.5px;fill:var(--nb-ink);paint-order:stroke;stroke:#fff;stroke-width:3px;stroke-linejoin:round}
+.nb-perfect{font-family:var(--font-display);font-weight:600;font-size:13px;fill:#3f9b73}
+
+/* radicals + exponents */
+.nb-sup{font-size:.66em}
+.nb-pow{white-space:nowrap}
+.nb-halfexp{font-size:.62em}
+.nb-dfrac{white-space:nowrap;font-style:italic;letter-spacing:-.01em}
+.nb-dfn{font-size:.84em;position:relative;top:-.18em}
+.nb-dfsl{margin:0 -.04em}
+.nb-dfd{font-size:.84em;position:relative;top:.12em}
+.nb-sqrt{display:inline-flex;align-items:stretch;white-space:nowrap}
+.nb-sqrt-sign{width:.5em;align-self:stretch;height:auto;flex:none;overflow:visible;position:relative;top:.5px}
+.nb-sqrt-body{border-top:1px solid currentColor;padding:.12em .24em 0 .18em;line-height:1.06}
+
+/* ---- exercise "show me this" ---- */
+.nb-showme{display:inline-flex;align-items:center;gap:5px;margin:0 0 12px;padding:6px 11px;cursor:pointer;
+  font-family:var(--font-ui);font-weight:600;font-size:.78rem;color:var(--nb-accent);
+  background:rgba(191,53,53,0.07);border:1px solid rgba(191,53,53,0.2);border-radius:var(--r-chip)}
+.nb-showme i{font-family:var(--nb-serif);font-style:italic}
+.nb-showme:hover{background:rgba(191,53,53,0.12)}
+
+/* The kit stacks when ITS OWN box is narrow (container query), not when the
+   window is — so it never disagrees with the article's column count. */
+@container (max-width:560px){
+  .nb-kit{flex-direction:column}
+  .nb-panel{order:2;flex:none;border-right:none;border-top:2px solid var(--nb-ink);padding:12px 0 0;margin-top:10px}
+  .nb-svg{order:1;flex:none;padding-left:0}
+}
+/* below this the article itself goes single-column: rail under the prose, and
+   the kit's container widens again so it returns to side-by-side */
+@media (max-width:820px){
+  .nbp-body .reader-grid{grid-template-columns:minmax(0,1fr)}
+  .nbp-body .reader-main{padding-right:0}
+  .nbp-body .reader-rail{border-left:none;padding-left:0;margin-top:30px;padding-top:26px;border-top:1.5px solid var(--wii-ink)}
+}

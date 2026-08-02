@@ -1,0 +1,78 @@
+/* Topic page — design study. Two columns like the notebook reader:
+   left = the modal, expanded; right = the topic's contents as title rows. */
+*{box-sizing:border-box}
+html,body{margin:0;height:100%}
+body{font-family:var(--font-ui);color:var(--wii-ink);-webkit-font-smoothing:antialiased;overflow:hidden;
+  background:radial-gradient(120% 90% at 50% -10%,var(--wii-bg-1),var(--wii-bg-2) 55%,var(--wii-bg-3) 100%)}
+
+.ts-wrap{position:fixed;inset:0;display:flex;align-items:center;justify-content:center;padding:22px}
+.ts-card{width:100%;max-width:1240px;height:100%;max-height:920px;display:flex;flex-direction:column;
+  border-radius:var(--r-tile);overflow:hidden;background:var(--glass-bg-nav);
+  -webkit-backdrop-filter:blur(20px) saturate(180%);backdrop-filter:blur(20px) saturate(180%);
+  border:1px solid var(--wii-edge);box-shadow:var(--shadow-float)}
+
+/* back strip — same gesture as the notebook reader */
+.ts-top{flex:none;display:flex;align-items:center;gap:14px;padding:14px 22px;border-bottom:1px solid var(--wii-edge)}
+.ts-back{width:38px;height:38px;flex:none;display:flex;align-items:center;justify-content:center;cursor:pointer;
+  border:1px solid var(--wii-edge-2);border-radius:var(--r-chip);background:rgba(255,255,255,0.7);
+  font-size:1.1rem;line-height:1;color:var(--wii-ink-2)}
+.ts-back:hover{color:var(--wii-ink);background:#fff}
+.ts-crumb{font-family:var(--font-ui);font-weight:700;font-size:.72rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--fg3)}
+
+.ts-grid{flex:1 1 auto;min-height:0;display:grid;grid-template-columns:minmax(0,42fr) minmax(0,58fr)}
+
+/* ---------- LEFT: the modal, expanded ---------- */
+.ts-left{min-width:0;display:flex;flex-direction:column;padding:26px 24px 30px 30px;
+  border-right:1.5px solid var(--wii-ink);overflow-y:scroll;scrollbar-width:thin;
+  scrollbar-color:rgba(70,90,130,0.32) rgba(70,90,130,0.08)}
+.ts-cover{position:relative;flex:none;width:100%;aspect-ratio:16/11;border-radius:var(--r-card);overflow:hidden;
+  background:#fff;box-shadow:var(--shadow-tile)}
+.ts-cover .tile-cover{position:absolute;inset:0;z-index:0;filter:saturate(1.1)}
+.ts-cover .tile-sheen{position:absolute;inset:0;z-index:1;pointer-events:none;
+  background:linear-gradient(150deg,rgba(255,255,255,0.55) 0%,rgba(255,255,255,0.10) 26%,transparent 50%)}
+
+/* the glyph badge straddles the rule, as in the sketch — flat white, like the modal */
+.ts-rule{position:relative;flex:none;margin:34px -24px 0 0;border-top:1.5px solid var(--wii-ink)}
+.ts-glyph{position:absolute;left:0;top:-32px;width:64px;height:64px;border-radius:18px;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:700;font-size:1.4rem;
+  background:#fff;color:var(--c2);
+  box-shadow:0 0 14px rgba(30,40,70,0.16),0 4px 12px rgba(30,40,70,0.12)}
+
+.ts-num{margin:22px 0 4px;font-family:var(--font-ui);font-weight:700;font-size:.72rem;letter-spacing:.15em;
+  text-transform:uppercase;color:var(--fg3)}
+.ts-name{margin:0;font-family:var(--font-display);font-weight:700;font-size:2.3rem;line-height:1.05;
+  letter-spacing:-.02em;color:var(--wii-ink)}
+.ts-desc{margin:14px 0 0;font-size:1.04rem;line-height:1.66;color:var(--wii-ink);text-wrap:pretty}
+.ts-chips{display:flex;flex-wrap:wrap;gap:8px;margin-top:20px}
+.ts-chip{font-family:var(--font-ui);font-weight:600;font-size:.78rem;padding:6px 12px;border-radius:var(--r-chip);
+  background:var(--scrim);color:var(--wii-ink-2)}
+.ts-chip.tone{background:var(--peach);color:var(--peach-ink)}
+
+/* ---------- RIGHT: the contents ---------- */
+.ts-right{min-width:0;display:flex;flex-direction:column;gap:14px;padding:26px 30px 30px;
+  overflow-y:auto;scrollbar-width:thin}
+.ts-right::-webkit-scrollbar,.ts-left::-webkit-scrollbar{width:10px}
+.ts-right::-webkit-scrollbar-track,.ts-left::-webkit-scrollbar-track{background:rgba(70,90,130,0.08);border-radius:5px}
+.ts-right::-webkit-scrollbar-thumb,.ts-left::-webkit-scrollbar-thumb{background:rgba(70,90,130,0.32);border-radius:5px}
+.ts-right::-webkit-scrollbar-thumb:hover,.ts-left::-webkit-scrollbar-thumb:hover{background:rgba(70,90,130,0.5)}
+.ts-row{display:flex;align-items:center;gap:16px;min-height:86px;padding:16px 20px;cursor:pointer;
+  border:1.5px solid var(--wii-edge-2);border-radius:var(--r-card);background:rgba(255,255,255,0.62);
+  box-shadow:var(--shadow-xs);transition:transform var(--dur-fast) var(--ease-smooth),
+    box-shadow var(--dur-base) var(--ease-smooth),border-color var(--dur-fast) ease}
+.ts-row:hover{transform:translateY(-2px);box-shadow:var(--shadow-card);border-color:var(--wii-edge)}
+.ts-rowtx{flex:1 1 auto;min-width:0;display:flex;flex-direction:column;gap:4px}
+.ts-kick{font-family:var(--font-ui);font-weight:700;font-size:.66rem;letter-spacing:.15em;text-transform:uppercase;
+  color:var(--c2)}
+.ts-title{font-family:var(--font-display);font-weight:600;font-size:1.1rem;line-height:1.25;color:var(--wii-ink);
+  text-wrap:pretty}
+.ts-sub{font-size:.86rem;line-height:1.45;color:var(--wii-ink-2)}
+.ts-go{flex:none;font-size:1.3rem;line-height:1;color:var(--fg3)}
+.ts-row:hover .ts-go{color:var(--wii-ink-2)}
+.ts-row.soon{cursor:default;background:rgba(255,255,255,0.3);border-style:dashed}
+.ts-row.soon:hover{transform:none;box-shadow:var(--shadow-xs);border-color:var(--wii-edge-2)}
+.ts-row.soon .ts-title{color:var(--wii-ink-2)}
+.ts-row.soon .ts-kick{color:var(--fg3)}
+
+a{color:var(--z-indigo)}a:hover{color:var(--z-blue)}

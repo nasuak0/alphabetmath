@@ -1,0 +1,181 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — Mobile Landing (draft)</title>
+<link rel="stylesheet" href="../zmath/tokens.css" />
+<style>
+*{box-sizing:border-box}
+html,body{margin:0;min-height:100%}
+body{font-family:var(--font-ui);color:var(--wii-ink);-webkit-font-smoothing:antialiased;
+  background:radial-gradient(120% 80% at 50% -10%,var(--wii-bg-1),var(--wii-bg-2) 55%,var(--wii-bg-3) 100%);}
+body::before{content:"";position:fixed;inset:0;pointer-events:none;
+  background-image:radial-gradient(var(--wii-dot) 1px,transparent 1px);background-size:22px 22px;opacity:.55}
+.ml{position:relative;max-width:430px;margin:0 auto;padding:34px 22px 30px;display:flex;flex-direction:column;gap:26px}
+
+/* ---- brand row ---- */
+.ml-brand{display:flex;align-items:center;gap:11px}
+.ml-mark{flex:none;width:46px;height:46px;border-radius:14px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-weight:700;font-size:26px;color:#fff;background:var(--brand-grad);
+  box-shadow:var(--shadow-tile)}
+.ml-brandtx{display:flex;flex-direction:column;gap:1px;min-width:0}
+.ml-name{font-family:var(--font-display);font-weight:700;font-size:1.16rem;letter-spacing:-.01em;line-height:1.1}
+.ml-tag{font-size:.74rem;font-weight:600;letter-spacing:.11em;text-transform:uppercase;color:var(--fg3)}
+
+/* ---- headline ---- */
+.ml-head{display:flex;flex-direction:column;gap:12px}
+.ml-h1{font-family:var(--font-display);font-weight:700;font-size:2.05rem;line-height:1.08;letter-spacing:-.02em;margin:0;text-wrap:pretty}
+.ml-h1 span{background:var(--brand-spectrum);-webkit-background-clip:text;background-clip:text;color:transparent}
+.ml-lede{margin:0;font-size:1rem;line-height:1.62;color:var(--wii-ink-2);text-wrap:pretty}
+.ml-lede b{color:var(--wii-ink);font-weight:600}
+
+/* ---- hero preview ---- */
+.ml-shot{position:relative;width:100%;aspect-ratio:4/3;border-radius:var(--r-card);overflow:hidden;
+  border:1px solid var(--wii-edge);box-shadow:var(--shadow-pop);background:var(--surface)}
+.ml-shotcap{margin:9px 2px 0;font-size:.74rem;color:var(--fg3);font-family:var(--font-mono)}
+
+/* ---- what's inside ---- */
+.ml-sect{font-size:.72rem;font-weight:700;letter-spacing:.15em;text-transform:uppercase;color:var(--fg3);margin:0}
+.ml-rows{display:flex;flex-direction:column;gap:10px;margin-top:12px}
+.ml-row{display:flex;align-items:center;gap:13px;padding:13px 15px;border-radius:var(--r-card);
+  background:var(--wii-panel);-webkit-backdrop-filter:blur(20px) saturate(170%);backdrop-filter:blur(20px) saturate(170%);
+  border:1px solid var(--wii-edge);box-shadow:var(--shadow-wii)}
+.ml-glyph{flex:none;width:38px;height:38px;border-radius:12px;display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-serif,Georgia,serif);font-style:italic;font-size:1.05rem;color:#fff;box-shadow:var(--glass-spec)}
+.ml-rowtx{display:flex;flex-direction:column;gap:2px;min-width:0}
+.ml-rowt{font-weight:700;font-size:.96rem;line-height:1.2}
+.ml-rows{--x:0}
+.ml-rowd{font-size:.83rem;line-height:1.42;color:var(--wii-ink-2)}
+
+/* ---- action ---- */
+.ml-act{display:flex;flex-direction:column;gap:12px}
+.ml-btn{display:flex;align-items:center;justify-content:center;gap:9px;width:100%;min-height:52px;padding:0 20px;
+  border:none;border-radius:var(--r-button);cursor:pointer;font-family:var(--font-ui);font-weight:700;font-size:1rem;
+  color:var(--fg-on-dark);background:var(--ink-button);box-shadow:var(--shadow-card);
+  transition:transform var(--dur-fast) var(--ease-snap),background var(--dur-fast) ease}
+.ml-btn:active{transform:scale(.975)}
+.ml-btn.done{background:var(--green-2)}
+.ml-hint{margin:0;text-align:center;font-size:.85rem;line-height:1.5;color:var(--fg3)}
+.ml-ghost{align-self:center;background:none;border:none;padding:6px 4px;cursor:pointer;font-family:var(--font-ui);
+  font-size:.82rem;font-weight:600;color:var(--fg3);text-decoration:underline;text-underline-offset:3px}
+.ml-ghost:hover{color:var(--wii-ink-2)}
+
+/* ---- foot + draft readout ---- */
+.ml-foot{margin-top:4px;padding-top:18px;border-top:1px solid var(--hairline);
+  display:flex;align-items:center;justify-content:space-between;gap:10px;font-size:.76rem;color:var(--fg3)}
+.ml-dev{font-family:var(--font-mono);font-size:.7rem;line-height:1.75;color:var(--fg3);
+  background:var(--scrim);border-radius:12px;padding:12px 14px}
+.ml-dev b{color:var(--wii-ink-2);font-weight:500}
+.ml-dev .yes{color:var(--green-2);font-weight:700}
+.ml-dev .no{color:var(--red);font-weight:700}
+.ml-devh{font-family:var(--font-ui);font-size:.66rem;font-weight:700;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--fg3);margin-bottom:6px}
+a{color:var(--z-indigo)}a:hover{color:var(--z-blue)}
+</style>
+</head>
+<body>
+<div class="ml">
+  <div class="ml-brand">
+    <div class="ml-mark">&#955;</div>
+    <div class="ml-brandtx">
+      <div class="ml-name">AlphabetMath</div>
+      <div class="ml-tag">Interactive mathematics</div>
+    </div>
+  </div>
+
+  <div class="ml-head">
+    <h1 class="ml-h1">Built for a <span>bigger screen.</span></h1>
+    <p class="ml-lede">AlphabetMath is made for <b>iPad and desktop</b>. The library, the lab and the notebook all need room to draw &mdash; an iPhone can&rsquo;t give them that, so we&rsquo;d rather not pretend.</p>
+  </div>
+
+  <div>
+    <div class="ml-shot"><image-slot id="ml-hero" shape="rect" placeholder="App screenshot &mdash; Notebook reader on iPad"></image-slot></div>
+    <p class="ml-shotcap">the notebook, running on iPad</p>
+  </div>
+
+  <div>
+    <p class="ml-sect">What&rsquo;s waiting for you</p>
+    <div class="ml-rows">
+      <div class="ml-row">
+        <span class="ml-glyph" style="background:linear-gradient(155deg,#b48cf0,#6a36b5)">&#8721;</span>
+        <span class="ml-rowtx">
+          <span class="ml-rowt">Library</span>
+          <span class="ml-rowd">Every topic as a tile. Browse by what you&rsquo;re curious about.</span>
+        </span>
+      </div>
+      <div class="ml-row">
+        <span class="ml-glyph" style="background:linear-gradient(155deg,#4fe0bf,#159c7e)">&#9651;</span>
+        <span class="ml-rowtx">
+          <span class="ml-rowt">Lab</span>
+          <span class="ml-rowd">Demos you drive yourself &mdash; drag the figure, watch the algebra follow.</span>
+        </span>
+      </div>
+      <div class="ml-row">
+        <span class="ml-glyph" style="background:linear-gradient(155deg,#ffc24d,#e0701f)">&#402;</span>
+        <span class="ml-rowtx">
+          <span class="ml-rowt">Notebook</span>
+          <span class="ml-rowd">Field notes with live figures and exercises that check themselves.</span>
+        </span>
+      </div>
+    </div>
+  </div>
+
+  <div class="ml-act">
+    <button class="ml-btn" id="ml-copy" type="button">Copy the link</button>
+    <p class="ml-hint">Then open it on your iPad or laptop.</p>
+    <button class="ml-ghost" id="ml-anyway" type="button">Continue anyway</button>
+  </div>
+
+  <div class="ml-dev">
+    <div class="ml-devh">Draft only &middot; device readout</div>
+    <div id="ml-readout">&hellip;</div>
+  </div>
+
+  <div class="ml-foot">
+    <span>&#955; AlphabetMath</span>
+    <span>alphabetmath.com</span>
+  </div>
+</div>
+
+<script src="image-slot.js"></script>
+<script>
+/* The detection we plan to ship, adapted from zperiod's isRealMobileDevice().
+   Difference: iPad is a FIRST-CLASS target here, so a touch device only counts
+   as "phone" when its screen is genuinely small. Reads hardware, not the window,
+   so rotating the phone changes nothing. */
+function phoneReport(){
+  const shortSide = Math.min(screen.width, screen.height);
+  const coarse    = matchMedia('(pointer: coarse)').matches;
+  const noHover   = matchMedia('(hover: none)').matches;
+  const touch     = ('ontouchstart' in window) || navigator.maxTouchPoints > 0;
+  const phoneUA   = /iPhone|iPod|Android.*Mobile|webOS|BlackBerry|IEMobile|Opera Mini/i.test(navigator.userAgent);
+  const iPadUA    = /iPad/i.test(navigator.userAgent) || (/Macintosh/i.test(navigator.userAgent) && touch);
+  /* phone = a small piece of glass you touch, and never a recognised iPad */
+  const isPhone = !iPadUA && (coarse || noHover) && (shortSide < 700 || phoneUA);
+  return { shortSide, coarse, noHover, touch, phoneUA, iPadUA, isPhone,
+           win: innerWidth + '\u00d7' + innerHeight, scr: screen.width + '\u00d7' + screen.height };
+}
+(function(){
+  const r = phoneReport(), f = (b) => '<span class="' + (b ? 'yes' : 'no') + '">' + (b ? 'yes' : 'no') + '</span>';
+  document.getElementById('ml-readout').innerHTML =
+    '<b>window</b> ' + r.win + ' &middot; rotates<br>' +
+    '<b>screen</b> ' + r.scr + ' &middot; short side <b>' + r.shortSide + '</b><br>' +
+    '<b>finger pointer</b> ' + f(r.coarse) + ' &middot; <b>no hover</b> ' + f(r.noHover) + '<br>' +
+    '<b>phone name in UA</b> ' + f(r.phoneUA) + ' &middot; <b>iPad</b> ' + f(r.iPadUA) + '<br>' +
+    '<b>verdict &mdash; phone</b> ' + f(r.isPhone);
+
+  const btn = document.getElementById('ml-copy');
+  btn.addEventListener('click', async () => {
+    try { await navigator.clipboard.writeText(location.href);
+      btn.textContent = 'Link copied \u2713'; btn.classList.add('done');
+      setTimeout(() => { btn.textContent = 'Copy the link'; btn.classList.remove('done'); }, 2200);
+    } catch (e) { btn.textContent = 'Copy failed \u2014 hold the address bar'; }
+  });
+  document.getElementById('ml-anyway').addEventListener('click', () => {
+    alert('Draft: in the real app this would set a "let me in" flag and load the app anyway.');
+  });
+})();
+</script>
+</body>
+</html>

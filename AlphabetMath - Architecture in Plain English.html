@@ -1,0 +1,193 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — Architecture in Plain English</title>
+<style>
+doc-page:not(:defined){visibility:hidden}
+doc-page{font-family:Georgia,"Times New Roman",serif;font-size:11.5pt;line-height:1.6;color:#111;--shell:#b45309;--entry:#7c3aed;--core:#2563eb;--screens:#0891b2;--ui:#059669;--data:#e11d48;--style:#64748b;--mix:#334155}
+h1{font-size:20pt;font-weight:700;margin:0 0 4px;line-height:1.2}
+.sub{font-size:11pt;color:#555;margin:0 0 20px;font-style:italic}
+h2{font-size:13pt;font-weight:700;margin:26px 0 0;padding:7px 10px;background:var(--tint);border-left:4px solid var(--c);break-after:avoid}
+h2 .n{color:var(--c);margin-right:9px}
+h3{font-size:11.5pt;font-weight:700;margin:16px 0 4px;font-style:italic}
+h3 .dot{display:inline-block;width:8px;height:8px;border-radius:50%;background:var(--c);margin-right:7px;vertical-align:2px}
+p{margin:0 0 10px}
+h2+p,h2+.ptr{margin-top:11px}
+ul,ol{margin:8px 0 12px;padding-left:24px}
+li{margin-bottom:7px}
+code{font-family:"Courier New",monospace;font-size:10pt}
+.ptr{break-inside:avoid;font-family:system-ui,-apple-system,"Segoe UI",sans-serif;font-size:8.8pt;line-height:1.5;color:#4b5563;background:var(--tint);border-left:4px solid var(--c);padding:7px 10px;margin:0 0 13px}
+.ptr b{color:var(--c);font-weight:600;letter-spacing:.07em;text-transform:uppercase;font-size:7.8pt}
+.ptr code{font-family:"Courier New",monospace;font-size:8.6pt;color:#111}
+dl{margin:10px 0}
+dt{font-weight:700;margin-top:10px}
+dt .dot{display:inline-block;width:9px;height:9px;border-radius:2px;background:var(--c);margin-right:8px;vertical-align:1px}
+dd{margin:0 0 0 25px}
+.file{color:#555;font-family:"Courier New",monospace;font-size:9.5pt;font-weight:400}
+.legend{break-inside:avoid;border-top:1px solid #ddd;border-bottom:1px solid #ddd;padding:11px 0;margin:0 0 22px;font-family:system-ui,-apple-system,sans-serif;font-size:9pt;line-height:1.6;color:#4b5563}
+.legend .lt{font-weight:700;letter-spacing:.09em;text-transform:uppercase;font-size:7.8pt;color:#8a93a1;margin-bottom:6px}
+.legend span.k{display:inline-block;margin-right:16px;white-space:nowrap}
+.legend i{display:inline-block;width:9px;height:9px;border-radius:2px;margin-right:6px;vertical-align:0}
+a{color:#00e}a:hover{color:#00a}
+</style>
+</head>
+<body>
+<doc-page margin="1in">
+
+<h1>How AlphabetMath Is Built</h1>
+<p class="sub">A plain-English introduction, written for someone who has never seen the project — or has completely forgotten it. Companion to the interactive Architecture &amp; Flows explorer. v0.11, July 2026.</p>
+
+<div class="legend">
+<div class="lt">Colors match the Explorer's seven layers</div>
+<span class="k"><i style="background:#b45309"></i>Shells &amp; Runtime</span><span class="k"><i style="background:#7c3aed"></i>Entry</span><span class="k"><i style="background:#2563eb"></i>App Shell</span><span class="k"><i style="background:#0891b2"></i>Screens</span><span class="k"><i style="background:#059669"></i>UI Primitives</span><span class="k"><i style="background:#e11d48"></i>Static Data</span><span class="k"><i style="background:#64748b"></i>Style Cascade</span>
+</div>
+
+<h2 style="--c:var(--mix);--tint:#f1f5f9"><span class="n">1</span>What this app actually is</h2>
+<p>AlphabetMath is a teaching app that runs entirely inside a web browser. There is no server, no login, no database, and nothing is stored anywhere except on the machine you are looking at. When you open it, the whole app arrives at once and then runs by itself.</p>
+<p>That single fact drives nearly every other decision in the project. A normal web app is a conversation: your browser asks a server for something, the server answers, back and forth. AlphabetMath has no one to talk to. It is closer to a book than a phone call — everything it will ever show you is already inside it the moment it loads.</p>
+<p>The consequences are good ones. It is fast, because nothing waits on a network. It cannot lose your data, because it never sends any. It costs nothing to run. It can be handed to someone as a folder of files. And it can be maintained by one person without a team, which is the actual point.</p>
+
+<h2 style="--c:var(--shell);--tint:#fdf6ed"><span class="n">2</span>The one big idea: one brain, two readers</h2>
+<div class="ptr" style="--c:var(--shell);--tint:#fdf6ed"><b>In the Explorer</b> — the amber <i>Shells &amp; Runtime</i> column. Compare the two flows <code>Boot — no-build (live product)</code> and <code>Boot — Vite build (desktop app)</code>: same destination, two routes.</div>
+<p>This is the decision everything else hangs from.</p>
+<p>All the real code lives in one folder called <code>zmath</code>. Nothing important lives anywhere else. Think of it as the manuscript of a book — the only authoritative copy.</p>
+<p>Two separate things know how to read that manuscript. The first is <b>the live product</b> <span class="file">(AlphabetMath - Mobile/index.html)</span>, which opens the raw files directly in a browser and translates them on the spot. Nothing has to be prepared, packaged or published first: double-click and it runs. This is what you mean when you say "the app." The second is <b>the packaged build</b> <span class="file">(AlphabetMath - App/)</span>, a conventional build setup that reads the very same folder and produces a compact, optimised version suitable for the public internet. Its own entry file is two lines long and contains no app code at all.</p>
+<h3 style="--c:var(--shell)">Why this, and not the obvious alternative</h3>
+<p>The obvious alternative is to keep two copies: one you tinker with, one you ship. Everyone tries this. It fails the same way every time. You fix something in the copy you happen to have open, forget to carry it across, and the two versions quietly disagree. Weeks later you are debugging a problem that exists in only one of them, and you cannot remember which one is correct.</p>
+<p>Here that is structurally impossible. There is only one copy of the source. The packaged build does not contain app code — it points at the brain. Change a screen and both readers change, because both are reading the same page of the same manuscript. You cannot forget to sync, because there is nothing to sync.</p>
+<p>The cost is one rule, and it is absolute: <b>edit only inside <code>zmath</code></b>. If you ever find yourself editing something in the packaged folder, you have wandered off the path.</p>
+
+<h2 style="--c:var(--shell);--tint:#fdf6ed"><span class="n">3</span>What happens when you open the app</h2>
+<div class="ptr" style="--c:var(--shell);--tint:#fdf6ed"><b>In the Explorer</b> — flow <code>Boot — no-build (live product)</code>. It lights up, in order: <code>index.html</code> → <code>@babel/standalone</code> → <code>zmath-loader</code> → <code>esm.sh</code> → <code>main.jsx</code> → <code>app.jsx</code>. That is amber crossing into violet, then blue.</div>
+<p>The live product does something slightly unusual, and it explains a whole category of behaviour you might otherwise find mysterious.</p>
+<p>Most web apps go through a build step: before anyone can use them, a program chews through all the source files and produces a compressed bundle. You edit, you run the build, you look at the result. It works, but it puts a machine between you and your own work.</p>
+<p>AlphabetMath's live version skips that entirely. The browser reads your actual files, as they sit on disk, and translates them the moment they are needed. You save a file and refresh — that is the whole loop.</p>
+<p>In order:</p>
+<ol>
+<li><b>The page paints something instantly.</b> Before any code has loaded, the browser already has the stylesheet and shows a placeholder. This is deliberate — the screen is never blank, so a slow load looks like loading rather than like breakage.</li>
+<li><b>A translator arrives.</b> The app's source is written in a convenient dialect browsers do not natively understand. A small translator is fetched from the internet to convert it on the fly.</li>
+<li><b>The files are walked, one leading to the next.</b> Starting from a single entry file, the loader reads it, notices which other files it mentions, fetches those, notices what they mention, and so on until the whole web of files has been collected. Each file is fetched only once, no matter how many others need it.</li>
+<li><b>Each file is translated and rewired.</b> Every file is converted, and its references to its neighbours are rewritten to point at the already-translated versions held in memory. This is the fiddly part, and it is the price of having no build step.</li>
+<li><b>The app starts.</b> The finished entry file is handed to the browser, the app takes over the page, and the placeholder disappears.</li>
+</ol>
+<p>There is a safety net around all of this. If something fails during startup, or a screen fails while running, the app catches it and prints the actual error on the page as plain text. This matters more than it sounds: the default behaviour of a broken web app is a white screen that tells you nothing.</p>
+<p>One trade-off comes with it. The translator and the app framework are both fetched from the internet at startup, so with no connection the live version shows an error instead of an app. The packaged build has no such dependency — everything is baked in. That is the real reason both readers exist.</p>
+
+<h2 style="--c:var(--mix);--tint:#f1f5f9"><span class="n">4</span>A tour of the parts</h2>
+<div class="ptr" style="--c:var(--mix);--tint:#f1f5f9"><b>In the Explorer</b> — this is the whole diagram, read left to right. Each square below is the color of the column that file sits in.</div>
+<p>The whole system, plain name first, real filename after. There are fewer pieces than you would expect, which is itself an achievement.</p>
+<dl>
+<dt style="--c:var(--entry)"><span class="dot"></span>The front door <span class="file">main.jsx</span></dt>
+<dd>Ten lines. Starts the app and puts the safety net around it. Both readers arrive here.</dd>
+<dt style="--c:var(--core)"><span class="dot"></span>The conductor <span class="file">app.jsx</span></dt>
+<dd>Remembers which screen you are on, swaps screens when you navigate, opens and closes the pop-up panel, and sets the app-wide appearance switches. If behaviour seems to come from nowhere, it usually comes from here.</dd>
+<dt style="--c:var(--screens)"><span class="dot"></span>Home &amp; Topics <span class="file">picker-screens.jsx</span></dt>
+<dd>The two tile screens: Home's shelves and the Topics grid. Both built on the geometry described in section 6.</dd>
+<dt style="--c:var(--screens)"><span class="dot"></span>The Lab <span class="file">lab-screen.jsx</span></dt>
+<dd>The Projects screen — a spotlight rail of cartridges. This one came first; the other two were modelled on it.</dd>
+<dt style="--c:var(--ui)"><span class="dot"></span>The parts bin <span class="file">components.jsx</span></dt>
+<dd>Pieces used all over: the side navigation, the tiles themselves, the pop-up panel, the note reader, the pixel logo.</dd>
+<dt style="--c:var(--ui)"><span class="dot"></span>The icon sheet <span class="file">icons.jsx</span></dt>
+<dd>Every icon, drawn in code rather than stored as image files. One icon renders in three finishes by changing a setting instead of drawing it three times.</dd>
+<dt style="--c:var(--ui)"><span class="dot"></span>The lesson diagrams <span class="file">figures.jsx</span></dt>
+<dd>Eight illustrations that appear inside note articles. Drawn by code, so they stay sharp at any size and can be adjusted by changing a number.</dd>
+<dt style="--c:var(--data)"><span class="dot"></span>The coat check <span class="file">figures-registry.js</span></dt>
+<dd>A shared list where those diagrams register themselves so articles can call for them by name. Explained in section 7.</dd>
+<dt style="--c:var(--data)"><span class="dot"></span>The content <span class="file">data.js</span></dt>
+<dd>Every topic, project, note, article body and exercise — typed directly into the app. This is the book itself.</dd>
+<dt style="--c:var(--data)"><span class="dot"></span>The cover art <span class="file">tile-covers.js</span></dt>
+<dd>The artwork on the tiles, stored once and referenced everywhere it appears rather than copied per tile.</dd>
+<dt style="--c:var(--style)"><span class="dot"></span>The look <span class="file">styles.css, plus five more</span></dt>
+<dd>One stylesheet that pulls in five others in a deliberate order. Both readers load this one file and nothing else. Order is the whole trick — see section 8.</dd>
+<dt style="--c:var(--ui)"><span class="dot"></span>The tuning knobs <span class="file">tweaks-panel.jsx</span></dt>
+<dd>A design-time control panel for adjusting the look without editing code. A tool for building the app, not a feature of it.</dd>
+</dl>
+
+<h2 style="--c:var(--core);--tint:#eff6ff"><span class="n">5</span>How a tap becomes a screen</h2>
+<div class="ptr" style="--c:var(--core);--tint:#eff6ff"><b>In the Explorer</b> — flow <code>Navigation — rail → screen → modal</code>. Watch it run from green (<code>components.jsx</code>) through blue (<code>app.jsx</code>) into cyan (<code>picker-screens.jsx</code>) and back out to rose for the content.</div>
+<p>Navigating here works differently from most websites, and the difference is intentional.</p>
+<p>On a normal site, clicking a link changes the web address, and the address determines what you see. AlphabetMath does not do that. It simply remembers a word — Home, Topics, Projects, Notes, About — and shows whichever screen matches. Changing screens is changing the channel, not driving to a new address. The address bar never moves.</p>
+<p>Why give up web addresses? Because this is meant to feel like an app on a tablet, not like a website. There are no shareable links to individual pages, no back-button expectations, no history to manage, no risk of a reload dropping you somewhere unexpected. For a self-contained teaching app, addresses would be pure overhead. A back door exists for testing — you can force a starting screen — but it is a developer convenience, not a feature.</p>
+<p>One interaction detail is worth recording, because it will otherwise look like a bug: <b>tiles need two taps</b>. The first selects and highlights; the second opens. On a touch screen with no hover, this gives you a way to look before you leap.</p>
+
+<h2 style="--c:var(--screens);--tint:#ecfeff"><span class="n">6</span>Why nothing ever rearranges</h2>
+<div class="ptr" style="--c:var(--screens);--tint:#ecfeff"><b>In the Explorer</b> — flow <code>Fixed-canvas tray scaling</code>. Five nodes across blue, cyan and slate: <code>app.jsx</code> → <code>picker-screens.jsx</code> → <code>lab-screen.jsx</code> → <code>picker.css</code> → <code>lab.css</code>.</div>
+<p>This is the heart of the project's visual identity, and the decision most likely to be undone by accident.</p>
+<p>Ordinary web pages are elastic. Make the window narrower and the content reflows — columns collapse, things stack, text rewraps. That is a sensible default for documents. It is the wrong behaviour for this app.</p>
+<p>AlphabetMath's screens are drawn once at one fixed size — a canvas 980 by 612 units — and the whole picture is then scaled up or down to fit your window, like a photograph or a television image. Every element keeps its exact position and proportion relative to every other element. A tile is always 218 by 162 units. Nothing ever moves to a new place because the window changed.</p>
+<p>Why accept the constraint? Because you are designing a physical-feeling object — a shelf of cartridges. Physical objects do not rearrange themselves when you step back from them; reflowing layouts would break the illusion instantly. It also means what you see while designing is exactly what everyone sees, at every size, with no surprises.</p>
+<p>Two refinements sit on top. First, the picture grows only to a point — about 1.6 times its natural size — then stops and centres itself with margin; without that cap, a large monitor would inflate the tiles to absurdity. Second, the composition is tuned so that at full width you see a sliver of the next tile at the edge of the shelf. That peek is not decoration: it tells you there is more to scroll to, without a scrollbar or an arrow.</p>
+<p>One rule must not be broken. The tray and the tiles inside it scale as <b>one unit</b> — the tiles are part of the picture, not stickers stuck on top of it. If they are ever separated, the tiles will drift out of alignment with the tray at some window sizes and the illusion collapses. Resizing tiles is fine; separating them is not.</p>
+
+<h2 style="--c:var(--mix);--tint:#f1f5f9"><span class="n">7</span>Two patterns worth recognising</h2>
+<h3 style="--c:var(--data)"><span class="dot"></span>The coat check</h3>
+<div class="ptr" style="--c:var(--data);--tint:#fff1f4"><b>In the Explorer</b> — flow <code>Note figures — registry pattern</code>, ending at the rose node <code>figures-registry.js</code>.</div>
+<p>An article in the app is written as a list of pieces: a heading, some paragraphs, a diagram called <code>lattice</code>, more paragraphs. But <code>lattice</code> is just a word in a text file — something has to connect that word to the actual drawing.</p>
+<p>The solution is a shared list, like a coat check. When the app starts, every diagram hangs itself up and leaves its name on the hook. When an article asks for <code>lattice</code>, the reader collects it by name. Neither side needs to know about the other, and adding a new diagram requires no changes anywhere else.</p>
+<p>Why this is a named pattern rather than an obvious one: the earlier approach relied on files loading in exactly the right order, which is fragile and fails in ways that are miserable to diagnose. The coat check has one clear owner and no ordering requirement at all.</p>
+<h3 style="--c:var(--style)"><span class="dot"></span>Flipping a switch instead of repainting the room</h3>
+<div class="ptr" style="--c:var(--style);--tint:#f4f6f8"><b>In the Explorer</b> — flow <code>Tweaks → live restyling</code>: <code>app.jsx</code> → <code>tweaks-panel.jsx</code> → <code>tweaks-overrides.css</code> → <code>tokens.css</code>.</div>
+<p>The app can change its whole appearance — materials, finishes, spacing modes — instantly. It does this by writing a small label onto the page, something like "material: flat." The stylesheet is watching for those labels and restyles everything accordingly.</p>
+<p>The alternative would be for the code to hand every individual element its own appearance instructions, meaning every element has to be rebuilt whenever anything changes. Here the code flips one switch and the styling system does the rest, instantly and without rebuilding anything. It also keeps a clean boundary: code decides what state the app is in; the stylesheet decides what that looks like.</p>
+
+<h2 style="--c:var(--style);--tint:#f4f6f8"><span class="n">8</span>Why the stylesheet order matters</h2>
+<div class="ptr" style="--c:var(--style);--tint:#f4f6f8"><b>In the Explorer</b> — the slate <i>Style Cascade</i> column, far right. The numbers on its wires (1 through 6) are the loading order described below.</div>
+<p>Six stylesheets load in a fixed sequence, and the sequence is a genuine contract rather than an accident of history. Later sheets can override earlier ones, so the order is a hierarchy of authority:</p>
+<ul>
+<li><b>Foundations</b> — the colours, sizes and spacings everything else refers to. Change one value here and it propagates everywhere.</li>
+<li><b>Layout and chrome</b> — the frame of the app: navigation, stage, pop-ups, the note reader.</li>
+<li><b>Materials</b> — the moulded look of the tiles.</li>
+<li><b>The Lab, then Home and Topics</b> — screen-specific styling, in that order, because the two picker screens inherit their base look from the Lab.</li>
+<li><b>Overrides</b> — last, and therefore able to overrule anything above. This is where the tuning switches from section 7 take effect.</li>
+</ul>
+<p>The practical takeaway: a new stylesheet is added to that one list, never to a reader. If styling were added to the live product's page, the packaged build would not have it, and the two would look different. Same principle as the brain — one place, no drift.</p>
+
+<h2 style="--c:var(--mix);--tint:#f1f5f9"><span class="n">9</span>Two things to keep an eye on</h2>
+<div class="ptr" style="--c:var(--mix);--tint:#f1f5f9"><b>In the Explorer</b> — both appear as orange <i>risk</i> cards under <i>Patterns &amp; risks</i>, below the diagram.</div>
+<p><b>A tool nobody picks up.</b> There is a file of reusable diagram parts that was updated during a past reorganisation but is referenced by nothing. It never loads and has no effect on the running app. It is not harmful — but it looks alive, so a future reader (including you) may waste time studying it. Either wire it in or delete it.</p>
+<p><b>The startup dependency.</b> As covered in section 3, the live version needs the internet at the moment it loads. If it were ever used somewhere without a reliable connection, the packaged build is the answer — it carries everything with it.</p>
+
+<h2 style="--c:var(--mix);--tint:#f1f5f9"><span class="n">10</span>Glossary</h2>
+<p>These are the words the interactive explorer uses, and what they mean. The square shows which layer each word belongs to.</p>
+<dl>
+<dt style="--c:var(--shell)"><span class="dot"></span>The brain</dt><dd>The one folder holding all the real code. Everything else points at it.</dd>
+<dt style="--c:var(--shell)"><span class="dot"></span>Shell / reader</dt><dd>A wrapper that knows how to start the brain. There are two.</dd>
+<dt style="--c:var(--shell)"><span class="dot"></span>Thin adapter</dt><dd>A file that contains no logic of its own — it just connects one thing to another.</dd>
+<dt style="--c:var(--entry)"><span class="dot"></span>Module</dt><dd>One source file. "The import graph" is the web of which files call for which others.</dd>
+<dt style="--c:var(--entry)"><span class="dot"></span>Import / dependency</dt><dd>One file saying "I need something from that other file."</dd>
+<dt style="--c:var(--shell)"><span class="dot"></span>Build step</dt><dd>Preparing and packaging code before anyone can run it. The live version does not have one.</dd>
+<dt style="--c:var(--shell)"><span class="dot"></span>Compile / transform</dt><dd>Translating the source dialect into something the browser understands.</dd>
+<dt style="--c:var(--entry)"><span class="dot"></span>Entry point</dt><dd>The first file that runs. Everything else is reached from it.</dd>
+<dt style="--c:var(--core)"><span class="dot"></span>State</dt><dd>Something the app is currently remembering — such as which screen you are on.</dd>
+<dt style="--c:var(--ui)"><span class="dot"></span>Component</dt><dd>A reusable piece of interface with its own appearance and behaviour. A tile is one.</dd>
+<dt style="--c:var(--ui)"><span class="dot"></span>Render / mount</dt><dd>Drawing a component onto the screen for the first time.</dd>
+<dt style="--c:var(--core)"><span class="dot"></span>Router / routing</dt><dd>Using the web address to decide what to show. This app deliberately does not do it.</dd>
+<dt style="--c:var(--data)"><span class="dot"></span>Registry</dt><dd>The coat check — a shared list things add themselves to so others can find them by name.</dd>
+<dt style="--c:var(--ui)"><span class="dot"></span>Side effect</dt><dd>A file that does something merely by being loaded, rather than by being called.</dd>
+<dt style="--c:var(--data)"><span class="dot"></span>Static data</dt><dd>Content typed into the app itself instead of fetched from a server.</dd>
+<dt style="--c:var(--style)"><span class="dot"></span>Cascade</dt><dd>The rule that later styling can override earlier styling. Why sheet order matters.</dd>
+<dt style="--c:var(--style)"><span class="dot"></span>Token</dt><dd>A named value — a colour, a size — referred to by name, so one edit changes everything using it.</dd>
+<dt style="--c:var(--screens)"><span class="dot"></span>Fixed canvas</dt><dd>Designing at one exact size and scaling the result, rather than letting it reflow.</dd>
+<dt style="--c:var(--screens)"><span class="dot"></span>Reflow / responsive</dt><dd>Content rearranging itself to fit the window. Standard on the web; avoided here.</dd>
+<dt style="--c:var(--screens)"><span class="dot"></span>Viewport</dt><dd>The visible area of the window.</dd>
+<dt style="--c:var(--entry)"><span class="dot"></span>Error boundary</dt><dd>The safety net that prints a real error instead of showing a blank white screen.</dd>
+<dt style="--c:var(--core)"><span class="dot"></span>Guard / gate</dt><dd>A check that blocks the app until a condition is met — correct screen size, correct orientation.</dd>
+<dt style="--c:var(--core)"><span class="dot"></span>Portal</dt><dd>Placing something outside the app's normal container, so it can sit over the top of everything.</dd>
+<dt style="--c:var(--data)"><span class="dot"></span>Backend / API</dt><dd>A server the app talks to. This project has none, by choice.</dd>
+</dl>
+
+<h2 style="--c:var(--mix);--tint:#f1f5f9"><span class="n">11</span>If you remember only five things</h2>
+<ol>
+<li><b>Edit only inside the brain.</b> All real code lives in <code>zmath</code>. Both readers point at it. Editing anywhere else creates the drift this whole structure exists to prevent.</li>
+<li><b>There is no server and no build.</b> The app is a self-contained object. It loads whole and runs alone.</li>
+<li><b>Screens are pictures, not layouts.</b> Drawn once at a fixed size and scaled. Nothing reflows. The tray and its tiles scale as one unit — never separate them.</li>
+<li><b>Content is typed in, not fetched.</b> Every topic, note and exercise sits in one content file. Adding a lesson means editing that file.</li>
+<li><b>Appearance is switches, not instructions.</b> Code sets a label; the stylesheet decides what it looks like. Look for styling problems in the stylesheets, not the code.</li>
+</ol>
+
+</doc-page>
+<script src="doc-page.js"></script>
+</body>
+</html>
