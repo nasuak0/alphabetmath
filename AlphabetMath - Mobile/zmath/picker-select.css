@@ -32,6 +32,16 @@
   inset: -4px; border-radius: 22px; box-shadow: 0 0 0 2px rgba(120,130,150,0.30);
 }
 
+/* the LAB uses the same ring, sized to match HOME on screen. The Lab tray zooms
+   differently from Home's and has no nudge, so lab-screen.jsx sets --ring-k
+   (Home's on-screen ring size ÷ the Lab's). Gap and thickness are multiplied by
+   it; the corner grows by the same extra gap so the ring keeps hugging the card. */
+.scr[data-layout="cart-flat"] .ptile.sel .pring {
+  inset: calc(-4px * var(--ring-k, 1));
+  border-radius: calc(22px + 4px * (var(--ring-k, 1) - 1));
+  box-shadow: 0 0 0 calc(2px * var(--ring-k, 1)) rgba(120,130,150,0.30);
+}
+
 /* the nudge — the card is NOT re-sized, it only scales in place */
 .scr[data-layout]:where([data-screenfit="poster"], :not([data-screenfit])) .ptile {
   transition: transform 0.32s var(--ease-bounce);

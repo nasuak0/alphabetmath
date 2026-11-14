@@ -1,0 +1,17 @@
+{
+  "name": "alphabetmath-desktop",
+  "productName": "AlphabetMath",
+  "version": "0.1.0",
+  "private": true,
+  "description": "AlphabetMath desktop app — an Electron window onto the Mobile reader (AlphabetMath - Mobile/).",
+  "main": "main.js",
+  "scripts": {
+    "start": "electron ."
+  },
+  "devDependencies": {
+    "electron": "33.2.1"
+  },
+  "allowScripts": {
+    "electron@33.2.1": true
+  }
+}

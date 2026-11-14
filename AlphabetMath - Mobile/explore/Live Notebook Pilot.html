@@ -14,25 +14,37 @@
 <script src="https://unpkg.com/react@18.3.1/umd/react.development.js" integrity="sha384-hD6/rw4ppMLGNu3tX5cjIb+uRZ7UkRJ6BPkLpg4hAu/6onKUg4lLsHAs9EBPT82L" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/react-dom@18.3.1/umd/react-dom.development.js" integrity="sha384-u6aeetuaXnQ38mYT8rp6sbXaQe3NL9t+IBXmnYxwkUI2Hw4bsp2Wvmx4yRQF1uAm" crossorigin="anonymous"></script>
 <script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<script type="text/babel" src="tweaks-panel.jsx"></script>
 <script type="text/babel" src="nb-state.jsx"></script>
 <script type="text/babel" src="nb-figure.jsx"></script>
 <script type="text/babel" src="nb-blocks.jsx"></script>
 <script type="text/babel">
+const TWEAK_DEFAULTS = /*EDITMODE-BEGIN*/{
+  "fig1Sliders": "in the figure"
+}/*EDITMODE-END*/;
+
 /* ---- Section 1 of note n6, rewritten to READ the notebook's numbers.
    Prose text is unchanged except where {{ }} makes a value live. ---- */
-const SECTION_1 = [
+const SECTION_1A = [
   { sec:'1', t:'Drawing Squares: What Is a Square Root?' },
   { sub:'The central idea' },
   { p:'Every positive integer <i>n</i> is the area of some square, and that square&rsquo;s <em>side length</em> is, by definition, &#8730;<i>n</i>. So a square root is never just a number off a calculator &mdash; it is a <em>length you can draw</em>. The only real question is how to draw a square of area <i>n</i> when <i>n</i> is awkward.' },
   { sub:'Every square is a step (p, q)' },
-  { p:'One move handles all of them at once. Choose a <em>step</em> &mdash; <i>p</i> units across and <i>q</i> units up &mdash; and let that be one side of the square. Its four corners always land on grid points, and its area always comes out to <i>p</i>&sup2; + <i>q</i>&sup2;. Right now your step is ({{p}}, {{q}}), so the square below has area <b>{{p*p+q*q}}</b> and side &#8730;{{p*p+q*q}}.' },
-  { kit:true, cap:'<b>Figure 1.</b> One square, one step (<i>p</i>, <i>q</i>). Drag the red corner, move a slider, or tap a row in the table &mdash; every number on this page follows.' },
   { p:'A perfect square is simply the flat case <i>q</i> = 0: no tilt, area <i>p</i>&sup2;. Raise <i>q</i> and the same square tilts, reaching the in-between values 2, 5, 8, 13&hellip; There are not two kinds of square &mdash; there is one rule, seen from two angles.' },
+  { kit:true, trap:true, working:true, cap:'<b>Figure 1.</b> Trap and peel. The bounding square has side <i>p</i> + <i>q</i>; the four pink offcuts are each &frac12;<i>pq</i>. The side and area panel evaluates the identity at your step.' },
+  { p:'One move handles all of them at once. Choose a <em>step</em> &mdash; <i>p</i> units across and <i>q</i> units up &mdash; and let that be one side of the square. Its four corners always land on grid points, and its area always comes out to <i>p</i>&sup2; + <i>q</i>&sup2;. Right now your step is ({{p}}, {{q}}), so the square above has area <b>{{p*p+q*q}}</b> and side &#8730;{{p*p+q*q}}.' },
+];
+
+/* ---- Figure 2's half of the section: its own (p, q), driven by the figure,
+   the table beneath it and the exercise rail. ---- */
+const SECTION_1B = [
   { sub:'Trap and peel: why the area is p\u00b2 + q\u00b2' },
   { p:'To measure a tilted square, <em>trap</em> it inside the smallest upright square that contains it &mdash; that bounding square has side <i>p</i> + <i>q</i> = {{p+q}}. Four identical right triangles fill the corners, each with legs <i>p</i> and <i>q</i>, so each has area &frac12;<i>pq</i> = {{p*q/2}}. <em>Peel</em> all four away and only the tilted square is left:' },
   { box:'(<i>p</i>+<i>q</i>)&sup2; &minus; 4&middot;&frac12;<i>pq</i> = (<i>p</i>+<i>q</i>)&sup2; &minus; 2<i>pq</i> = <i>p</i>&sup2; + <i>q</i>&sup2;',
     live:'({{p}}+{{q}})&sup2; &minus; 2({{p}})({{q}}) = {{(p+q)*(p+q)}} &minus; {{2*p*q}} = {{p*p+q*q}}' },
   { p:'Flatten the square back to <i>q</i> = 0 and the four corners shrink to nothing &mdash; the bounding square <em>is</em> the square, and the formula collapses to plain <i>p</i>&sup2;. Same identity, no special case. The table below reads straight off the step: the first three rows are flat (<i>q</i> = 0, whole-number sides), then the square tilts.' },
+  { sliders:true },
+  { kit:true, trap:true, working:false, kitSliders:false, cap:'<b>Figure 2.</b> One square, one step (<i>p</i>, <i>q</i>). Drag the red corner, or use the sliders above &mdash; or tap a row in the table below.' },
   { table:{ cols:['<i>n</i>','Step (<i>p</i>,<i>q</i>)','Side','Area check'], rows:[
       { pq:[1,0], cells:['1','(1, 0)','&#8730;1 = 1','(1+0)&sup2; &minus; 2(1)(0) = 1'] },
       { pq:[2,0], cells:['4','(2, 0)','&#8730;4 = 2','(2+0)&sup2; &minus; 2(2)(0) = 4'] },
@@ -62,6 +74,13 @@ const EXERCISES = [
 ];
 
 function App() {
+  const [t, setTweak] = useTweaks(TWEAK_DEFAULTS);
+  const inline = t.fig1Sliders === 'in the article';
+  const sec1a = SECTION_1A;
+  const sec1b = SECTION_1B.filter(b => !(b.sliders && !inline)).map(b =>
+    b.kit && !b.working ? { ...b, kitSliders: !inline, cap: inline
+      ? '<b>Figure 2.</b> One square, one step (<i>p</i>, <i>q</i>). Drag the red corner, or use the sliders above &mdash; or tap a row in the table below.'
+      : '<b>Figure 2.</b> One square, one step (<i>p</i>, <i>q</i>). Drag the red corner, move a slider, or tap a row in the table below.' } : b);
   return (
     <NotebookProvider vars={{ p:1, q:2 }}>
       <div className="nbp-wrap">
@@ -75,7 +94,10 @@ function App() {
             <div className="reader-grid">
               <div className="reader-main">
                 <div className="reader-prose">
-                  {SECTION_1.map((b, i) => <NBBlock key={i} b={b} />)}
+                  <NotebookProvider vars={{ p:1, q:0 }}>
+                    {sec1a.map((b, i) => <NBBlock key={'a' + i} b={b} />)}
+                  </NotebookProvider>
+                  {sec1b.map((b, i) => <NBBlock key={'b' + i} b={b} />)}
                 </div>
               </div>
               <aside className="reader-rail">
@@ -87,6 +109,10 @@ function App() {
           </div>
         </div>
       </div>
+      <TweaksPanel>
+        <TweakSection label="Figure 1" />
+        <TweakRadio label="p and q sliders" value={t.fig1Sliders} options={['in the article', 'in the figure']} onChange={v => setTweak('fig1Sliders', v)} />
+      </TweaksPanel>
     </NotebookProvider>
   );
 }

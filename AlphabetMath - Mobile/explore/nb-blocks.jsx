@@ -13,8 +13,9 @@
         {b.live && <span className="nb-boxlive" dangerouslySetInnerHTML={{ __html: nbFill(b.live, v) }} />}
       </div>
     );
+    if (b.sliders) return <NBStepSliders />;
     if (b.table) return <NBTable t={b.table} />;
-    if (b.kit) return <NBStickyFigure cap={b.cap} />;
+    if (b.kit) return <NBStickyFigure cap={b.cap} trap={b.trap !== false} working={!!b.working} sliders={b.sliders !== false && b.kitSliders !== false} />;
     return null;
   }
 
@@ -44,15 +45,11 @@
   }
 
   /* the figure stays in view while its section scrolls past */
-  function NBStickyFigure({ cap }) {
-    const [expanded, setExpanded] = React.useState(false);
+  function NBStickyFigure({ cap, trap = true, working = true, sliders = true }) {
     return (
       <figure className="rd-figure nb-sticky">
         <div className="nb-figcard">
-          <NBFigure expanded={expanded} />
-          <button type="button" className="nb-expand" onClick={() => setExpanded(x => !x)}>
-            {expanded ? 'Hide the working' : 'Show the working'}
-          </button>
+          <NBFigure expanded={working} trap={trap} sliders={sliders} />
         </div>
         {cap && <figcaption className="rd-cap" dangerouslySetInnerHTML={{ __html: cap }} />}
       </figure>

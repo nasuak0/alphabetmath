@@ -8,21 +8,14 @@
      The real title is set by the brain (zmath/main.jsx) on boot. -->
 <link rel="stylesheet" href="zmath/styles.css" />
 
-<!-- warm the ESM CDN connection so React resolves faster on first paint -->
-<link rel="preconnect" href="https://esm.sh" crossorigin />
-
-<!-- React/ReactDOM as ES modules, resolved by the import map below. The same
-     bare "react" / "react-dom/client" specifiers the Vite app uses, so the
-     SOURCE FILES are identical across both readers. -->
-<script type="importmap">
-{
-  "imports": {
-    "react": "https://esm.sh/react@18.3.1",
-    "react-dom": "https://esm.sh/react-dom@18.3.1?external=react",
-    "react-dom/client": "https://esm.sh/react-dom@18.3.1/client?external=react"
-  }
-}
-</script>
+<!-- React/ReactDOM 18.3.1 UMD builds, kept LOCALLY in vendor/ so the app opens
+     with no internet (desktop app). Originals: unpkg.com/react@18.3.1 and
+     unpkg.com/react-dom@18.3.1. The loader below swaps the bare "react" /
+     "react-dom" / "react-dom/client" specifiers for tiny shims over
+     window.React / window.ReactDOM, so the SOURCE FILES stay identical to what
+     the Vite app reads. -->
+<script src="vendor/react.production.min.js"></script>
+<script src="vendor/react-dom.production.min.js"></script>
 </head>
 <body>
 <!-- Phone gate: pure CSS. Under 700px wide the app is hidden and only the
@@ -38,17 +31,26 @@
   </div>
 </div>
 
-<script src="https://unpkg.com/@babel/standalone@7.29.0/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y" crossorigin="anonymous"></script>
+<!-- Babel standalone 7.29.0, local copy (original: unpkg.com/@babel/standalone@7.29.0).
+     The integrity hash still matches the pinned original. -->
+<script src="vendor/babel.min.js" integrity="sha384-m08KidiNqLdpJqLq95G/LEi8Qvjl/xUYll3QILypMoQ65QorJ9Lvtp2RXYGBFj1y"></script>
 
 <!-- ── zmath-loader: no-build ESM+JSX import-graph loader ──────────────────────
      Babel-standalone only compiles the script tag it owns, NOT files reached via
      `import`. So we walk the graph ourselves: fetch each relative module,
      Babel-transform its JSX, rewrite relative specifiers to blob URLs, and pin
      import.meta.url to each file's real URL (blob: URLs are not a resolvable
-     base). Bare specifiers (react) fall through to the import map untouched.
+     base). Bare specifiers (react) are swapped for the UMD shims above.
      The Vite build reads the SAME source files natively — this loader exists
      only so the portable page can run them with no build step. -->
 <script>
+const shim = (src) => URL.createObjectURL(new Blob([src], { type: "text/javascript" }));
+const BARE_SHIMS = {
+  "react": shim("export default window.React;"),
+  "react-dom": shim("export default window.ReactDOM; export const createPortal = window.ReactDOM.createPortal;"),
+  "react-dom/client": shim("export default window.ReactDOM; export const createRoot = window.ReactDOM.createRoot;"),
+};
+const BARE = /(\bfrom\s*|\bimport\s*)(["'])(react|react-dom|react-dom\/client)\2/g;
 async function loadGraph(entryUrl) {
   const cache = new Map();                                   // absUrl -> blobUrl
   const RELATIVE = /(\bfrom\s*|\bimport\s*)(["'])(\.[^"']+)\2/g;
@@ -65,6 +67,7 @@ async function loadGraph(entryUrl) {
     }).code;
     code = code.replace(RELATIVE, (m, kw, q, spec) =>
       map[spec] ? `${kw}${q}${map[spec]}${q}` : m);
+    code = code.replace(BARE, (m, kw, q, spec) => `${kw}${q}${BARE_SHIMS[spec]}${q}`);
     code = code.replace(/import\.meta\.url/g, JSON.stringify(absUrl));
     const blob = URL.createObjectURL(new Blob([code], { type: "text/javascript" }));
     cache.set(absUrl, blob);

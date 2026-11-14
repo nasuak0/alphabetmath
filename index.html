@@ -1,0 +1,126 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — Project Pages</title>
+<!-- Project home page (studio). Opened by the whole-project server (localhost:5501).
+     Lists PAGES ONLY (.html). The list is hand-written: when a new page is added
+     to explore/, interactives/ or the root, add a link here too. -->
+<link rel="stylesheet" href="AlphabetMath - Mobile/zmath/tokens.css" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper, #f4f5fb);
+    color: var(--fg1, #2b2723);
+    font-family: var(--font-ui, ui-sans-serif, system-ui, sans-serif);
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 48px 24px 64px; }
+  .eyebrow {
+    margin: 0 0 8px;
+    font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--fg2, #5b5650);
+  }
+  h1 {
+    margin: 0 0 8px;
+    font-family: var(--font-display, var(--font-ui, system-ui));
+    font-size: 36px; line-height: 1.1; letter-spacing: -.02em;
+  }
+  .lede { margin: 0 0 36px; font-size: 16px; color: var(--fg2, #5b5650); }
+
+  section { margin: 0 0 32px; }
+  h2 {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 12px; font-size: 18px;
+  }
+  h2 .count {
+    font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    background: var(--tone, #e3e8ff); color: var(--tone-ink, #2a3db0);
+  }
+  .grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .grid a {
+    display: flex; flex-direction: column; gap: 4px; height: 100%;
+    padding: 16px 18px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--hairline, rgba(0,0,0,.08));
+    border-left: 0;
+    border-radius: var(--r-card, 18px);
+    box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,.06));
+    color: inherit; text-decoration: none;
+    transition: transform var(--dur-fast, .15s) var(--ease-smooth, ease),
+                box-shadow var(--dur-fast, .15s) var(--ease-smooth, ease);
+  }
+  .grid a:hover { transform: translateY(-2px); box-shadow: var(--shadow-card, 0 6px 18px rgba(0,0,0,.1)); }
+  .grid a:focus-visible { outline: 3px solid var(--tone-ink, #2a3db0); outline-offset: 2px; }
+  .name { font-weight: 700; font-size: 15px; }
+  .file { font-size: 12px; color: var(--fg2, #5b5650); word-break: break-word; }
+
+  .app    { --tone: var(--sky, #dbe7ff);   --tone-ink: var(--sky-ink, #1f4fa8); }
+  .drafts { --tone: var(--lilac, #ece3ff); --tone-ink: var(--lilac-ink, #5a2fa0); }
+  .inter  { --tone: var(--mint, #d9f5ea);  --tone-ink: var(--mint-ink, #146b52); }
+  .guides { --tone: var(--peach, #ffe6d4); --tone-ink: var(--peach-ink, #9a4a12); }
+
+  footer { margin-top: 40px; font-size: 13px; color: var(--fg2, #5b5650); }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Studio</p>
+  <h1>AlphabetMath — Project Pages</h1>
+  <p class="lede">Every page in the project, in one place. Click a card to open it.</p>
+
+  <section class="app" aria-labelledby="h-app">
+    <h2 id="h-app">App <span class="count">1</span></h2>
+    <ul class="grid">
+      <li><a href="AlphabetMath%20-%20Mobile/index.html"><span class="name">AlphabetMath</span><span class="file">The main app</span></a></li>
+    </ul>
+  </section>
+
+  <section class="drafts" aria-labelledby="h-drafts">
+    <h2 id="h-drafts">Explore drafts <span class="count">8</span></h2>
+    <ul class="grid">
+      <li><a href="AlphabetMath%20-%20Mobile/explore/3D%20Graph.html"><span class="name">3D Graph</span><span class="file">explore/3D Graph.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Mobile/explore/Design%20Icons.html"><span class="name">Design Icons</span><span class="file">explore/Design Icons.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Mobile/explore/Design%20Lab.html"><span class="name">Design Lab</span><span class="file">explore/Design Lab.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Mobile/explore/Design%20Tile.html"><span class="name">Design Tile</span><span class="file">explore/Design Tile.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Mobile/explore/Lesson%20Player.html"><span class="name">Lesson Player</span><span class="file">explore/Lesson Player.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Mobile/explore/Live%20Notebook%20Pilot.html"><span class="name">Live Notebook Pilot</span><span class="file">explore/Live Notebook Pilot.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Mobile/explore/Mobile%20Landing.html"><span class="name">Mobile Landing</span><span class="file">explore/Mobile Landing.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Mobile/explore/Topic%20Page%20Study.html"><span class="name">Topic Page Study</span><span class="file">explore/Topic Page Study.html</span></a></li>
+    </ul>
+  </section>
+
+  <section class="inter" aria-labelledby="h-inter">
+    <h2 id="h-inter">Interactives <span class="count">7</span></h2>
+    <ul class="grid">
+      <li><a href="interactives/Equation%20Workshop.html"><span class="name">Equation Workshop</span><span class="file">interactives/Equation Workshop.html</span></a></li>
+      <li><a href="interactives/Grade%208%20Template.html"><span class="name">Grade 8 Template</span><span class="file">interactives/Grade 8 Template.html</span></a></li>
+      <li><a href="interactives/Interaction%20Kit%20Directions.html"><span class="name">Interaction Kit Directions</span><span class="file">interactives/Interaction Kit Directions.html</span></a></li>
+      <li><a href="interactives/Pythagoras%20Without%20Words.html"><span class="name">Pythagoras Without Words</span><span class="file">interactives/Pythagoras Without Words.html</span></a></li>
+      <li><a href="interactives/Slope%20Machine.html"><span class="name">Slope Machine</span><span class="file">interactives/Slope Machine.html</span></a></li>
+      <li><a href="interactives/Source%20Framework.html"><span class="name">Source Framework</span><span class="file">interactives/Source Framework.html</span></a></li>
+      <li><a href="interactives/Unit%20Build%20Sheet.html"><span class="name">Unit Build Sheet</span><span class="file">interactives/Unit Build Sheet.html</span></a></li>
+    </ul>
+  </section>
+
+  <section class="guides" aria-labelledby="h-guides">
+    <h2 id="h-guides">Guides <span class="count">5</span></h2>
+    <ul class="grid">
+      <li><a href="AlphabetMath%20-%20Architecture%20Explorer.html"><span class="name">Architecture Explorer</span><span class="file">AlphabetMath - Architecture Explorer.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20iPad%20Port%20Guide.html"><span class="name">iPad Port Guide</span><span class="file">AlphabetMath - iPad Port Guide.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Menu%20Console%20Plan.html"><span class="name">Menu Console Plan</span><span class="file">AlphabetMath - Menu Console Plan.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Project%20Tree.html"><span class="name">Project Tree</span><span class="file">AlphabetMath - Project Tree.html</span></a></li>
+      <li><a href="AlphabetMath%20-%20Tray%20Scaling%20Wire%20Diagram.html"><span class="name">Tray Scaling Wire Diagram</span><span class="file">AlphabetMath - Tray Scaling Wire Diagram.html</span></a></li>
+    </ul>
+  </section>
+
+  <footer>Studio page · lists pages only · add new pages here by hand.</footer>
+</main>
+</body>
+</html>

@@ -48,16 +48,38 @@
 
 /* ---- the kit itself ---- */
 .nb-kit{display:flex;align-items:stretch;gap:0}
-.nb-svg{order:2;flex:1 1 72%;min-width:0;width:100%;height:auto;align-self:flex-start;
-  padding-left:18px;touch-action:none;user-select:none;display:block}
+.nb-graphwrap{order:3;position:relative;flex:1 1 72%;min-width:0;display:flex;align-items:center}
+.nb-svg{flex:1 1 auto;min-width:0;width:100%;height:auto;align-self:flex-start;
+  touch-action:none;user-select:none;display:block}
+/* the divider is a handle: drag it to give the graph more or less room */
+.nb-split{order:2;flex:0 0 18px;display:flex;align-items:stretch;justify-content:center;cursor:col-resize;touch-action:none}
+.nb-split span{width:2px;background:var(--nb-ink);border-radius:2px;transition:width .12s,background .12s}
+.nb-split:hover span,.nb-split:active span{width:4px;background:var(--nb-accent)}
+/* sliders set into the graph — bottom-left, the one corner the drawing never uses */
+/* sliders sit in their own strip under the graph — same build as the article's */
+.nb-split--fixed{cursor:default}\n.nb-split--fixed:hover span,.nb-split--fixed:active span{width:2px;background:var(--nb-ink)}\n.nb-float-sliders{width:100%;max-width:420px;margin-top:16px;padding:0}
+.nb-float-sliders .nb-sliders{gap:12px}
+.nb-float-sliders .nb-sliders label{font-size:14.5px}
+.nb-kit--left .nb-graphwrap{flex-direction:column;align-items:flex-start;justify-content:center}
 .nb-panel{order:1;flex:0 0 28%;display:flex;flex-direction:column;justify-content:center;gap:11px;
-  padding-right:18px;border-right:2px solid var(--nb-ink)}
-.nb-kit--full .nb-panel{flex:0 0 40%;justify-content:flex-start;gap:7px}
-.nb-kit--full .nb-svg{flex:1 1 58%}
-.nb-slidercard{background:var(--nb-well);border:1px solid var(--wii-edge-2);border-radius:10px;padding:8px 11px}
-.nb-sliders{display:flex;flex-direction:column;gap:7px}
-.nb-sliders label{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:600;font-size:13px;color:var(--nb-ink)}
-.nb-sliders label b{font-family:var(--font-display);background:var(--nb-ink);color:#fff;border-radius:6px;padding:1px 7px;font-size:12.5px;min-width:22px;text-align:center}
+  padding-right:18px}
+/* Figure 1 only: panel on the left, graph on the right, same split as Figure 2 */
+.nb-kit--left .nb-graphwrap{order:3;flex:1 1 58%}
+.nb-kit--left .nb-panel{order:1;padding-right:18px;padding-left:0}
+.nb-panel--empty{padding:0;border:none}
+.nb-kit--full .nb-panel{justify-content:flex-start;gap:7px}
+.nb-kit--full .nb-graphwrap{flex:1 1 58%}
+/* Figure 1: sliders live in the article, so the graph takes the whole card */
+.nb-kit--bare .nb-graphwrap{flex:1 1 100%}
+.nb-kit--bare .nb-svg{align-self:center;max-height:340px}
+/* the same two sliders, set into the prose Desmos-style: no card, no border */
+.nb-inline-sliders{display:block;margin:2px 0 20px;padding:0 2px}
+.nb-inline-sliders .nb-sliders{gap:12px;max-width:420px}
+.nb-inline-sliders .nb-sliders label{font-size:14.5px}/* the sliders wear one look wherever they sit — bare, Desmos-style, no well */
+.nb-slidercard{background:none;border:none;border-radius:0;padding:0}
+.nb-sliders{display:flex;flex-direction:column;gap:12px}
+.nb-sliders label{display:flex;align-items:center;gap:9px;font-family:var(--font-display);font-weight:600;font-size:14.5px;color:var(--nb-ink)}
+.nb-sliders label b{font-family:var(--font-display);background:var(--nb-ink);color:#fff;border-radius:6px;padding:1px 7px;font-size:13px;min-width:22px;text-align:center}
 .nb-sliders label.nb-var-p{color:var(--nb-p)}
 .nb-sliders label.nb-var-p b{background:var(--nb-p)}
 .nb-sliders label.nb-var-q{color:var(--nb-q)}
@@ -128,8 +150,10 @@
    window is — so it never disagrees with the article's column count. */
 @container (max-width:560px){
   .nb-kit{flex-direction:column}
-  .nb-panel{order:2;flex:none;border-right:none;border-top:2px solid var(--nb-ink);padding:12px 0 0;margin-top:10px}
-  .nb-svg{order:1;flex:none;padding-left:0}
+  .nb-panel{order:2;flex:none !important;border-right:none;border-top:2px solid var(--nb-ink);padding:12px 0 0;margin-top:10px}
+  .nb-panel--empty{display:none}
+  .nb-graphwrap{order:1;flex:none}
+  .nb-split{display:none}
 }
 /* below this the article itself goes single-column: rail under the prose, and
    the kit's container widens again so it returns to side-by-side */

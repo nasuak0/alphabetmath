@@ -1201,5 +1201,449 @@
       }
     }
   ],
-  "$note": "Every layer, node, flow, step and observation carries a `plain` twin: plain.label/note, plain.sub/notes, plain.label/summary, plain.title/detail. Technical text is the default field; `plain` is the same meaning in non-specialist English."
+  "$note": "Single source of truth for the project architecture. Every layer, node, flow, step, observation, glossary term, invariant and behaviour carries a `plain` twin — technical text is the default field, `plain` is the same meaning in non-specialist English. Sections: layers · nodes · edges · flows · observations · invariants (rules that must not break) · glossary (the vocabulary, linked to the nodes that demonstrate it) · behaviours (things that look like bugs but are decisions). Pages read this file; they never restate it.",
+  "invariants": [
+    {
+      "id": "one_brain",
+      "title": "Edit only inside the brain",
+      "condition": "No application source exists outside AlphabetMath - Mobile/zmath/. AlphabetMath - App/src/main.jsx contains imports only.",
+      "breaks": "The two readers diverge silently. A fix lands in one and not the other, and months later a bug exists in only one version with no record of which is correct.",
+      "nodes": [
+        "vite_main",
+        "main",
+        "mobile_index"
+      ],
+      "plain": {
+        "title": "Edit only inside the brain",
+        "condition": "All real code lives in zmath. The packaged version holds no app code at all.",
+        "breaks": "The two versions quietly disagree, and you cannot tell which one is right."
+      }
+    },
+    {
+      "id": "tray_containment",
+      "title": "Tray and tiles are one scaling unit",
+      "condition": "Tiles are direct children of .scr. Structure is lab-stage → heroScale → .scr → tiles, with no intermediate wrapper between .scr and the tiles.",
+      "breaks": "Tiles drift out of alignment with the tray at some window sizes, because two elements end up scaled by two different measurements.",
+      "note": "Resizing tile or cartridge dimensions is fine and does not affect this rule.",
+      "nodes": [
+        "picker_screens",
+        "lab_screen",
+        "picker_css"
+      ],
+      "plain": {
+        "title": "Tray and tiles scale together",
+        "condition": "The tiles sit inside the tray, so the whole picture zooms as one.",
+        "breaks": "The tiles slide out of place at some window sizes and the illusion collapses."
+      }
+    },
+    {
+      "id": "one_stylesheet",
+      "title": "New styling is added to styles.css, never to a shell",
+      "condition": "Both shells reference exactly one stylesheet. Every other sheet is reached by @import from styles.css.",
+      "breaks": "A sheet added to one shell is absent from the other, so the two readers look different.",
+      "nodes": [
+        "styles_css",
+        "mobile_index",
+        "vite_main"
+      ],
+      "plain": {
+        "title": "New styling goes on one list",
+        "condition": "Both ways of opening the app load one stylesheet, which pulls in the rest.",
+        "breaks": "Styling added to a page would be missing from the other version."
+      }
+    },
+    {
+      "id": "fixed_canvas",
+      "title": "Screens are scaled, not reflowed",
+      "condition": "Screen geometry is expressed in canvas units at a fixed logical size and fitted with a single uniform transform. No media queries reposition tray content.",
+      "breaks": "Elements move relative to each other at different window sizes, breaking the physical-object illusion the visual identity rests on.",
+      "nodes": [
+        "picker_screens",
+        "lab_screen",
+        "picker_css",
+        "lab_css"
+      ],
+      "plain": {
+        "title": "Screens are pictures, not layouts",
+        "condition": "Drawn once at a fixed size and scaled like a photo.",
+        "breaks": "Things start moving around when the window changes, and it stops feeling like an object."
+      }
+    },
+    {
+      "id": "static_content",
+      "title": "Content is compiled in, never fetched",
+      "condition": "All topics, projects, notes, article bodies and exercises are constants in data.js. No fetch, no API, no database, no persistence beyond the host-written EDITMODE block.",
+      "breaks": "Introducing a fetch adds a loading state, a failure state and a server — the three things this architecture exists to avoid.",
+      "nodes": [
+        "data_js"
+      ],
+      "plain": {
+        "title": "Content is typed in, not fetched",
+        "condition": "Every topic, note and exercise sits in one content file.",
+        "breaks": "Adding a server brings back loading spinners, error states, and something to maintain."
+      }
+    },
+    {
+      "id": "attribute_theming",
+      "title": "Appearance is switches, not instructions",
+      "condition": "React writes data-* attributes on <html>; CSS owns every visual consequence. Components are never handed per-instance appearance props.",
+      "breaks": "Appearance changes start costing re-renders, and you can no longer tell whether a look is decided in code or in CSS.",
+      "nodes": [
+        "app",
+        "tweaks_overrides",
+        "tokens_css"
+      ],
+      "plain": {
+        "title": "Appearance is switches, not instructions",
+        "condition": "Code sets a label; the stylesheet decides what it looks like.",
+        "breaks": "Styling problems become impossible to locate, because they could be in either place."
+      }
+    }
+  ],
+  "glossary": [
+    {
+      "term": "The brain",
+      "layer": "shell",
+      "detail": "The single source folder, zmath/. Both shells resolve into it; no source exists outside it.",
+      "plain": {
+        "detail": "The one folder holding all the real code. Everything else points at it."
+      },
+      "nodes": [
+        "vite_main",
+        "main"
+      ]
+    },
+    {
+      "term": "Shell / reader",
+      "layer": "shell",
+      "detail": "A host document plus whatever it needs to start the brain. Contains no application logic.",
+      "plain": {
+        "detail": "A wrapper that knows how to start the brain. There are two."
+      },
+      "nodes": [
+        "mobile_index",
+        "vite_index"
+      ]
+    },
+    {
+      "term": "Thin adapter",
+      "layer": "shell",
+      "detail": "A module whose entire body is imports pointing elsewhere. Zero logic, so nothing can drift.",
+      "plain": {
+        "detail": "A file that contains no logic of its own — it just connects one thing to another."
+      },
+      "nodes": [
+        "vite_main"
+      ]
+    },
+    {
+      "term": "Module",
+      "layer": "entry",
+      "detail": "One source file with its own scope, declaring what it needs and what it offers.",
+      "plain": {
+        "detail": "One source file. The import graph is the web of which files call for which others."
+      },
+      "nodes": [
+        "main"
+      ]
+    },
+    {
+      "term": "Import graph",
+      "layer": "entry",
+      "detail": "The directed graph of module dependencies. The loader walks it depth-first; Vite resolves it at build time.",
+      "plain": {
+        "detail": "The web of which files call for which others."
+      },
+      "nodes": [
+        "loader"
+      ]
+    },
+    {
+      "term": "Import / dependency",
+      "layer": "entry",
+      "detail": "A declaration that one module needs a binding from another.",
+      "plain": {
+        "detail": "One file saying: I need something from that other file."
+      },
+      "nodes": [
+        "main",
+        "app"
+      ]
+    },
+    {
+      "term": "Bare specifier",
+      "layer": "shell",
+      "detail": "An import by package name rather than by path — react, not ./react.js. Resolved by the import map here, by node_modules in Vite, both pointing at the same version. That is what keeps one source set valid in both readers.",
+      "plain": {
+        "detail": "Asking for something by name instead of by location."
+      },
+      "nodes": [
+        "esmsh"
+      ]
+    },
+    {
+      "term": "Build step",
+      "layer": "shell",
+      "detail": "Compiling and bundling source before it can run. The live reader has none; the Vite reader does it ahead of time.",
+      "plain": {
+        "detail": "Preparing and packaging code before anyone can run it. The live version does not have one."
+      },
+      "nodes": [
+        "loader",
+        "vite_config"
+      ]
+    },
+    {
+      "term": "Compile / transform",
+      "layer": "shell",
+      "detail": "Converting JSX into plain JavaScript — in the browser via Babel-standalone, or at build time via Vite.",
+      "plain": {
+        "detail": "Translating the source dialect into something the browser understands."
+      },
+      "nodes": [
+        "babel"
+      ]
+    },
+    {
+      "term": "Blob URL",
+      "layer": "shell",
+      "detail": "An in-memory URL standing in for a file. The loader rewrites each module to point at its dependencies blob URLs, which is how a no-build import graph resolves.",
+      "plain": {
+        "detail": "A temporary address for something held in memory rather than saved to disk."
+      },
+      "nodes": [
+        "loader"
+      ]
+    },
+    {
+      "term": "Entry point",
+      "layer": "entry",
+      "detail": "The first module executed. Everything else is reached from it. Both shells converge on main.jsx.",
+      "plain": {
+        "detail": "The first file that runs. Everything else is reached from it."
+      },
+      "nodes": [
+        "main"
+      ]
+    },
+    {
+      "term": "State",
+      "layer": "core",
+      "detail": "A value React re-renders on when it changes. Here: which page you are on, which modal is open, the tweak values.",
+      "plain": {
+        "detail": "Something the app is currently remembering — such as which screen you are on."
+      },
+      "nodes": [
+        "app"
+      ]
+    },
+    {
+      "term": "Component",
+      "layer": "ui",
+      "detail": "A function returning UI, with its own props and behaviour. A tile is one.",
+      "plain": {
+        "detail": "A reusable piece of interface with its own appearance and behaviour. A tile is one."
+      },
+      "nodes": [
+        "components"
+      ]
+    },
+    {
+      "term": "Render / mount",
+      "layer": "ui",
+      "detail": "Producing a components output and inserting it into the document for the first time.",
+      "plain": {
+        "detail": "Drawing a component onto the screen for the first time."
+      },
+      "nodes": [
+        "main"
+      ]
+    },
+    {
+      "term": "Router / routing",
+      "layer": "core",
+      "detail": "Deriving what to show from the URL. Deliberately absent — a screens map keyed by a page string does the job instead.",
+      "plain": {
+        "detail": "Using the web address to decide what to show. This app deliberately does not do it."
+      },
+      "nodes": [
+        "app"
+      ]
+    },
+    {
+      "term": "Registry",
+      "layer": "data",
+      "detail": "A single exported object that other modules populate on import and a consumer reads by key. Replaces load-order-dependent globals.",
+      "plain": {
+        "detail": "The coat check — a shared list things add themselves to so others can find them by name."
+      },
+      "nodes": [
+        "fig_registry"
+      ]
+    },
+    {
+      "term": "Side effect",
+      "layer": "ui",
+      "detail": "Work a module performs merely by being imported, rather than through anything it exports.",
+      "plain": {
+        "detail": "A file that does something merely by being loaded, rather than by being called."
+      },
+      "nodes": [
+        "figures"
+      ]
+    },
+    {
+      "term": "Static data",
+      "layer": "data",
+      "detail": "Content compiled into the bundle as constants. No fetch, no API, no database.",
+      "plain": {
+        "detail": "Content typed into the app itself instead of fetched from a server."
+      },
+      "nodes": [
+        "data_js"
+      ]
+    },
+    {
+      "term": "Cascade",
+      "layer": "style",
+      "detail": "The CSS rule that later declarations of equal specificity win. Here the @import order in styles.css is a deliberate hierarchy of authority.",
+      "plain": {
+        "detail": "The rule that later styling can override earlier styling. Why sheet order matters."
+      },
+      "nodes": [
+        "styles_css",
+        "tweaks_overrides"
+      ]
+    },
+    {
+      "term": "Token",
+      "layer": "style",
+      "detail": "A CSS custom property holding a named design value. Overrides mostly reassign tokens, so one flip repaints everything reading them.",
+      "plain": {
+        "detail": "A named value — a colour, a size — referred to by name, so one edit changes everything using it."
+      },
+      "nodes": [
+        "tokens_css"
+      ]
+    },
+    {
+      "term": "Fixed canvas",
+      "layer": "screens",
+      "detail": "Authoring at one logical size and applying a uniform transform: scale() to fit, instead of reflowing. Layout bugs become geometry bugs.",
+      "plain": {
+        "detail": "Designing at one exact size and scaling the result, rather than letting it reflow."
+      },
+      "nodes": [
+        "picker_screens"
+      ]
+    },
+    {
+      "term": "Reflow / responsive",
+      "layer": "screens",
+      "detail": "Content rearranging at breakpoints to fit the viewport. Standard on the web; avoided here because it would break the physical-object illusion.",
+      "plain": {
+        "detail": "Content rearranging itself to fit the window. Standard on the web; avoided here."
+      },
+      "nodes": [
+        "picker_screens"
+      ]
+    },
+    {
+      "term": "Viewport",
+      "layer": "screens",
+      "detail": "The visible area of the window. Measured here to derive a scale, never to switch layouts.",
+      "plain": {
+        "detail": "The visible area of the window."
+      },
+      "nodes": [
+        "app"
+      ]
+    },
+    {
+      "term": "Error boundary",
+      "layer": "entry",
+      "detail": "A React component that catches render errors below it and renders a fallback — here, the real stack in monospace.",
+      "plain": {
+        "detail": "The safety net that prints a real error instead of showing a blank white screen."
+      },
+      "nodes": [
+        "main"
+      ]
+    },
+    {
+      "term": "Guard / gate",
+      "layer": "core",
+      "detail": "A check that blocks the app until a condition holds. The phone gate is pure CSS; the rotate guard is a portalled overlay plus one selector.",
+      "plain": {
+        "detail": "A check that blocks the app until a condition is met — correct screen size, correct orientation."
+      },
+      "nodes": [
+        "mobile_index",
+        "app_css"
+      ]
+    },
+    {
+      "term": "Portal",
+      "layer": "core",
+      "detail": "Rendering into a DOM node outside the components own tree. Used so the rotate overlay sits outside #root and a CSS rule can hide the app behind it.",
+      "plain": {
+        "detail": "Placing something outside the apps normal container, so it can sit over the top of everything."
+      },
+      "nodes": [
+        "app"
+      ]
+    },
+    {
+      "term": "Backend / API",
+      "layer": "data",
+      "detail": "A server the client talks to. This project has none, by choice.",
+      "plain": {
+        "detail": "A server the app talks to. This project has none, by choice."
+      },
+      "nodes": [
+        "data_js"
+      ]
+    }
+  ],
+  "behaviours": [
+    {
+      "id": "two_tap",
+      "title": "Tiles need two taps",
+      "node": "picker_screens",
+      "observed": "First tap rings and selects the tile. A second tap on the same tile calls onOpen and the modal appears.",
+      "deliberate": "Touch screens have no hover, so there is no way to inspect before committing. The ring is the hover state, made explicit.",
+      "mistaken_fix": "Making the first tap open the modal — which removes the look-before-you-leap step and makes every mis-tap costly.",
+      "plain": {
+        "observed": "Tap once to highlight, tap again to open.",
+        "deliberate": "On a touch screen there is no hovering, so this is your chance to look before you leap.",
+        "mistaken_fix": "Making one tap open it. Then every mis-tap costs you a pop-up."
+      }
+    },
+    {
+      "id": "edge_sliver",
+      "title": "A half tile shows at the edge",
+      "node": "picker_css",
+      "observed": "At full width the shelf shows a partial fifth tile (or fourth cartridge) clipped at the right edge.",
+      "deliberate": "It falls out of the fixed tile geometry rather than a media query, and it signals that the shelf continues — an affordance costing no scrollbar and no arrow.",
+      "mistaken_fix": "Adjusting tile width or gap so the row ends cleanly — which removes the only cue that there is more to scroll to.",
+      "plain": {
+        "observed": "At full width you see a sliver of the next tile.",
+        "deliberate": "It tells you the shelf keeps going, without needing a scrollbar or an arrow.",
+        "mistaken_fix": "Resizing the tiles so the row ends neatly — and losing the only hint that there is more."
+      }
+    },
+    {
+      "id": "offline_fails",
+      "title": "No internet, no app",
+      "node": "babel",
+      "observed": "The live reader fetches Babel from unpkg and React from esm.sh at startup. Offline or blocked, the loader prints its error panel instead of the app.",
+      "deliberate": "Accepted cost of having no build step. The Vite build carries everything and exists partly for this reason.",
+      "mistaken_fix": "Vendoring the CDN files into the brain folder — which reintroduces the copies-that-drift problem the whole structure avoids. Use the packaged build instead.",
+      "plain": {
+        "observed": "With no connection, the live version shows an error instead of an app.",
+        "deliberate": "That is the price of having no publishing step. The packaged version carries everything with it.",
+        "mistaken_fix": "Copying those files into the project — which brings back the two-copies problem. Use the packaged build."
+      }
+    }
+  ]
 }

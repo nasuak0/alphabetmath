@@ -107,14 +107,21 @@ export function LabSpotlight({ onOpen }) {
       const h = el.clientHeight - parseFloat(cs.paddingTop) - parseFloat(cs.paddingBottom);
       if (w <= 0 || h <= 0) return;
       const scale = Math.min(w / 980, h / 612);
-      setFit({ scale, cw: w / scale, ch: h / scale });
+      /* RING MATCH: the selection ring is the same 2px ring as Home's
+         (picker-select.css), but Home's tray zooms by width (poster fit:
+         min(w/1080, h/500)) and nudges its selected card ×1.045, while this
+         tray zooms by min(w/980, h/612). ringK is Home's on-screen ring size
+         divided by ours, so the Lab ring renders exactly as thick and as far
+         from the card as Home's on any display. */
+      const ringK = Math.min(w / 1080, h / 500) * 1.045 / scale;
+      setFit({ scale, cw: w / scale, ch: h / scale, ringK });
     };
     measure();
     const ro = new ResizeObserver(() => requestAnimationFrame(measure));
     ro.observe(el);
     return () => ro.disconnect();
   }, []);
-  const { scale, cw, ch } = fit;
+  const { scale, cw, ch, ringK = 1 } = fit;
 
   /* arrow keys move the selection (study behavior), wrapping; Enter opens */
   uE(() => {
@@ -147,7 +154,7 @@ export function LabSpotlight({ onOpen }) {
       <div className="heroScale" style={{ width: cw * scale, height: ch * scale }}>
         <div className="scr" ref={scrRef} data-screen-label="Lab — Spotlight tray"
              data-layout="cart-flat" data-ghost="bold" data-chrome="live" data-knot="composed" data-ring={ringOn ? 'on' : 'off'}
-             style={{ transform: 'scale(' + scale + ')', width: cw + 'px', height: ch + 'px' }}>
+             style={{ '--ring-k': ringK, transform: 'scale(' + scale + ')', width: cw + 'px', height: ch + 'px' }}>
           <div className="ghost" dangerouslySetInnerHTML={{ __html: ghostSvg(sel) }}></div>
           <div className="railv">
             <div className="railcol" style={{ transform: 'translateY(' + colOffset(selIdx, ch / 2).toFixed(1) + 'px)' }}>

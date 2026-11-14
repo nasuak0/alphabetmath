@@ -1,0 +1,99 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0" />
+<title>AlphabetMath — Explore Drafts</title>
+<!-- Explore page list (studio). Opened at localhost:5500/explore/.
+     Lists PAGES ONLY (.html). Hand-written: when a new draft is added to
+     explore/, add a card here too (and on the project home page, ../../index.html). -->
+<link rel="stylesheet" href="../zmath/tokens.css" />
+<style>
+  * { box-sizing: border-box; }
+  body {
+    margin: 0;
+    background: var(--paper, #f4f5fb);
+    color: var(--fg1, #2b2723);
+    font-family: var(--font-ui, ui-sans-serif, system-ui, sans-serif);
+    -webkit-font-smoothing: antialiased;
+  }
+  main { max-width: 1040px; margin: 0 auto; padding: 48px 24px 64px; }
+  .eyebrow {
+    margin: 0 0 8px;
+    font-size: 12px; font-weight: 700; letter-spacing: .14em; text-transform: uppercase;
+    color: var(--fg2, #5b5650);
+  }
+  h1 {
+    margin: 0 0 8px;
+    font-family: var(--font-display, var(--font-ui, system-ui));
+    font-size: 36px; line-height: 1.1; letter-spacing: -.02em;
+  }
+  .lede { margin: 0 0 36px; font-size: 16px; color: var(--fg2, #5b5650); }
+
+  section { margin: 0 0 32px; }
+  h2 {
+    display: flex; align-items: center; gap: 10px;
+    margin: 0 0 12px; font-size: 18px;
+  }
+  h2 .count {
+    font-size: 12px; font-weight: 700; padding: 3px 9px; border-radius: 999px;
+    background: var(--tone, #e3e8ff); color: var(--tone-ink, #2a3db0);
+  }
+  .grid {
+    list-style: none; margin: 0; padding: 0;
+    display: grid; gap: 12px;
+    grid-template-columns: repeat(auto-fill, minmax(220px, 1fr));
+  }
+  .grid a {
+    display: flex; flex-direction: column; gap: 4px; height: 100%;
+    padding: 16px 18px;
+    background: var(--surface, #fff);
+    border: 1px solid var(--hairline, rgba(0,0,0,.08));
+    border-radius: var(--r-card, 18px);
+    box-shadow: var(--shadow-xs, 0 1px 2px rgba(0,0,0,.06));
+    color: inherit; text-decoration: none;
+    transition: transform var(--dur-fast, .15s) var(--ease-smooth, ease),
+                box-shadow var(--dur-fast, .15s) var(--ease-smooth, ease);
+  }
+  .grid a:hover { transform: translateY(-2px); box-shadow: var(--shadow-card, 0 6px 18px rgba(0,0,0,.1)); }
+  .grid a:focus-visible { outline: 3px solid var(--tone-ink, #2a3db0); outline-offset: 2px; }
+  .name { font-weight: 700; font-size: 15px; }
+  .file { font-size: 12px; color: var(--fg2, #5b5650); word-break: break-word; }
+
+  .app    { --tone: var(--sky, #dbe7ff);   --tone-ink: var(--sky-ink, #1f4fa8); }
+  .drafts { --tone: var(--lilac, #ece3ff); --tone-ink: var(--lilac-ink, #5a2fa0); }
+
+  footer { margin-top: 40px; font-size: 13px; color: var(--fg2, #5b5650); }
+</style>
+</head>
+<body>
+<main>
+  <p class="eyebrow">Studio · Mobile</p>
+  <h1>Explore Drafts</h1>
+  <p class="lede">Design studies for the app. Click a card to open it.</p>
+
+  <section class="app" aria-labelledby="h-app">
+    <h2 id="h-app">App <span class="count">1</span></h2>
+    <ul class="grid">
+      <li><a href="../index.html"><span class="name">Back to app</span><span class="file">AlphabetMath — the main app</span></a></li>
+    </ul>
+  </section>
+
+  <section class="drafts" aria-labelledby="h-drafts">
+    <h2 id="h-drafts">Explore drafts <span class="count">8</span></h2>
+    <ul class="grid">
+      <li><a href="3D%20Graph.html"><span class="name">3D Graph</span><span class="file">3D Graph.html</span></a></li>
+      <li><a href="Design%20Icons.html"><span class="name">Design Icons</span><span class="file">Design Icons.html</span></a></li>
+      <li><a href="Design%20Lab.html"><span class="name">Design Lab</span><span class="file">Design Lab.html</span></a></li>
+      <li><a href="Design%20Tile.html"><span class="name">Design Tile</span><span class="file">Design Tile.html</span></a></li>
+      <li><a href="Lesson%20Player.html"><span class="name">Lesson Player</span><span class="file">Lesson Player.html</span></a></li>
+      <li><a href="Live%20Notebook%20Pilot.html"><span class="name">Live Notebook Pilot</span><span class="file">Live Notebook Pilot.html</span></a></li>
+      <li><a href="Mobile%20Landing.html"><span class="name">Mobile Landing</span><span class="file">Mobile Landing.html</span></a></li>
+      <li><a href="Topic%20Page%20Study.html"><span class="name">Topic Page Study</span><span class="file">Topic Page Study.html</span></a></li>
+    </ul>
+  </section>
+
+  <footer>Studio page · lists pages only · add new drafts here by hand.</footer>
+</main>
+</body>
+</html>

@@ -84,3 +84,17 @@ Remaining to-dos:
 ├── AlphabetMath - Codespaces Plan.html
 ├── CLAUDE.md · STATUS.md
 ```
+
+---
+
+## 2026-11-11 — moved out of the canvas to a local IntelliJ project
+- **Mobile reader no longer uses esm.sh.** `AlphabetMath - Mobile/index.html` loads the
+  React 18.3.1 UMD builds from unpkg, and its loader swaps the bare `react` /
+  `react-dom` / `react-dom/client` imports for small shims over `window.React` /
+  `window.ReactDOM`. The import map is gone. Brain source files are unchanged.
+- **Default Screen fit is now `poster`** (`TWEAK_DEFAULTS` in `zmath/app.jsx`); Tray stays
+  `aligned`.
+- **IntelliJ run buttons** `dev` and `build` live in `.idea/runConfigurations/`.
+- **Left behind in the canvas (studio-only):** `uploads/`, `scraps/`, `_ds/`, `_download/`,
+  `gate-fix/`.
+- This folder is now the working copy. Do not keep editing the canvas copy.

@@ -47,11 +47,23 @@
     return out;
   }
 
-  function NBFigure({ expanded = false, braceSide = 'OP' }) {
+  function NBFigure({ expanded = false, braceSide = 'OP', trap = true, sliders = true }) {
     const { v, set, disp } = useNotebook();
-    const [showTrap, setShowTrap] = React.useState(true);
+    const showTrap = trap;
     const [dragging, setDragging] = React.useState(false);
     const gRef = React.useRef(null), drag = React.useRef(false);
+    const kitRef = React.useRef(null), split = React.useRef(false);
+    const [panelPct, setPanelPct] = React.useState(expanded ? 33.8 : 40);
+    const floatSliders = sliders && !expanded;
+
+    const onSplitDown = (e) => { split.current = true; e.target.setPointerCapture?.(e.pointerId); };
+    const onSplitMove = (e) => {
+      if (!split.current || !kitRef.current) return;
+      const r = kitRef.current.getBoundingClientRect();
+      const pct = (e.clientX - r.left) / r.width;
+      setPanelPct(Math.max(0, Math.min(60, pct * 100)));
+    };
+    const onSplitUp = () => { split.current = false; };
 
     const toLattice = (e) => {
       const grp = gRef.current; if (!grp) return null;
@@ -79,7 +91,9 @@
     const lx0 = -tx / S, lx1 = (VB.w - tx) / S, ly0 = -ty / S, ly1 = (VB.h - ty) / S;
 
     return (
-      <div className={'nb-kit' + (expanded ? ' nb-kit--full' : '')}>
+      <div ref={kitRef} className={'nb-kit' + (expanded ? ' nb-kit--full' : '') + (sliders ? '' : ' nb-kit--bare') + (floatSliders ? ' nb-kit--left' : '')}
+           onPointerMove={onSplitMove} onPointerUp={onSplitUp} onPointerLeave={onSplitUp}>
+        <div className="nb-graphwrap">
         <svg viewBox={`0 0 ${VB.w} ${VB.h}`} className="nb-svg" onPointerMove={onMove} onPointerUp={onUp} onPointerLeave={onUp}>
           <defs>
             <filter id="nbPinShadow" x="-60%" y="-60%" width="220%" height="220%">
@@ -128,15 +142,24 @@
           </g>
           {perfect && <text x={VB.w - 12} y={22} className="nb-perfect" textAnchor="end">perfect square &#10003;</text>}
         </svg>
+        {floatSliders && <div className="nb-float-sliders">
+          <div className="nb-sliders">
+            <label className="nb-var-p">p <input type="range" min="1" max={MAXP} value={v.p} onChange={e => set({ p: +e.target.value })} /><b>{v.p}</b></label>
+            <label className="nb-var-q">q <input type="range" min="0" max={MAXQ} value={v.q} onChange={e => set({ q: +e.target.value })} /><b>{v.q}</b></label>
+          </div>
+        </div>}
+        </div>
 
-        <div className="nb-panel">
-          <div className="nb-slidercard">
+        {sliders && !expanded && <div className="nb-split" onPointerDown={onSplitDown} title="Drag to resize"><span /></div>}
+        {expanded && <div className="nb-split nb-split--fixed"><span /></div>}
+
+        {(sliders || expanded) && <div className={'nb-panel' + (floatSliders ? ' nb-panel--empty' : '')} style={{ flexBasis: panelPct + '%' }}>
+          {sliders && !floatSliders && <div className="nb-slidercard">
             <div className="nb-sliders">
               <label className="nb-var-p">p <input type="range" min="1" max={MAXP} value={v.p} onChange={e => set({ p: +e.target.value })} /><b>{v.p}</b></label>
               <label className="nb-var-q">q <input type="range" min="0" max={MAXQ} value={v.q} onChange={e => set({ q: +e.target.value })} /><b>{v.q}</b></label>
             </div>
-            <div className="nb-step"><span className="nb-step-key">Step</span> <i>(p, q)</i> = <b>(<span className="nb-var-p">{v.p}</span>, <span className="nb-var-q">{v.q}</span>)</b></div>
-          </div>
+          </div>}
 
           {expanded && <div className="nb-sh-grid">
             <span className="nb-sh-h">Side</span>
@@ -150,17 +173,23 @@
             <span className="nb-sh-v"><b>{areaInt}</b></span>
           </div>}
 
-          <button type="button" className="nb-toggle" onClick={() => setShowTrap(t => !t)}>
-            <span className="nb-tgl-text">
-              <span className="nb-tgl-title">Show the trap</span>
-              <span className="nb-tgl-sub">Bounding square &amp; four offcuts</span>
-            </span>
-            <span className={'nb-switch' + (showTrap ? ' on' : '')}><span /></span>
-          </button>
+        </div>}
+      </div>
+    );
+  }
+
+  /* the same two sliders, written into the article instead of the figure */
+  function NBStepSliders() {
+    const { v, set } = useNotebook();
+    return (
+      <div className="nb-inline-sliders nb-kit">
+        <div className="nb-sliders">
+          <label className="nb-var-p">p <input type="range" min="1" max={MAXP} value={v.p} onChange={e => set({ p: +e.target.value })} /><b>{v.p}</b></label>
+          <label className="nb-var-q">q <input type="range" min="0" max={MAXQ} value={v.q} onChange={e => set({ q: +e.target.value })} /><b>{v.q}</b></label>
         </div>
       </div>
     );
   }
 
-  Object.assign(window, { NBFigure });
+  Object.assign(window, { NBFigure, NBStepSliders });
 })();
