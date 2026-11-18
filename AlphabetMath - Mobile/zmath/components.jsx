@@ -193,6 +193,26 @@ function Tile({ item, idx, onOpen, selected }) {
   );
 }
 
+/* ---- shared About pieces (About screen + Help / About pop-up) ---- */
+/* The official GitHub logo (Invertocat), solid — from GitHub_Invertocat_Logo.svg.
+   A filled shape, so it's drawn here rather than in the line-icon set (icons.jsx). */
+const GitHubMark = ({ size = 22 }) => (
+  <svg width={size} height={size} viewBox="0 0 240 240" aria-hidden="true">
+    <g transform="translate(0,240) scale(0.1,-0.1)" fill="#1f2328">
+      <path d="M970 2301 c-305 -68 -555 -237 -727 -493 -301 -451 -241 -1056 143 -1442 115 -116 290 -228 422 -271 49 -16 55 -16 77 -1 24 16 25 20 25 135 l0 118 -88 -5 c-103 -5 -183 13 -231 54 -17 14 -50 62 -73 106 -38 74 -66 108 -144 177 -26 23 -27 24 -9 37 43 32 130 1 185 -65 96 -117 133 -148 188 -160 49 -10 94 -6 162 14 9 3 21 24 27 48 6 23 22 58 35 77 l24 35 -81 16 c-170 35 -275 96 -344 200 -64 96 -85 179 -86 334 0 146 16 206 79 288 28 36 31 47 23 68 -15 36 -11 188 5 234 13 34 20 40 47 43 45 5 129 -24 214 -72 l73 -42 64 15 c91 21 364 20 446 0 l62 -16 58 35 c77 46 175 82 224 82 39 0 39 -1 55 -52 17 -59 20 -166 5 -217 -8 -30 -6 -39 16 -68 109 -144 121 -383 29 -579 -62 -129 -193 -219 -369 -252 l-84 -16 31 -55 32 -56 3 -223 4 -223 25 -16 c23 -15 28 -15 76 2 80 27 217 101 292 158 446 334 590 933 343 1431 -145 293 -419 518 -733 602 -137 36 -395 44 -525 15z" />
+    </g>
+  </svg>
+);
+const REPO_URL = 'https://github.com/nasuak0/alphabetmath';
+/* The desktop app serves this page at app://alphabetmath/ — Get Started closes the window there
+   (the desktop app can't usefully download itself). */
+const IN_DESKTOP_APP = typeof location !== 'undefined' && location.protocol === 'app:';
+// Always the newest release's file (the release asset must be named AlphabetMath.dmg).
+const DOWNLOAD_URL = 'https://github.com/nasuak0/alphabetmath/releases/latest/download/AlphabetMath.dmg';
+// Shown in Help / About. Keep in step with the GitHub Release tag (v0.0.1) and
+// "version" in AlphabetMath - Desktop/package.json.
+const APP_VERSION = '0.0.1';
+
 /* ---- MODAL (Zperiod element-modal) ---- */
 function Modal({ entry, onClose }) {
   const open = !!entry;
@@ -212,7 +232,74 @@ function Modal({ entry, onClose }) {
     const h = (ev) => { if (ev.key === 'Escape') onClose(); };
     window.addEventListener('keydown', h); return () => window.removeEventListener('keydown', h);
   }, [onClose]);
+
+  /* Help / About window: drawn at one fixed size (980px wide) and scaled down evenly
+     to fit smaller screens — like the trays — so it stays side by side and never clips. */
+  const aboutPopRef = useRef(null);
+  const [aboutScale, setAboutScale] = useState(1);
+  useEffect(() => {
+    if (!e || e.type !== 'about') return;
+    const fit = () => {
+      const el = aboutPopRef.current; if (!el) return;
+      const room = 56; // breathing space around the window (incl. the ✕ outside the corner)
+      setAboutScale(Math.min(1, (window.innerWidth - room) / el.offsetWidth,
+                                (window.innerHeight - room) / el.offsetHeight));
+    };
+    fit();
+    window.addEventListener('resize', fit);
+    return () => window.removeEventListener('resize', fit);
+  }, [e && e.type]);
+
   if (!e) return <div className="scrim" />;
+
+  /* Help / About (About screen) — a wide white window with two sides (like Zperiod's intro):
+     LEFT  AlphabetMath, tagline, short paragraph, big "[⬇] Get Started" button, version
+           (button downloads the desktop app on the website; closes this window in the desktop app);
+     RIGHT the creator card — name → role → info + contact panel.
+     Always two sides, side by side; scaled down evenly on small screens (aboutScale above). */
+  if (e.type === 'about') {
+    return (
+      <div className={'scrim' + (open ? ' open' : '')} onClick={onClose}>
+        <div className="about-pop" ref={aboutPopRef} style={{ '--about-scale': aboutScale }}
+             role="dialog" aria-modal="true" aria-labelledby="about-app-title"
+             onClick={ev => ev.stopPropagation()}>
+          <button className="about-close" onClick={onClose} aria-label="Close"><Icon name="x" size={18} sw={2.4} /></button>
+          <div className="about-sheet">
+            <div className="about-intro">
+              <h2 id="about-app-title" className="ai-name">AlphabetMath</h2>
+              <p className="ai-tag">Mathematics that moves.<br />Visually &amp; intuitively.</p>
+              <p className="ai-desc">I build small interactive things that make a piece of mathematics click.
+                 Most of what lives here started as a question I couldn’t answer with a static picture,
+                 so I made it move instead.</p>
+              {/* "[⬇] Get Started" everywhere: on the website it downloads the desktop app;
+                  in the desktop app it just closes this window. */}
+              {IN_DESKTOP_APP
+                ? <button type="button" className="ai-cta" onClick={onClose}>
+                    <Icon name="download" size={20} stroke="#1f2328" sw={2.2} />Get Started</button>
+                : <a className="ai-cta" href={DOWNLOAD_URL}>
+                    <Icon name="download" size={20} stroke="#1f2328" sw={2.2} />Get Started</a>}
+              <div className="ai-ver">v{APP_VERSION}</div>
+            </div>
+            <div className="about-card">
+              <h3 className="ab-name">Nana Kumi</h3>
+              <div className="ab-role">Creative Developer</div>
+              <div className="ab-panel">
+                <div className="ab-info"><Icon name="cap" size={20} stroke="#4f5fe0" sw={1.8} /><span>SUNY · Upper-level undergraduate</span></div>
+                <div className="ab-info"><Icon name="pin" size={20} stroke="#4f5fe0" sw={1.8} /><span>New York (USA)</span></div>
+                <div className="ab-rule" />
+                <a className="ab-row" href="mailto:nybkumi@gmail.com">
+                  <span className="ab-ic"><Icon name="at" size={17} stroke="#4f5fe0" sw={1.9} /></span><span>nybkumi@gmail.com</span>
+                </a>
+                <a className="ab-row" href={REPO_URL} target="_blank" rel="noopener noreferrer">
+                  <span className="ab-ic"><GitHubMark size={17} /></span><span>@nasuak0/alphabetmath</span>
+                </a>
+              </div>
+            </div>
+          </div>
+        </div>
+      </div>
+    );
+  }
 
   const isProj = e.type === 'project';
   const data = e.data;
@@ -372,4 +459,5 @@ function NoteReader({ entry, onClose }) {
 }
 Object.assign(ZFIGURES, { parallelogram: ParallelogramFig });
 
-export { PixelLetter, Sidebar, Dock, Tile, Modal, ParallelogramFig, NoteBlock, NoteReader };
+export { PixelLetter, Sidebar, Dock, Tile, Modal, ParallelogramFig, NoteBlock, NoteReader,
+         GitHubMark, IN_DESKTOP_APP, REPO_URL, DOWNLOAD_URL, APP_VERSION };

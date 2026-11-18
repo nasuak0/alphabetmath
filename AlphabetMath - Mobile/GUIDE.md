@@ -47,12 +47,13 @@ The app's code ("the brain") lives in `zmath/` and is **standard ESM** — every
 1. **Loads ONE stylesheet** in `<head>`: `zmath/styles.css`, which @imports `tokens.css`
    (the variables) then `app.css` (the layout that consumes them), then
    `tweaks-overrides.css`. Add future stylesheets inside `styles.css`, never in the shell.
-2. **Declares an import map** so the bare specifier `react` / `react-dom/client` resolves to
-   esm.sh (`?external=react` keeps a single React instance — don't remove it).
+2. **Loads React, ReactDOM and Babel from `vendor/`** — local copies, so the app opens with
+   no internet (this is also what the desktop app shows).
 3. **Runs a small in-page ESM+JSX loader**: it walks the import graph from
    `./zmath/main.jsx`, fetches each relative module, Babel-transforms the JSX in the browser,
-   rewrites relative specifiers to blob URLs, and runs the entry. No `npm`, no bundler. Don't
-   touch the pinned Babel tag or the import map — they are the whole runtime.
+   swaps the bare `react` / `react-dom/client` imports for tiny shims over `window.React` /
+   `window.ReactDOM`, rewrites relative specifiers to blob URLs, and runs the entry. No `npm`,
+   no bundler. Don't touch the `vendor/` scripts or the loader shims — they are the whole runtime.
 
 **Reader B — the Vite App** (sibling `AlphabetMath - App/`). Its `src/main.jsx` simply
 `import`s the same `zmath/` files; Vite resolves and bundles them natively.

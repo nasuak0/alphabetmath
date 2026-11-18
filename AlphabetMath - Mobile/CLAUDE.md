@@ -22,9 +22,12 @@ AlphabetMath - App/              ← Reader #2: a Vite build (sibling folder)
   src/main.jsx                   ← ~20-line thin reader; imports ../../AlphabetMath - Mobile/zmath/
 ```
 
-- **Reader #1 (this folder, no build):** `index.html` carries an **import map** (bare `react`
-  → esm.sh) plus a small **ESM+JSX import-graph loader** that fetches each `zmath/` module,
-  Babel-transforms the JSX in the browser, and runs it. No `npm install`, no bundler.
+- **Reader #1 (this folder, no build):** `index.html` loads React, ReactDOM and Babel from the
+  local **`vendor/`** folder (offline — never point them back at a CDN) plus a small **ESM+JSX
+  import-graph loader** that fetches each `zmath/` module, Babel-transforms the JSX in the
+  browser, swaps the bare `react` / `react-dom` / `react-dom/client` imports for tiny shims over
+  `window.React` / `window.ReactDOM`, and runs it. No `npm install`, no bundler. The desktop app
+  (`../AlphabetMath - Desktop/`) shows exactly this reader, served at `app://alphabetmath/`.
 - **Reader #2 (the App, real build):** Vite imports the same `zmath/` files natively and
   bundles them into a shippable `dist/`.
 
@@ -95,7 +98,7 @@ store, or new top-level state without a reason — keep this flat.
    `import` it where used.
 2. **Bare specifiers stay bare.** Import React as `import React from "react"` and
    `import { createRoot } from "react-dom/client"` — never a CDN URL or relative path. The
-   Mobile import map and the App's bundler each resolve `react` their own way; using the bare
+   Mobile loader's shims and the App's bundler each resolve `react` their own way; using the bare
    specifier is what keeps the SOURCE identical across both readers.
 3. **Relative imports need the extension** (`"./icons.jsx"`, `"./figures-registry.js"`). The
    browser loader and Vite both rely on the explicit path.
@@ -126,8 +129,9 @@ store, or new top-level state without a reason — keep this flat.
   you ever see `app.jsx`/`components.jsx`/`data.js`/CSS appear inside `AlphabetMath - App/src/`,
   that's the bug — the App is supposed to be a thin reader. Don't duplicate the brain.
 - Make changes in **small steps** and reload to verify; there's no CI to catch regressions.
-- **Mobile reader:** don't change the pinned Babel tag or the import map in `index.html`
-  without reason — they're the whole no-build runtime.
+- **Mobile reader:** don't change the `vendor/` scripts, the pinned Babel version (and its
+  integrity hash) or the loader shims in `index.html` without reason — they're the whole
+  no-build runtime.
 - Don't add a second copy of React or a new CDN/runtime dependency without asking.
 - Internal identifiers stay `ZMATH_*` on purpose (rename is pure risk, zero user benefit).
 

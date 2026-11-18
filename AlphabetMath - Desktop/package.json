@@ -1,17 +1,39 @@
 {
   "name": "alphabetmath-desktop",
   "productName": "AlphabetMath",
-  "version": "0.1.0",
+  "version": "0.0.1",
   "private": true,
   "description": "AlphabetMath desktop app — an Electron window onto the Mobile reader (AlphabetMath - Mobile/).",
   "main": "main.js",
   "scripts": {
-    "start": "electron ."
+    "start": "electron .",
+    "package": "electron-builder --mac dmg --arm64"
   },
   "devDependencies": {
-    "electron": "33.2.1"
+    "electron": "33.2.1",
+    "electron-builder": "25.1.8"
   },
   "allowScripts": {
     "electron@33.2.1": true
+  },
+  "build": {
+    "appId": "app.alphabetmath.desktop",
+    "productName": "AlphabetMath",
+    "directories": { "output": "release" },
+    "files": ["main.js", "package.json"],
+    "extraResources": [
+      {
+        "from": "../AlphabetMath - Mobile",
+        "to": "mobile",
+        "filter": ["index.html", "zmath/**/*", "vendor/**/*"]
+      }
+    ],
+    "mac": {
+      "category": "public.app-category.education",
+      "identity": null
+    },
+    "dmg": {
+      "artifactName": "AlphabetMath.dmg"
+    }
   }
 }

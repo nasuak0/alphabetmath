@@ -1,7 +1,7 @@
 /* Zmath app — screens + shell. */
 import React from "react";
 import { createPortal } from "react-dom";
-import { Sidebar, Tile, Modal, NoteBlock } from "./components.jsx";
+import { Sidebar, Tile, Modal, NoteBlock, GitHubMark, REPO_URL } from "./components.jsx";
 import { Icon } from "./icons.jsx";
 import { ZMATH_TOPICS, ZMATH_PROJECTS, ZMATH_TByID, ZMATH_PByID, ZMATH_NOTES, NOTE_GLYPH } from "./data.js";
 import { LabSpotlight } from "./lab-screen.jsx";
@@ -233,30 +233,29 @@ function NotesScreen({ onOpen, eyebrows }) {
 }
 
 /* ---- ABOUT ---- */
-function AboutScreen({ eyebrows }) {
+/* GitHubMark and REPO_URL live in components.jsx. Help / About opens the wide pop-up window
+   (Modal type 'about', components.jsx): AlphabetMath intro + Get Started on the left, creator card
+   on the right. */
+function AboutScreen({ eyebrows, onOpen }) {
   const links = [
-    { t: 'GitHub', s: '@nasuak0/alphabetmath', icon: 'github', c: ['#7a8290', '#3a4150'] },
+    { t: 'GitHub', s: '@nasuak0/alphabetmath', mark: <GitHubMark />, href: REPO_URL, newTab: true },
   ];
   return (
     <div className="fade">
       <HeroWidget compact pillEyebrow eyebrow={eyebrows.about} />
-      <div className="about-grid">
-        <div className="card">
-          <h3>Hello — I’m Nana.</h3>
-          <p>I build small interactive things that make a piece of mathematics click. Most of
-             what lives here started as a question I couldn’t answer with a static picture, so I
-             made it move instead.</p>
-          <p>This site is laid out like a home-menu on purpose: every topic is a tile, every demo
-             a little cartridge you can pop in. Tap around — there’s no wrong order.</p>
-          <div className="sig"><span>Nana · 2026</span></div>
-        </div>
-        <div>
+      {/* Rows keep their original width (the old right-hand column) and sit on the left. */}
+      <div className="about-list">
+        <button type="button" className="link-card" aria-haspopup="dialog"
+                onClick={() => onOpen({ type: 'about' })}>
+          <span className="link-ic light"><Icon name="info" size={22} stroke="#3f7de6" sw={2.4} /></span>
+          <span className="link-tx"><b>Help / About</b><span>Introduction &amp; Installation</span></span>
+        </button>
+        <div className="about-links">
           {links.map(l => (
-            <a key={l.t} className="link-card">
-              <span className="link-ic" style={{ background: `linear-gradient(155deg, ${l.c[0]}, ${l.c[1]})` }}>
-                <Icon name={l.icon} size={20} stroke="#fff" sw={1.9} />
-              </span>
-              <span className="link-tx"><b>{l.t}</b><span>{l.s}</span></span>
+            <a key={l.t} className="link-card" href={l.href}
+               {...(l.newTab ? { target: "_blank", rel: "noopener noreferrer" } : {})}>
+              <span className={`link-ic ${l.ic || 'light'}`}>{l.mark}</span>
+              <span className="link-tx"><b>{l.t}</b>{l.s && <span>{l.s}</span>}</span>
             </a>
           ))}
         </div>

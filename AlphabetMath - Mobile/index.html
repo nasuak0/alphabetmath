@@ -56,7 +56,9 @@ async function loadGraph(entryUrl) {
   const RELATIVE = /(\bfrom\s*|\bimport\s*)(["'])(\.[^"']+)\2/g;
   async function build(absUrl) {
     if (cache.has(absUrl)) return cache.get(absUrl);
-    const src = await (await fetch(absUrl)).text();
+    // cache: "no-cache" = always ask the server whether the file changed (cheap 304 if not),
+    // so a browser (Safari especially) can never mix an old saved module with new ones.
+    const src = await (await fetch(absUrl, { cache: "no-cache" })).text();
     const deps = [];
     src.replace(RELATIVE, (m, _k, _q, spec) => { deps.push(spec); return m; });
     const map = {};

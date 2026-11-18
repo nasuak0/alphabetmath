@@ -10,10 +10,10 @@
    - CORNERS / SPECULAR LIGHT borrowed from Apple "Liquid Glass".
 
    Load this once, then use the CSS vars + .helper classes below.
-   Fonts load from Google Fonts (see @import at top, or link in HTML).
+   Fonts load from LOCAL copies in fonts/ (offline / desktop app) — see fonts/fonts.css.
    ============================================================ */
 
-@import url("https://fonts.googleapis.com/css2?family=Baloo+2:wght@500;600;700;800&family=Fredoka:wght@400;500;600;700&family=Inter:wght@400;450;500;600;700;800&family=JetBrains+Mono:wght@400;500;700&display=swap");
+@import url("fonts/fonts.css");
 
 :root {
   /* ---------------------------------------------------------

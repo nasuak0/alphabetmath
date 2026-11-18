@@ -12,12 +12,17 @@
    the Mobile loader fetch()es each .jsx module, and fetch() is blocked for
    file:// pages. The app:// scheme serves the Mobile folder from inside the
    app — the same job localhost:5500 does in the browser, with no server. */
-const { app, BrowserWindow, protocol, net, shell } = require("electron");
+const { app, BrowserWindow, WebContentsView, protocol, net, shell } = require("electron");
 const path = require("node:path");
 const { pathToFileURL } = require("node:url");
 
 // The folder the window shows: the Mobile reader (index.html + zmath/ + vendor/).
-const MOBILE_DIR = path.resolve(__dirname, "..", "AlphabetMath - Mobile");
+// While developing (npm start) that's the live project folder next door; in the
+// packaged AlphabetMath.app it's the copy electron-builder puts in Resources/mobile
+// (app only — explore/ drafts are left out; see "extraResources" in package.json).
+const MOBILE_DIR = app.isPackaged
+  ? path.join(process.resourcesPath, "mobile")
+  : path.resolve(__dirname, "..", "AlphabetMath - Mobile");
 const HOST = "alphabetmath";
 const START_URL = `app://${HOST}/index.html`;
 
@@ -48,34 +53,82 @@ function windowSize() {
   return { width: 1180, height: 820, minWidth: 1024, minHeight: 700 };
 }
 
+/* The window has no grey title bar. Instead it has two layers:
+   1. a thin TOP STRIP (STRIP_H tall, painted like the app's own ground) that holds the
+      red/yellow/green buttons and is the handle to drag the window by;
+   2. the APP, placed just below the strip — so nothing sits under the buttons,
+      and the app measures its real (shorter) height and scales correctly.
+   Desktop-only: the shared app code in zmath/ and the browser version are untouched. */
+const STRIP_H = 10; // thin on purpose (user's choice); the window buttons hang just below it
+const BG = "#f4f5fb"; // the loading-screen colour (window + app view background while loading)
+// The strip paints the SAME ground as the app's .os (zmath/app.css + tokens.css): the white
+// radial gradient, the faint pastel glows and the 22px dot grid — so there's no visible line
+// where the strip meets the app. The dot grid is shifted (STRIP_H % 22) so it keeps its 22px
+// rhythm across the seam. If the app's ground changes in app.css, mirror it here.
+// The drag handle must cover ONLY the strip (STRIP_H tall). macOS applies a page's drag
+// regions to the whole window, so a full-height handle here would swallow every click
+// meant for the app layered on top of it.
+const STRIP_CSS = `
+  html,body{margin:0;height:100%;overflow:hidden}
+  body{position:relative;background:radial-gradient(120% 90% at 50% -10%,#ffffff,#fcfdff 55%,#f6f7fb 100%)}
+  body::before{content:"";position:absolute;inset:-15%;filter:blur(40px);background:
+    radial-gradient(26% 24% at 14% 18%,rgba(160,110,224,0.09),transparent 70%),
+    radial-gradient(24% 22% at 86% 14%,rgba(255,150,110,0.07),transparent 70%)}
+  body::after{content:"";position:absolute;inset:0;background-image:radial-gradient(rgba(0,0,0,0.07) 1px,transparent 1.5px);
+    background-size:22px 22px;background-position:0 ${STRIP_H % 22}px}
+  .drag{position:relative;z-index:1;height:${STRIP_H}px;-webkit-app-region:drag}`;
+const STRIP_PAGE =
+  "data:text/html;charset=utf-8," +
+  encodeURIComponent(
+    `<!DOCTYPE html><html><head><title>AlphabetMath</title><style>${STRIP_CSS}</style></head>` +
+    `<body><div class="drag"></div></body></html>`
+  );
+
 function createWindow() {
+  const secure = { contextIsolation: true, nodeIntegration: false, sandbox: true };
+
+  // Layer 1 — the window itself shows the top strip.
   const win = new BrowserWindow({
     ...windowSize(),
     title: "AlphabetMath",
-    backgroundColor: "#f4f5fb", // matches the loading screen, so no white flash
+    backgroundColor: BG, // no white flash while loading
+    titleBarStyle: "hidden",
+    // Buttons (~12px tall) are taller than the 10px strip, so they sit 4px from the top and
+    // reach a few px into the app's own empty top margin (above the side bar).
+    trafficLightPosition: { x: 14, y: Math.max(4, (STRIP_H - 12) / 2) },
     show: false,
-    webPreferences: {
-      contextIsolation: true,
-      nodeIntegration: false,
-      sandbox: true,
-    },
+    webPreferences: secure,
   });
-
+  win.loadURL(STRIP_PAGE);
   win.once("ready-to-show", () => win.show());
+  // Keep the window named "AlphabetMath" (Window menu, Mission Control).
+  win.on("page-title-updated", (event) => event.preventDefault());
+
+  // Layer 2 — the app, below the strip, resized with the window.
+  const view = new WebContentsView({ webPreferences: secure });
+  view.setBackgroundColor(BG);
+  win.contentView.addChildView(view);
+  const layout = () => {
+    const [width, height] = win.getContentSize();
+    view.setBounds({ x: 0, y: STRIP_H, width, height: height - STRIP_H });
+  };
+  layout();
+  win.on("resize", layout);
 
   // Links that leave the app (e.g. GitHub in About) open in the normal browser.
-  win.webContents.setWindowOpenHandler(({ url }) => {
+  const appWeb = view.webContents;
+  appWeb.setWindowOpenHandler(({ url }) => {
     if (!url.startsWith(`app://${HOST}/`)) shell.openExternal(url);
     return { action: "deny" };
   });
-  win.webContents.on("will-navigate", (event, url) => {
+  appWeb.on("will-navigate", (event, url) => {
     if (!url.startsWith(`app://${HOST}/`)) {
       event.preventDefault();
       shell.openExternal(url);
     }
   });
 
-  win.loadURL(START_URL);
+  appWeb.loadURL(START_URL);
 }
 
 app.whenReady().then(() => {
